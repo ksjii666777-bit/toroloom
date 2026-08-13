@@ -86,6 +86,8 @@ interface MarketState {
   stocks: Stock[];
   selectedStock: Stock | null;
   isLoading: boolean;
+  /** True when the last refreshMarket() could not reach the backend. */
+  lastRefreshFailed: boolean;
   searchQuery: string;
   searchResults: Stock[];
 
@@ -112,6 +114,7 @@ export const useMarketStore = create<MarketState>((set, get) => ({
   stocks: mockStocks,
   selectedStock: null,
   isLoading: false,
+  lastRefreshFailed: false,
   searchQuery: '',
   searchResults: [],
   screenerFilters: { ...DEFAULT_SCREENER_FILTERS },
@@ -182,8 +185,9 @@ export const useMarketStore = create<MarketState>((set, get) => ({
       ]);
       // Cache on successful fetch
       await offlineCache.save('market', { indices, stocks });
-      set({ indices, stocks, isLoading: false });
+      set({ indices, stocks, isLoading: false, lastRefreshFailed: false });
     } catch {
+      set({ lastRefreshFailed: true });
       // Backend unavailable — try stale cache
       const cached = await offlineCache.load<{ indices: MarketIndex[]; stocks: Stock[] }>('market');
       if (cached) {

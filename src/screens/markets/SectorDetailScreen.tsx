@@ -15,8 +15,8 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, RefreshControl,
+  View, Text, StyleSheet, TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +25,7 @@ import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: _width } = Dimensions.get('window');
 
@@ -107,29 +108,27 @@ export default function SectorDetailScreen({ navigation, route }: any) {
   const avgChangeColor = sectorStats.avgChange >= 0 ? '#00E676' : '#FF5252';
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </AnimatedPressable>
-          <View style={{ flex: 1, marginLeft: SPACING.md }}>
-            <Text style={[styles.title, { color: colors.text }]}>{sectorName}</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              {t('sectorDetail.overview')}
-            </Text>
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </AnimatedPressable>
+            <View style={{ flex: 1, marginLeft: SPACING.md }}>
+              <Text style={[styles.title, { color: colors.text }]}>{sectorName}</Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                {t('sectorDetail.overview')}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
-        }
-      >
+      }
+    >
         {/* ── Summary Cards ── */}
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -292,25 +291,20 @@ export default function SectorDetailScreen({ navigation, route }: any) {
           </View>
         )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ─── Styles ────────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.md,
   },
   headerRow: {

@@ -21,6 +21,7 @@ import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {OpenOrder, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 Dimensions.get('window');
 
@@ -140,8 +141,7 @@ export default function OpenOrdersScreen({ navigation }: NativeStackScreenProps<
     .reduce((s, o) => s + o.price * (o.quantity - o.filledQuantity), 0);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <AppScreen scroll={false} padded={false} header={
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -154,6 +154,7 @@ export default function OpenOrdersScreen({ navigation }: NativeStackScreenProps<
           <Ionicons name="refresh" size={22} color={colors.primary} />
         </TouchableOpacity>
       </View>
+    }>
 
       {/* Stats Cards */}
       <View style={styles.statsRow}>
@@ -431,19 +432,16 @@ export default function OpenOrdersScreen({ navigation }: NativeStackScreenProps<
           </View>
         </View>
       )}
-    </View>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.lg,
   },

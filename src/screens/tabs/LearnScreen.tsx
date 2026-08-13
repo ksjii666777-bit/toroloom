@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,7 @@ import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock} from '../../components/ui/SkeletonLoader';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 Dimensions.get('window');
@@ -58,8 +59,10 @@ export default function LearnScreen({ navigation }: NativeStackScreenProps<RootS
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <AppScreen
+        padded={false}
+        contentStyle={styles.scrollContent}
+      >
           <View style={styles.header}>
             <SkeletonBlock width="40%" height={28} />
             <View style={{ height: 4 }} />
@@ -82,26 +85,17 @@ export default function LearnScreen({ navigation }: NativeStackScreenProps<RootS
               </View>
             ))}
           </View>
-        </ScrollView>
-      </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title} testID="learn-title">{t('learn.title')}</Text>
@@ -341,22 +335,17 @@ export default function LearnScreen({ navigation }: NativeStackScreenProps<RootS
           </View>
         </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     marginBottom: SPACING.xl,
   },

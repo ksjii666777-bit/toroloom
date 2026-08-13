@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import ReanimatedAnimated, { useSharedValue, withTiming, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -11,6 +11,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import PortfolioHolding from '../../components/PortfolioHolding';
 import PnLChart from '../../components/PnLChart';
+import AppScreen from '../../components/ui/AppScreen';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
@@ -92,39 +93,30 @@ export default function PortfolioScreen({ navigation }: CompositeScreenProps<Bot
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <SkeletonBlock width="40%" height={28} />
-            <View style={{ height: 4 }} />
-            <SkeletonBlock width="30%" height={14} />
-          </View>
-          <View style={styles.paddingHorizontal}>
-            <PortfolioSkeleton />
-            <SkeletonBlock width="100%" height={40} borderRadius={8} />
-            <View style={{ height: SPACING.lg }} />
-            {[1, 2, 3].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction={false} />)}
-          </View>
-        </ScrollView>
-      </View>
+      <AppScreen hasTabBar padded={false} contentStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <SkeletonBlock width="40%" height={28} />
+          <View style={{ height: 4 }} />
+          <SkeletonBlock width="30%" height={14} />
+        </View>
+        <View style={styles.paddingHorizontal}>
+          <PortfolioSkeleton />
+          <SkeletonBlock width="100%" height={40} borderRadius={8} />
+          <View style={{ height: SPACING.lg }} />
+          {[1, 2, 3].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction={false} />)}
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      hasTabBar
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title} testID="portfolio-title">{t('portfolio.title')}</Text>
@@ -517,17 +509,11 @@ export default function PortfolioScreen({ navigation }: CompositeScreenProps<Bot
           </View>
         </AnimatedPressable>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
   },
@@ -535,7 +521,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: SPACING.xl,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     marginBottom: SPACING.lg,
   },

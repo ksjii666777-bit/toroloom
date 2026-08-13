@@ -22,10 +22,7 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  View,
   StyleSheet,
-  ScrollView,
-  RefreshControl,
   Alert,
 } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -50,6 +47,7 @@ import PnLBreakdownCard from '../../components/PnLBreakdownCard';
 import TaxSummaryCard from '../../components/TaxSummaryCard';
 import SectorMetricsCard from '../../components/SectorMetricsCard';
 import ReportHeader from '../../components/ReportHeader';
+import AppScreen from '../../components/ui/AppScreen';
 import PeriodTabs from '../../components/PeriodTabs';
 import EmptyReportState from '../../components/EmptyReportState';
 import { computeCognitiveSummary } from '../../services/gateway/cognitiveAnalytics';
@@ -159,28 +157,20 @@ export default function PeriodReportScreen({ navigation }: NativeStackScreenProp
 
   // ── Render ───────────────────────────────────────────────────
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <ReportHeader
-        navigation={navigation}
-        hasAnalytics={!!analytics}
-        isExporting={isExporting}
-        onExport={exportToPDF}
-      />
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <ReportHeader
+          navigation={navigation}
+          hasAnalytics={!!analytics}
+          isExporting={isExporting}
+          onExport={exportToPDF}
+        />
+      }
+    >
         {/* ── Period Type Tabs ─────────────────────────────── */}
         <PeriodTabs periodType={periodType} onSelect={setPeriodType} />
 
@@ -233,19 +223,13 @@ export default function PeriodReportScreen({ navigation }: NativeStackScreenProp
           </Animated.View>
         )}
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ──── Styles ─────────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TextInput, Pressable } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
@@ -8,7 +8,10 @@ import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS, IS_SMALL_DEVICE } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { FeatureGrid } from '../../components/patterns/FeatureGrid';
+import AppScreen from '../../components/ui/AppScreen';
+import { FinanceCard } from '../../components/ui/FinanceCard';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -21,7 +24,6 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type {RootStackParamList, TabParamList} from '../../types';
 
 
-const { width } = Dimensions.get('window');
 const BADGE_DISPLAY_COUNT = 8;
 
 // ── Category chips (searchable filter) ────────────────────────────────────
@@ -293,61 +295,47 @@ export default function MoreScreen({ navigation }: CompositeScreenProps<BottomTa
     }
   };
 
-  // Responsive grid — 4 columns mobile, 3 columns small screens
-  const columns = IS_SMALL_DEVICE ? 3 : 4;
-  const tileSize = (width - SPACING.xl * 2 - SPACING.lg * 2 - (columns - 1) * SPACING.md) / columns;
-
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <SkeletonBlock width="30%" height={28} />
-          </View>
-          <View style={{ paddingHorizontal: SPACING.xl }}>
-            <SkeletonBlock width="100%" height={48} borderRadius={BORDER_RADIUS.md} />
-            <View style={{ height: SPACING.md }} />
-            <SkeletonBlock width="70%" height={36} borderRadius={BORDER_RADIUS.full} />
-            <View style={{ height: SPACING.lg }} />
-            <SkeletonBlock width="100%" height={100} borderRadius={BORDER_RADIUS.xl} />
-            <View style={{ height: SPACING.lg }} />
-            {[1, 2, 3].map(i => (
-              <View key={`skel_more_${i}`}>
-                <SkeletonBlock width="25%" height={12} />
-                <View style={{ height: SPACING.md }} />
-                <View style={{ flexDirection: 'row', gap: SPACING.md }}>
-                  {[1, 2, 3, 4].map(j => (
-                    <View key={j} style={{ alignItems: 'center', gap: 4 }}>
-                      <SkeletonBlock width={48} height={48} borderRadius={14} />
-                      <SkeletonBlock width={40} height={10} />
-                    </View>
-                  ))}
-                </View>
-                <View style={{ height: SPACING.xl }} />
+      <AppScreen hasTabBar padded={false} contentStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <SkeletonBlock width="30%" height={28} />
+        </View>
+        <View style={{ paddingHorizontal: SPACING.xl }}>
+          <SkeletonBlock width="100%" height={48} borderRadius={BORDER_RADIUS.md} />
+          <View style={{ height: SPACING.md }} />
+          <SkeletonBlock width="70%" height={36} borderRadius={BORDER_RADIUS.full} />
+          <View style={{ height: SPACING.lg }} />
+          <SkeletonBlock width="100%" height={100} borderRadius={BORDER_RADIUS.xl} />
+          <View style={{ height: SPACING.lg }} />
+          {[1, 2, 3].map(i => (
+            <View key={`skel_more_${i}`}>
+              <SkeletonBlock width="25%" height={12} />
+              <View style={{ height: SPACING.md }} />
+              <View style={{ flexDirection: 'row', gap: SPACING.md }}>
+                {[1, 2, 3, 4].map(j => (
+                  <View key={j} style={{ alignItems: 'center', gap: 4 }}>
+                    <SkeletonBlock width={48} height={48} borderRadius={14} />
+                    <SkeletonBlock width={40} height={10} />
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+              <View style={{ height: SPACING.xl }} />
+            </View>
+          ))}
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      hasTabBar
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
@@ -448,26 +436,26 @@ export default function MoreScreen({ navigation }: CompositeScreenProps<BottomTa
         </View>
 
         {/* Balance Card */}
-        <Card style={styles.balanceCard}>
-          <View style={styles.balanceRow}>
-            <View>
-              <Text style={styles.balanceLabel}>{t('profile.availableBalance')}</Text>
-              <Text style={styles.balanceValue}>₹{((user?.balance || 2500000) / 100000).toFixed(1)}{t('profile.lakh')}</Text>
-            </View>
-            <View style={styles.balanceActions}>
-              <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
-                <View style={styles.balanceBtn}>
-                  <Text style={styles.balanceBtnText}>{t('profile.add')}</Text>
-                </View>
-              </AnimatedPressable>
-              <AnimatedPressable onPress={() => navigation.navigate('Withdraw')} haptic="light" scaleTo={0.95}>
-                <View style={[styles.balanceBtn, styles.balanceBtnOutline]}>
-                  <Text style={styles.balanceBtnOutlineText}>{t('profile.withdraw')}</Text>
-                </View>
-              </AnimatedPressable>
-            </View>
+        <View style={styles.balanceWrap}>
+          <View style={styles.balanceInfo}>
+            <FinanceCard
+              label={t('profile.availableBalance')}
+              value={`₹${((user?.balance || 2500000) / 100000).toFixed(1)}${t('profile.lakh')}`}
+            />
           </View>
-        </Card>
+          <View style={styles.balanceActions}>
+            <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
+              <View style={styles.balanceBtn}>
+                <Text style={styles.balanceBtnText}>{t('profile.add')}</Text>
+              </View>
+            </AnimatedPressable>
+            <AnimatedPressable onPress={() => navigation.navigate('Withdraw')} haptic="light" scaleTo={0.95}>
+              <View style={[styles.balanceBtn, styles.balanceBtnOutline]}>
+                <Text style={styles.balanceBtnOutlineText}>{t('profile.withdraw')}</Text>
+              </View>
+            </AnimatedPressable>
+          </View>
+        </View>
 
         {/* Menu Sections (filtered) */}
         {filteredSections.length === 0 ? (
@@ -487,27 +475,16 @@ export default function MoreScreen({ navigation }: CompositeScreenProps<BottomTa
             >
               <View style={[styles.menuCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <Text style={styles.menuSectionTitle}>{t(section.titleKey)}</Text>
-                <View style={styles.menuGrid}>
-                  {section.items.map((item, i) => (
-                    <AnimatedPressable
-                      key={`mi_${section.key}_${i}`}
-                      onPress={() => handleMenuPress(item)}
-                      haptic="selection"
-                      scaleTo={0.97}
-                      testID={item.testID || `menu-${item.screen}`}
-                      accessibilityLabel={t(item.labelKey)}
-                    >
-                      <View style={[styles.menuItem, { width: tileSize }]}>
-                        <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
-                          <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
-                        </View>
-                        <Text style={styles.menuLabel} numberOfLines={2}>
-                          {t(item.labelKey)}
-                        </Text>
-                      </View>
-                    </AnimatedPressable>
-                  ))}
-                </View>
+                <FeatureGrid
+                  columns={3}
+                  items={section.items.map(item => ({
+                    key: item.testID || `menu-${item.screen}`,
+                    label: t(item.labelKey),
+                    icon: <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />,
+                    testID: item.testID || `menu-${item.screen}`,
+                    onPress: () => handleMenuPress(item),
+                  }))}
+                />
               </View>
             </Animated.View>
           ))
@@ -541,23 +518,18 @@ export default function MoreScreen({ navigation }: CompositeScreenProps<BottomTa
           </View>
         </AnimatedPressable>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: SPACING.xl,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   headerRow: {
@@ -683,7 +655,9 @@ const createStyles = (colors: any) => StyleSheet.create({
   qaCard: {
     width: 72,
     height: 72,
-    backgroundColor: '#161922',
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: BORDER_RADIUS.lg,
     justifyContent: 'center',
     alignItems: 'center',
@@ -695,27 +669,16 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
     textAlign: 'center',
   },
-  balanceCard: {
+  balanceWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
     marginBottom: SPACING.xxl,
   },
-  balanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  balanceLabel: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: colors.textSecondary,
-  },
-  balanceValue: {
-    ...FONTS.bold,
-    fontSize: FONTS.size.xxl,
-    color: colors.text,
-    marginTop: 4,
+  balanceInfo: {
+    flex: 1,
   },
   balanceActions: {
-    flexDirection: 'row',
     gap: SPACING.sm,
   },
   balanceBtn: {
@@ -754,29 +717,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: SPACING.md,
-  },
-  menuGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.md,
-  },
-  menuItem: {
-    alignItems: 'center',
-    gap: SPACING.sm,
-    minHeight: 76,
-  },
-  menuIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuLabel: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.xs,
-    color: colors.text,
-    textAlign: 'center',
   },
   // ── Empty State ──
   emptyState: {

@@ -14,6 +14,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useBehaviorJournalStore, MISTAKE_LABELS } from '../../store/behavioralJournalStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { AppHeader } from '../../components/ui/AppHeader';
+import { SegmentedTabs } from '../../components/ui/SegmentedTabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -143,6 +145,24 @@ export default function BehavioralJournalScreen({ navigation: _navigation  }: Na
           <Text style={[styles.entryNotes, { color: colors.textSecondary }]} numberOfLines={2}>
             {item.notes}
           </Text>
+          <View style={styles.entryTags}>
+            {item.emotionalState ? (
+              <View style={[styles.entryTag, { backgroundColor: colors.primaryDim }]}>
+                <Ionicons name="happy-outline" size={12} color={colors.primary} />
+                <Text style={[styles.entryTagText, { color: colors.primary }]}>
+                  {item.emotionalState.charAt(0).toUpperCase() + item.emotionalState.slice(1)}
+                </Text>
+              </View>
+            ) : null}
+            {item.mistakes && item.mistakes.length > 0 ? (
+              <View style={[styles.entryTag, { backgroundColor: colors.dangerDim }]}>
+                <Ionicons name="alert-circle-outline" size={12} color={colors.danger} />
+                <Text style={[styles.entryTagText, { color: colors.danger }]}>
+                  {MISTAKE_LABELS[item.mistakes[0] as keyof typeof MISTAKE_LABELS] || item.mistakes[0]}
+                </Text>
+              </View>
+            ) : null}
+          </View>
           <Text style={[styles.entryDate, { color: colors.textMuted }]}>
             {new Date(item.date).toLocaleDateString()}
           </Text>
@@ -192,34 +212,18 @@ export default function BehavioralJournalScreen({ navigation: _navigation  }: Na
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
+      {/* Header — compact, safe-area padded by the parent */}
       <View style={[styles.header, { backgroundColor: colors.bgSecondary, paddingTop: insets.top + 12 }]}>
-        <Text style={[styles.title, { color: colors.text }]}>{t('journal.title')}</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('journal.subtitle')}</Text>
+        <AppHeader title={t('journal.title')} subtitle={t('journal.subtitle')} />
       </View>
 
-      {/* Tab Bar */}
-      <View style={[styles.tabBar, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-        {tabs.map(tab => (
-          <Pressable
-            key={tab}
-            style={[
-              styles.tab,
-              activeTab === tab && [styles.activeTab, { backgroundColor: colors.primary + '20', borderColor: colors.primary }],
-            ]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                { color: colors.textMuted },
-                activeTab === tab && { color: colors.primary, fontWeight: '700' },
-              ]}
-            >
-              {tabLabels[tab]}
-            </Text>
-          </Pressable>
-        ))}
+      {/* Segmented control — zero extra margins so content starts immediately */}
+      <View style={[styles.tabBar, { backgroundColor: colors.bgSecondary }]}>
+        <SegmentedTabs
+          tabs={tabs.map(tab => ({ key: tab, label: tabLabels[tab] }))}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
       </View>
 
       {/* Content */}
@@ -239,10 +243,18 @@ export default function BehavioralJournalScreen({ navigation: _navigation  }: Na
         </View>
       )}
 
-      {/* FAB */}
+      {/* FAB — safe-area aware: floats above the system navigation bar */}
       <Pressable
-        style={[styles.fab, { backgroundColor: colors.primary }]}
+        style={[
+          styles.fab,
+          {
+            backgroundColor: colors.primary,
+            bottom: Math.max(insets.bottom, SPACING.md) + SPACING.lg,
+          },
+        ]}
         onPress={() => setShowEntryModal(true)}
+        accessibilityRole="button"
+        accessibilityLabel="add"
       >
         <Ionicons name="add" size={24} color="#FFF" />
       </Pressable>
@@ -262,16 +274,12 @@ function MetricCard({ label, value, color }: { label: string; value: string; col
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: SPACING.xl },
-  title: { fontSize: 22, fontWeight: '800' },
-  subtitle: { fontSize: 13, marginTop: 4 },
+  header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
   tabBar: {
-    flexDirection: 'row', padding: SPACING.sm, gap: SPACING.sm,
-    borderBottomWidth: 1, marginBottom: SPACING.sm,
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.sm,
   },
-  tab: { flex: 1, alignItems: 'center', paddingVertical: SPACING.sm, borderRadius: BORDER_RADIUS.full },
-  activeTab: { borderWidth: 1 },
-  tabText: { fontSize: FONTS.size.sm, fontWeight: '600' },
   scrollArea: { flex: 1 },
   scrollContent: { padding: SPACING.xl, paddingBottom: 100 },
   sectionTitle: { fontSize: FONTS.size.lg, fontWeight: '700', marginBottom: SPACING.md },
@@ -316,6 +324,13 @@ const styles = StyleSheet.create({
   entrySymbol: { fontSize: FONTS.size.md, fontWeight: '700' },
   entryPnl: { fontSize: FONTS.size.sm, fontWeight: '700' },
   entryNotes: { fontSize: FONTS.size.sm, lineHeight: 18 },
+  entryTags: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.xs },
+  entryTag: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: SPACING.sm, paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  entryTagText: { fontSize: FONTS.size.xs, fontWeight: '600' },
   entryDate: { fontSize: FONTS.size.xs },
   reportsList: { padding: SPACING.xl, gap: SPACING.sm, paddingBottom: 100 },
   reportCard: {
@@ -328,7 +343,7 @@ const styles = StyleSheet.create({
   improvementBadge: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginTop: SPACING.sm },
   reportTipText: { fontSize: FONTS.size.sm, flex: 1, lineHeight: 18 },
   fab: {
-    position: 'absolute', bottom: 24, right: 20,
+    position: 'absolute', right: 20,
     width: 56, height: 56, borderRadius: 28,
     justifyContent: 'center', alignItems: 'center',
     elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },

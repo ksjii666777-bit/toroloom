@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TextInput, RefreshControl,
+  View, Text, StyleSheet, ScrollView, TextInput,
   TouchableOpacity, Modal, Dimensions, Alert,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -15,12 +15,14 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { formatCurrency } from '../../utils/formatters';
 import { Stock } from '../../types';
 import StockItem from '../../components/StockItem';
+import AppScreen from '../../components/ui/AppScreen';
 import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { tickerProvider } from '../../services/tickerProvider';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton, SkeletonCard } from '../../components/ui/SkeletonLoader';
+import { ErrorState } from '../../components/ui/ErrorState';
 import { triggerHaptic } from '../../utils/haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -76,7 +78,7 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { watchlists, createWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlistStore();
+  const { watchlists, createWatchlist, addToWatchlist, removeFromWatchlist, lastFetchFailed, fetchWatchlists } = useWatchlistStore();
   const { stocks } = useMarketStore();
   const { priceAlertRules, addPriceAlertRule } = useNotificationStore();
   const [activeWatchlist, setActiveWatchlist] = useState<string>(
@@ -486,39 +488,30 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
   // ── Main Render ────────────────────────────────────────────
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <SkeletonBlock width="40%" height={28} />
-            <View style={{ height: 4 }} />
-            <SkeletonBlock width="50%" height={14} />
-          </View>
-          <View style={{ paddingHorizontal: SPACING.xl }}>
-            <SkeletonBlock width="100%" height={36} borderRadius={18} />
-            <View style={{ height: SPACING.lg }} />
-            <PortfolioSkeleton />
-            {[1, 2, 3].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction />)}
-          </View>
-        </ScrollView>
-      </View>
+      <AppScreen hasTabBar padded={false} contentStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <SkeletonBlock width="40%" height={28} />
+          <View style={{ height: 4 }} />
+          <SkeletonBlock width="50%" height={14} />
+        </View>
+        <View style={{ paddingHorizontal: SPACING.xl }}>
+          <SkeletonBlock width="100%" height={36} borderRadius={18} />
+          <View style={{ height: SPACING.lg }} />
+          <PortfolioSkeleton />
+          {[1, 2, 3].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction />)}
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      hasTabBar
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
@@ -824,6 +817,19 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
           </Animated.View>
         )}
 
+        {/* Fetch-failure state — friendly message, technical detail logged internally */}
+        {lastFetchFailed && (
+          <ErrorState
+            compact
+            icon="cloud-offline-outline"
+            title={t('watchlist.loadError')}
+            message={t('app.checkConnection')}
+            retryLabel={t('app.retry')}
+            onRetry={() => { fetchWatchlists(); }}
+            detail="[WatchlistStore] fetchWatchlists failed — showing cached/mock data"
+          />
+        )}
+
         {/* Watchlist Content */}
         {(currentWatchlist || isAllView) && (
           <View style={styles.content}>
@@ -955,22 +961,18 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
           </View>
         )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
       {/* Sort Menu Modal */}
       {renderSortMenu()}
 
       {/* Price Alert Modal */}
       {renderAlertModal()}
-    </View>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
   scrollContent: { paddingBottom: 20 },
-  header: { paddingTop: 60, paddingHorizontal: SPACING.xl, marginBottom: SPACING.lg },
+  header: { paddingTop: SPACING.xl, paddingHorizontal: SPACING.xl, marginBottom: SPACING.lg },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: { ...FONTS.bold, fontSize: FONTS.size.title, color: colors.text },

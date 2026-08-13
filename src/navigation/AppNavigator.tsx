@@ -159,6 +159,7 @@ import SnapTradeConnectScreen from '../screens/snaptrade/SnapTradeConnectScreen'
 import SnapTradePortfolioScreen from '../screens/snaptrade/SnapTradePortfolioScreen';
 import SnapTradeOrderScreen from '../screens/snaptrade/SnapTradeOrderScreen';
 import OfflineBanner from '../components/ui/OfflineBanner';
+import OfflineModal from '../components/ui/OfflineModal';
 import SyncConflictModal from '../components/ui/SyncConflictModal';
 import { useBackgroundSync } from '../hooks/useBackgroundSync';
 import { startCacheWarming } from '../services/cacheWarmingService';
@@ -294,9 +295,9 @@ function MainTabs() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          // Dark glass — translucent surface with hairline top border
-          backgroundColor: 'rgba(14, 17, 26, 0.96)',
-          borderTopColor: 'rgba(255,255,255,0.08)',
+          // Solid design-system surface with hairline top border
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: StyleSheet.hairlineWidth,
           paddingTop: 6,
           paddingBottom: 8,
@@ -337,6 +338,7 @@ function MainTabs() {
       <IronLockOverlay />
       <UpgradePromptModal />
       <OfflineBanner />
+      <OfflineModal />
       <SyncConflictModal />
     </>
   );

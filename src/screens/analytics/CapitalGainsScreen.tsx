@@ -24,7 +24,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  RefreshControl,
   ActivityIndicator,
   Platform,
 } from 'react-native';
@@ -37,6 +36,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import { api } from '../../services/api';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ──── Types ────────────────────────────────────────────────────────────────
@@ -330,20 +330,12 @@ export default function CapitalGainsScreen({ navigation }: any) {
   // ── Render ───────────────────────────────────────────────────────────
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => loadData(true)}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={() => loadData(true)}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
@@ -596,18 +588,13 @@ export default function CapitalGainsScreen({ navigation }: any) {
         )}
 
         <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ──── Styles ──────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -619,7 +606,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.md,
   },
   headerRow: {

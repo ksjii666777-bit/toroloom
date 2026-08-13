@@ -17,7 +17,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
-  RefreshControl,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withSequence,
@@ -36,6 +35,7 @@ import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { showShareSheet, ShareContent } from '../../utils/share';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 
@@ -241,36 +241,28 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
 
   // ── Render ────────────────────────────────────────────────────────────
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Text style={styles.title}>{t('community.title')}</Text>
-          <Pressable
-            style={styles.newPostBtn}
-            onPress={() => {
-              setShowPostInput(!showPostInput);
-              triggerHaptic();
-            }}
-          >
-            <Ionicons name="create-outline" size={22} color={colors.primary} />
-          </Pressable>
+    <AppScreen
+      padded={false}
+      refreshing={isRefreshing}
+      onRefresh={refreshPosts}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>{t('community.title')}</Text>
+            <Pressable
+              style={styles.newPostBtn}
+              onPress={() => {
+                setShowPostInput(!showPostInput);
+                triggerHaptic();
+              }}
+            >
+              <Ionicons name="create-outline" size={22} color={colors.primary} />
+            </Pressable>
+          </View>
         </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={refreshPosts}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+      }
+    >
         {/* Create Post Input */}
         {showPostInput && (
           <Animated.View entering={BounceIn.duration(300)} style={styles.createPost}>
@@ -364,9 +356,7 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
           />
         ))}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -374,18 +364,15 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
-    header: {
-      paddingTop: 60,
-      paddingHorizontal: SPACING.xl,
-      paddingBottom: SPACING.md,
-      backgroundColor: colors.bg,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.divider,
-    },
+  header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.md,
+    backgroundColor: colors.bg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider,
+  },
     headerRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',

@@ -15,6 +15,8 @@ let _localIdCounter = 0;
 interface WatchlistState {
   watchlists: Watchlist[];
   isLoading: boolean;
+  /** True when the last fetchWatchlists() could not reach the backend. */
+  lastFetchFailed: boolean;
   fetchWatchlists: () => Promise<void>;
   addToWatchlist: (watchlistId: string, stock: Stock) => Promise<void>;
   removeFromWatchlist: (watchlistId: string, stockId: string, symbol: string) => Promise<void>;
@@ -32,6 +34,7 @@ interface WatchlistState {
 export const useWatchlistStore = create<WatchlistState>((set, get) => ({
   watchlists: mockWatchlists,
   isLoading: false,
+  lastFetchFailed: false,
 
   loadCachedWatchlists: async () => {
     const cached = await offlineCache.load<{ watchlists: Watchlist[] }>('watchlist');
@@ -55,8 +58,10 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
       set({
         watchlists: transformed,
         isLoading: false,
+        lastFetchFailed: false,
       });
     } catch {
+      set({ lastFetchFailed: true });
       // Backend unavailable — try stale cache only if current watchlists are empty
       const current = get();
       if (current.watchlists.length === 0) {

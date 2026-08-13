@@ -30,6 +30,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import type {LeaderboardSort, LeaderboardPeriod, TraderProfile, LeaderboardEntry, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -729,13 +730,14 @@ export default function SocialTradingScreen({ navigation }: NativeStackScreenPro
   // ── Premium Gate ───────────────────────────────────────────────────
   if (!hasSocialAccess) {
     return (
-      <View style={styles.container}>
+      <AppScreen scroll={false} padded={false} header={
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.title}>{t('social.title')}</Text>
         </View>
+      }>
         <View style={styles.premiumGate}>
           <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.premiumIconContainer}>
             <Ionicons name="people" size={48} color={colors.white} />
@@ -755,19 +757,20 @@ export default function SocialTradingScreen({ navigation }: NativeStackScreenPro
             </LinearGradient>
           </AnimatedPressable>
         </View>
-      </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>{t('social.title')}</Text>
-          <View style={{ width: 40 }} />
+    <AppScreen scroll={false} padded={false} header={
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.title}>{t('social.title')}</Text>
+        <View style={{ width: 40 }} />
       </View>
+    }>
 
       {/* Tab Bar */}
       <View style={styles.tabBar}>
@@ -1045,7 +1048,7 @@ export default function SocialTradingScreen({ navigation }: NativeStackScreenPro
           </ScrollView>
         </View>
       )}
-    </View>
+    </AppScreen>
   );
 }
 
@@ -1053,12 +1056,12 @@ export default function SocialTradingScreen({ navigation }: NativeStackScreenPro
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
     content: { flex: 1, paddingHorizontal: SPACING.xl },
 
     // ── Header ──
     header: {
-      paddingTop: 60, paddingHorizontal: SPACING.xl, flexDirection: 'row',
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl, paddingHorizontal: SPACING.xl, flexDirection: 'row',
       alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.md,
     },
     backBtn: {

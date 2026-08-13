@@ -41,6 +41,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
 import { brokerProxyApi, snapTradeApi } from '../../services/api';
+import { log } from '../../utils/logger';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -233,8 +234,10 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
           notificationAsync(NotificationFeedbackType.Success);
           showConnectedSuccess();
         }
-      } catch (err: any) {
-        Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedOAuth'));
+      } catch (err) {
+        // Technical details stay in the log — users get a friendly message.
+        log.warn('[ConnectBroker] OAuth callback failed:', err);
+        Alert.alert(t('brokerConnect.connectionFailed'), t('brokerConnect.checkConnection'));
       } finally {
         setIsConnectingSnapTrade(false);
       }
@@ -284,8 +287,10 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
         } else {
           throw new Error(t('brokerConnect.noOauthUrl'));
         }
-      } catch (err: any) {
-        Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedSnapTrade'));
+      } catch (err) {
+        // Technical details stay in the log — users get a friendly message.
+        log.warn('[ConnectBroker] SnapTrade connect failed:', err);
+        Alert.alert(t('brokerConnect.connectionFailed'), t('brokerConnect.checkConnection'));
         setIsConnectingSnapTrade(false);
       }
       // Don't set isConnectingSnapTrade = false here — the deep link callback will handle it
@@ -314,16 +319,21 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
       const result = await brokerProxyApi.getHoldings(connectedBroker);
 
       const title = result.success ? t('brokerConnect.apiSuccess') : t('brokerConnect.apiFailed');
-      const body = [
-        `Broker: ${connectedBroker.toUpperCase()}`,
-        result.success
-          ? `Data: ${JSON.stringify(result.data, null, 2).slice(0, 800)}`
-          : `Error: ${result.error}`,
-      ].join('\n');
+      // Never surface raw payloads/errors to the user — log them internally.
+      if (result.success) {
+        log.info('[ConnectBroker] Test API holdings:', result.data);
+      } else {
+        log.warn('[ConnectBroker] Test API error:', result.error);
+      }
+      const body = result.success
+        ? `Broker: ${connectedBroker.toUpperCase()}`
+        : t('brokerConnect.checkConnection');
 
       Alert.alert(title, body);
-    } catch (err: any) {
-      Alert.alert(t('brokerConnect.apiError'), err.message || t('brokerConnect.unexpectedApiError'));
+    } catch (err) {
+      // Technical details stay in the log — users get a friendly message.
+      log.warn('[ConnectBroker] Test API request failed:', err);
+      Alert.alert(t('brokerConnect.apiError'), t('brokerConnect.checkConnection'));
     } finally {
       setIsTestingProxy(false);
     }

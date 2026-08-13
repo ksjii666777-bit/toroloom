@@ -15,8 +15,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  RefreshControl,
+  View, Text, StyleSheet, TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +26,7 @@ import { useEducationStore } from '../../store/educationStore';
 import type {LearningPath, RootStackParamList} from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 export default function LearningPathsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'LearningPaths'>) {
   const { colors } = useTheme();
@@ -93,14 +93,12 @@ export default function LearningPathsScreen({ navigation }: NativeStackScreenPro
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
@@ -238,9 +236,7 @@ export default function LearningPathsScreen({ navigation }: NativeStackScreenPro
           );
         })}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -248,21 +244,18 @@ export default function LearningPathsScreen({ navigation }: NativeStackScreenPro
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
-    scrollContent: {
-      paddingBottom: 20,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingTop: 60,
-      paddingHorizontal: SPACING.xl,
-      marginBottom: SPACING.lg,
-      gap: SPACING.md,
-    },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+    gap: SPACING.md,
+  },
     backBtn: {
       width: 40,
       height: 40,

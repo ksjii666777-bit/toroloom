@@ -17,8 +17,8 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView,
-  Dimensions, RefreshControl,
+  View, Text, StyleSheet,
+  Dimensions,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +28,7 @@ import { useT } from '../../hooks/useT';
 import { useSocialStore } from '../../store/socialStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import Card from '../../components/ui/Card';
 import PnLChart from '../../components/PnLChart';
 
@@ -284,29 +285,27 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </AnimatedPressable>
-          <View style={{ flex: 1, marginLeft: SPACING.md }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('copyAnalytics.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              {t('copyAnalytics.subtitle')}
-            </Text>
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </AnimatedPressable>
+            <View style={{ flex: 1, marginLeft: SPACING.md }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('copyAnalytics.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                {t('copyAnalytics.subtitle')}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
-        }
-      >
+      }
+    >
         {/* ── Summary Cards ── */}
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -543,25 +542,20 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
           </View>
         )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ─── Styles ────────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.md,
   },
   headerRow: {

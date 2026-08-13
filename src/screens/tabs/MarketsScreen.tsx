@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Dimensions, RefreshControl, Keyboard, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Dimensions, Keyboard, Platform } from 'react-native';
 import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, interpolate, interpolateColor } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,10 +8,12 @@ import { useMarketStore } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import StockItem from '../../components/StockItem';
 import MarketCard from '../../components/MarketCard';
+import AppScreen from '../../components/ui/AppScreen';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, SkeletonCard } from '../../components/ui/SkeletonLoader';
+import { ErrorState } from '../../components/ui/ErrorState';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
@@ -30,7 +32,7 @@ export default function MarketsScreen({ navigation }: CompositeScreenProps<Botto
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { stocks, indices, searchQuery, searchResults, setSearchQuery } = useMarketStore();
+  const { stocks, indices, searchQuery, searchResults, setSearchQuery, lastRefreshFailed, refreshMarket } = useMarketStore();
   const [selectedSector, setSelectedSector] = useState('All');
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,41 +122,49 @@ export default function MarketsScreen({ navigation }: CompositeScreenProps<Botto
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <SkeletonBlock width="30%" height={28} />
-            <View style={{ height: 4 }} />
-            <SkeletonBlock width="50%" height={14} />
-          </View>
-          <View style={{ paddingHorizontal: SPACING.xl }}>
-            <SkeletonBlock width="100%" height={48} borderRadius={8} />
-            <View style={{ height: SPACING.lg }} />
-            <SkeletonBlock width="100%" height={100} borderRadius={12} />
-            <View style={{ height: SPACING.lg }} />
-            {[1, 2, 3, 4].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction />)}
-          </View>
-        </ScrollView>
-      </View>
+      <AppScreen hasTabBar padded={false} contentStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <SkeletonBlock width="30%" height={28} />
+          <View style={{ height: 4 }} />
+          <SkeletonBlock width="50%" height={14} />
+        </View>
+        <View style={{ paddingHorizontal: SPACING.xl }}>
+          <SkeletonBlock width="100%" height={48} borderRadius={8} />
+          <View style={{ height: SPACING.lg }} />
+          <SkeletonBlock width="100%" height={100} borderRadius={12} />
+          <View style={{ height: SPACING.lg }} />
+          {[1, 2, 3, 4].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction />)}
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-        keyboardShouldPersistTaps="handled"
-      >
+    <AppScreen
+      hasTabBar
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      overlay={
+        isSearchFocused && searchQuery.length === 0 ? (
+          <ReanimatedAnimated.View
+            style={[styles.backdropOverlay, overlayStyle]}
+            pointerEvents={isSearchFocused ? 'auto' : 'none'}
+          >
+            <TouchableOpacity
+              style={StyleSheet.absoluteFill}
+              activeOpacity={1}
+              onPress={() => {
+                Keyboard.dismiss();
+                setIsSearchFocused(false);
+                overlayProgress.value = withTiming(0, { duration: 200 });
+              }}
+            />
+          </ReanimatedAnimated.View>
+        ) : undefined
+      }
+    >
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -358,6 +368,19 @@ export default function MarketsScreen({ navigation }: CompositeScreenProps<Botto
           </ScrollView>
         )}
 
+        {/* Fetch-failure state — friendly message, technical detail logged internally */}
+        {lastRefreshFailed && (
+          <ErrorState
+            compact
+            icon="cloud-offline-outline"
+            title={t('market.refreshError')}
+            message={t('app.showingCached')}
+            retryLabel={t('app.retry')}
+            onRetry={() => { refreshMarket(); }}
+            detail="[MarketStore] refreshMarket failed — showing cached/mock data"
+          />
+        )}
+
         {/* Stock List */}
         <View style={styles.stockList}>
           <View style={styles.listHeader}>
@@ -378,40 +401,17 @@ export default function MarketsScreen({ navigation }: CompositeScreenProps<Botto
           ))}
         </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      {/* Backdrop overlay when search is focused */}
-      {isSearchFocused && searchQuery.length === 0 && (
-        <ReanimatedAnimated.View
-          style={[styles.backdropOverlay, overlayStyle]}
-          pointerEvents={isSearchFocused ? 'auto' : 'none'}
-        >
-          <TouchableOpacity
-            style={StyleSheet.absoluteFill}
-            activeOpacity={1}
-            onPress={() => {
-              Keyboard.dismiss();
-              setIsSearchFocused(false);
-              overlayProgress.value = withTiming(0, { duration: 200 });
-            }}
-          />
-        </ReanimatedAnimated.View>
-      )}
-    </View>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     marginBottom: SPACING.lg,
   },

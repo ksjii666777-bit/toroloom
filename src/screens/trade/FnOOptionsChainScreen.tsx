@@ -35,6 +35,7 @@ import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
 import { tickerProvider } from '../../services/tickerProvider';
 import type {FutureContract, FnOPosition, OptionChainRow, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const _width = Dimensions.get('window');
 
@@ -637,8 +638,7 @@ export default function FnOOptionsChainScreen({ navigation }: NativeStackScreenP
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <AppScreen scroll={false} padded={false} header={
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -648,6 +648,7 @@ export default function FnOOptionsChainScreen({ navigation }: NativeStackScreenP
           <Ionicons name="git-branch" size={20} color={colors.primary} />
         </Pressable>
       </View>
+    }>
 
       {/* Symbol Selector */}
       <View style={styles.symbolRow}>
@@ -835,19 +836,16 @@ export default function FnOOptionsChainScreen({ navigation }: NativeStackScreenP
 
       {/* Order Modal */}
       {renderOrderModal()}
-    </View>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.md,
   },

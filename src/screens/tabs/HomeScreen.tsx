@@ -1,12 +1,12 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, TextInput, Modal, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing, interpolate } from 'react-native-reanimated';
+import ReanimatedAnimated from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
@@ -16,10 +16,14 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { useAIStore } from '../../store/aiStore';
-import { SPACING, FONTS, BORDER_RADIUS, IS_SMALL_DEVICE } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import MarketCard from '../../components/MarketCard';
 import StockItem from '../../components/StockItem';
+import AppScreen from '../../components/ui/AppScreen';
+import { FeatureGrid } from '../../components/patterns/FeatureGrid';
+import { PortfolioSummaryCard } from '../../components/ui/PortfolioSummaryCard';
+import { SectionHeader } from '../../components/ui/SectionHeader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -118,17 +122,53 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
   const topGainers = [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 3);
   const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 3);
 
-  // ── 8 High-Priority Actions (Zerodha Kite style) ───────────────
-  const priorityActions = useMemo(() => [
-    { icon: 'link', label: t('profile.connectBroker'), color: colors.primary, screen: 'BrokerConnect' },
-    { icon: 'lock-closed', label: t('profile.ironLockTrade'), color: '#EF4444', screen: 'FnOOptionsChain' },
-    { icon: 'pie-chart', label: 'Portfolio', color: colors.accent, screen: 'Portfolio' },
-    { icon: 'document-text', label: t('profile.reports'), color: '#8B5CF6', screen: 'Reports' },
-    { icon: 'time', label: t('profile.tradeHistory'), color: '#FFC107', screen: 'TradeHistory' },
-    { icon: 'newspaper', label: t('profile.marketNews'), color: '#00D2FF', screen: 'NewsFeed' },
-    { icon: 'add-circle', label: t('funds.addFunds'), color: colors.success, screen: 'AddFunds' },
-    { icon: 'shield-checkmark', label: t('profile.riskSettings'), color: '#6E6E9A', screen: 'Settings' },
-  ], [t, colors]);
+  // ── More Tools (FeatureGrid pattern — 8 shortcuts, See All → More) ──
+  const priorityItems = useMemo(() => [
+    { key: 'connect', label: t('profile.connectBroker'), icon: <Ionicons name="link" size={22} color={colors.primary} />, testID: 'home-priority-brokerconnect', onPress: () => (navigation.navigate as (screenName: string) => void)('BrokerConnect') },
+    { key: 'ironlock', label: t('profile.ironLockTrade'), icon: <Ionicons name="lock-closed" size={22} color="#EF4444" />, testID: 'home-priority-fnooptionschain', onPress: () => (navigation.navigate as (screenName: string) => void)('FnOOptionsChain') },
+    { key: 'portfolio', label: 'Portfolio', icon: <Ionicons name="pie-chart" size={22} color={colors.accent} />, testID: 'home-priority-portfolio', onPress: () => (navigation.navigate as (screenName: string) => void)('Portfolio') },
+    { key: 'reports', label: t('profile.reports'), icon: <Ionicons name="document-text" size={22} color="#8B5CF6" />, testID: 'home-priority-reports', onPress: () => (navigation.navigate as (screenName: string) => void)('Reports') },
+    { key: 'history', label: t('profile.tradeHistory'), icon: <Ionicons name="time" size={22} color="#FFC107" />, testID: 'home-priority-tradehistory', onPress: () => (navigation.navigate as (screenName: string) => void)('TradeHistory') },
+    { key: 'news', label: t('profile.marketNews'), icon: <Ionicons name="newspaper" size={22} color="#00D2FF" />, testID: 'home-priority-newsfeed', onPress: () => (navigation.navigate as (screenName: string) => void)('NewsFeed') },
+    { key: 'funds', label: t('funds.addFunds'), icon: <Ionicons name="add-circle" size={22} color={colors.success} />, testID: 'home-priority-addfunds', onPress: () => (navigation.navigate as (screenName: string) => void)('AddFunds') },
+    { key: 'risk', label: t('profile.riskSettings'), icon: <Ionicons name="shield-checkmark" size={22} color="#6E6E9A" />, testID: 'home-priority-settings', onPress: () => (navigation.navigate as (screenName: string) => void)('Settings') },
+  ], [t, colors, navigation]);
+
+  // ── Quick Actions (FeatureGrid pattern — Buy/Sell/SIP/Learn) ───
+  const quickActions = useMemo(() => [
+    {
+      key: 'buy',
+      label: t('home.buy'),
+      icon: <Ionicons name="trending-up" size={22} color={colors.marketUp} />,
+      tone: 'positive' as const,
+      testID: 'home-quick-markets',
+      onPress: () => (navigation.navigate as (screenName: string) => void)('Markets'),
+    },
+    {
+      key: 'sell',
+      label: t('home.sell'),
+      icon: <Ionicons name="trending-down" size={22} color={colors.marketDown} />,
+      tone: 'negative' as const,
+      testID: 'home-quick-portfolio',
+      onPress: () => (navigation.navigate as (screenName: string) => void)('Portfolio'),
+    },
+    {
+      key: 'sip',
+      label: t('home.sip'),
+      icon: <Ionicons name="pie-chart" size={22} color={colors.primary} />,
+      tone: 'accent' as const,
+      testID: 'home-quick-sipcalculator',
+      onPress: () => (navigation.navigate as (screenName: string) => void)('SIPCalculator'),
+    },
+    {
+      key: 'learn',
+      label: t('home.learn'),
+      icon: <Ionicons name="school" size={22} color={colors.warning} />,
+      tone: 'warning' as const,
+      testID: 'home-quick-learn',
+      onPress: () => (navigation.navigate as (screenName: string) => void)('Learn'),
+    },
+  ], [t, colors, navigation]);
 
   // Calculators data for horizontal list
   const calculatorsData = useMemo(() => [
@@ -234,63 +274,37 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
     return `\u20B9${val.toFixed(0)}`;
   };
 
-  const glowProgress = useSharedValue(0);
-
-  useEffect(() => {
-    glowProgress.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1, // infinite repeat
-      true // yoyo (reverse each cycle)
-    );
-  }, [glowProgress]);
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(glowProgress.value, [0, 1], [0.2, 0.5]),
-  }));
-
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <View style={[styles.header, { paddingBottom: SPACING.xl }]}>
-            <SkeletonBlock width="40%" height={14} />
-            <View style={{ height: 8 }} />
-            <SkeletonBlock width="50%" height={28} />
-            <View style={{ height: SPACING.lg }} />
-            <PortfolioSkeleton />
-          </View>
-          <View style={{ paddingHorizontal: SPACING.xl }}>
-            {[1, 2, 3].map(i => (
-              <View key={i} style={{ marginTop: SPACING.lg }}>
-                <SkeletonBlock width="30%" height={18} />
-                <View style={{ height: SPACING.md }} />
-                <SkeletonBlock width="100%" height={72} borderRadius={12} />
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+      <AppScreen hasTabBar padded={false} contentStyle={styles.scrollContent}>
+        <View style={[styles.header, { paddingBottom: SPACING.xl }]}>
+          <SkeletonBlock width="40%" height={14} />
+          <View style={{ height: 8 }} />
+          <SkeletonBlock width="50%" height={28} />
+          <View style={{ height: SPACING.lg }} />
+          <PortfolioSkeleton />
+        </View>
+        <View style={{ paddingHorizontal: SPACING.xl }}>
+          {[1, 2, 3].map(i => (
+            <View key={i} style={{ marginTop: SPACING.lg }}>
+              <SkeletonBlock width="30%" height={18} />
+              <View style={{ height: SPACING.md }} />
+              <SkeletonBlock width="100%" height={72} borderRadius={12} />
+            </View>
+          ))}
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      hasTabBar
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header — Glassmorphic */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -330,86 +344,33 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
             <SyncStatusIndicator variant="inline" />
           </View>
 
-          {/* Glow effect behind portfolio card */}
-          <ReanimatedAnimated.View style={[styles.portfolioGlow, glowStyle]} />
-
-          {/* Portfolio Summary Card — Glassmorphic */}
+          {/* Portfolio Summary — Hero Card */}
           <View style={styles.portfolioCardWrapper}>
-            <View style={[styles.portfolioCard, { backgroundColor: 'rgba(0,230,118,0.04)', borderWidth: 1, borderColor: 'rgba(0,230,118,0.12)' }]}>
-              <Text style={styles.portfolioLabel} testID="home-portfolio-label">{t('home.portfolioValue')}</Text>
-              <Text style={styles.portfolioValue}>{formatLargeCurrency(displayInvested || 1250000)}</Text>
-              <View style={styles.portfolioChange}>
-                <View style={[styles.changeChip, { backgroundColor: displayPnl >= 0 ? 'rgba(0,230,118,0.15)' : 'rgba(255,82,82,0.15)' }]}>
-                  <Ionicons name={displayPnl >= 0 ? 'caret-up' : 'caret-down'} size={16} color={displayPnl >= 0 ? colors.marketUp : colors.marketDown} />
-                  <Text style={[styles.changeText, { color: displayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
-                    {formatPercent(displayPnlPercent || 12.5)}
-                  </Text>
-                </View>
-                <Text style={styles.portfolioSubtext}>{t('home.totalPnl')}: {formatCurrency(displayPnl || 150000)}</Text>
-              </View>
-              <View style={styles.portfolioActions}>
-                <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
-                  <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
-                    <Ionicons name="add-circle" size={20} color={colors.marketUp} />
-                    <Text style={styles.actionText}>{t('home.addFunds')}</Text>
-                  </View>
-                </AnimatedPressable>
-                <AnimatedPressable onPress={() => navigation.navigate('Transfer')} haptic="light" scaleTo={0.95}>
-                  <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
-                    <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
-                    <Text style={styles.actionText}>{t('home.transfer')}</Text>
-                  </View>
-                </AnimatedPressable>
-                <AnimatedPressable onPress={() => navigation.navigate('FundsDashboard')} haptic="light" scaleTo={0.95}>
-                  <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
-                    <Ionicons name="wallet" size={20} color={colors.accent} />
-                    <Text style={styles.actionText}>{t('home.balance')}</Text>
-                  </View>
-                </AnimatedPressable>
-              </View>
-            </View>
+            <PortfolioSummaryCard
+              label={t('home.portfolioValue')}
+              value={formatLargeCurrency(displayInvested || 1250000)}
+              change={formatPercent(displayPnlPercent || 12.5)}
+              changeDirection={displayPnl >= 0 ? 'up' : 'down'}
+              pnl={`${t('home.totalPnl')}: ${formatCurrency(displayPnl || 150000)}`}
+              actions={[
+                { key: 'add', label: t('home.addFunds'), icon: 'add-circle', color: colors.marketUp, onPress: () => navigation.navigate('AddFunds') },
+                { key: 'transfer', label: t('home.transfer'), icon: 'swap-horizontal', color: colors.primary, onPress: () => navigation.navigate('Transfer') },
+                { key: 'balance', label: t('home.balance'), icon: 'wallet', color: colors.accent, onPress: () => navigation.navigate('FundsDashboard') },
+              ]}
+            />
           </View>
 
-          {/* Quick Actions — Glassmorphic */}
-          <View style={styles.quickActions}>
-            {[
-              { icon: 'trending-up', label: t('home.buy'), screen: 'Markets', color: colors.marketUp },
-              { icon: 'trending-down', label: t('home.sell'), screen: 'Portfolio', color: colors.marketDown },
-              { icon: 'pie-chart', label: t('home.sip'), screen: 'SIPCalculator', color: colors.primary },
-              { icon: 'school', label: t('home.learn'), screen: 'Learn', color: colors.warning },
-            ].map((item, i) => (
-              <AnimatedPressable key={i} testID={`home-quick-${item.screen.toLowerCase()}`} onPress={() => (navigation.navigate as (screenName: string) => void)(item.screen)} haptic="light" scaleTo={0.92}>
-                <View style={styles.quickAction}>
-                  <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }]}>
-                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
-                  </View>
-                  <Text style={styles.quickActionLabel}>{item.label}</Text>
-                </View>
-              </AnimatedPressable>
-            ))}
-          </View>
+          {/* Quick Actions — FeatureGrid pattern (Buy/Sell/SIP/Learn) */}
+          <FeatureGrid items={quickActions} columns={4} />
 
-          {/* Priority Actions — 8 high-priority tools */}
-          <View style={styles.prioritySection}>
-            <View style={styles.priorityGrid}>
-              {priorityActions.map((item, i) => (
-                <AnimatedPressable
-                  key={i}
-                  testID={`home-priority-${item.screen.toLowerCase()}`}
-                  onPress={() => (navigation.navigate as (screenName: string) => void)(item.screen)}
-                  haptic="light"
-                  scaleTo={0.97}
-                  accessibilityLabel={item.label}
-                >
-                  <View style={[styles.priorityTile, { width: IS_SMALL_DEVICE ? '30%' : '22%' }]}>
-                    <View style={[styles.priorityIcon, { backgroundColor: item.color + '20', borderColor: item.color + '30' }]}>
-                      <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
-                    </View>
-                    <Text style={styles.priorityLabel} numberOfLines={2}>{item.label}</Text>
-                  </View>
-                </AnimatedPressable>
-              ))}
-            </View>
+          {/* More Tools — shortcut grid (See All → More) */}
+          <View style={styles.section}>
+            <SectionHeader
+              title={t('home.moreTools')}
+              actionLabel={t('app.seeAll')}
+              onAction={() => navigation.navigate('More')}
+            />
+            <FeatureGrid items={priorityItems} columns={4} />
           </View>
         </View>
 
@@ -1008,9 +969,7 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
           </ReanimatedAnimated.View>
         )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -1140,15 +1099,12 @@ function QuickAddAlertForm({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.xl,
   },
@@ -1200,18 +1156,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     position: 'relative',
     marginBottom: SPACING.lg,
   },
-  portfolioGlow: {
-    position: 'absolute',
-    top: -15,
-    left: -15,
-    right: -15,
-    bottom: -15,
-    borderRadius: BORDER_RADIUS.xl + 15,
-    backgroundColor: colors.primary,
-    boxShadow: `0px 0px 30px ${colors.primary}66`,
-    elevation: 10,
-    zIndex: 0,
-  },
   iconBtn: {
     position: 'relative',
     width: 40,
@@ -1250,118 +1194,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.lg,
     color: colors.white,
   },
-  portfolioCard: {
-    padding: SPACING.xl,
-    borderRadius: BORDER_RADIUS.xl,
-    marginBottom: 0,
-    zIndex: 1,
-  },
-  portfolioLabel: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  portfolioValue: {
-    ...FONTS.black,
-    fontSize: FONTS.size.hero,
-    color: colors.white,
-    marginTop: SPACING.xs,
-  },
-  portfolioChange: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    gap: SPACING.md,
-  },
-  changeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 3,
-    borderRadius: BORDER_RADIUS.full,
-    gap: 2,
-  },
-  changeText: {
-    ...FONTS.semiBold,
-    fontSize: FONTS.size.sm,
-  },
-  portfolioSubtext: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: 'rgba(255,255,255,0.7)',
-  },
-  portfolioActions: {
-    flexDirection: 'row',
-    gap: SPACING.lg,
-    marginTop: SPACING.xl,
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.full,
-  },
-  actionText: {
-    ...FONTS.medium,
-    fontSize: FONTS.size.sm,
-    color: colors.white,
-  },
-  quickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  quickAction: {
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  quickActionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quickActionLabel: {
-    ...FONTS.medium,
-    fontSize: FONTS.size.sm,
-    color: colors.text,
-  },
   headerSyncRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.lg,
     marginTop: -SPACING.sm,
-  },
-  prioritySection: {
-    marginTop: SPACING.lg,
-  },
-  priorityGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: SPACING.lg,
-  },
-  priorityTile: {
-    alignItems: 'center',
-    gap: SPACING.sm,
-    minHeight: 84,
-  },
-  priorityIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  priorityLabel: {
-    ...FONTS.medium,
-    fontSize: FONTS.size.xs,
-    color: colors.text,
-    textAlign: 'center',
   },
 
   // ── Search Bar ──
