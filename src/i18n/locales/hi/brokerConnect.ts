@@ -16,6 +16,7 @@ export default {
     oauthConnect: 'OAuth कनेक्ट',
     tapToConnect: 'कनेक्ट करने के लिए टैप करें',
     connectionFailed: 'कनेक्शन विफल',
+    checkConnection: 'कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।',
     snapTradeOauthTitle: 'SnapTrade OAuth गेटवे',
     snapTradeDesc: 'अपने Zerodha, Angel One, Dhan, Upstox, Groww, या Interactive Brokers खाते को 1-टैप OAuth से कनेक्ट करें। आपकी साख हमारे साथ कभी साझा नहीं की जाती।',
     requiredFields: 'आवश्यक फ़ील्ड',

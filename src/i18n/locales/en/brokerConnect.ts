@@ -16,6 +16,7 @@ export default {
     oauthConnect: 'OAuth Connect',
     tapToConnect: 'Tap to Connect',
     connectionFailed: 'Connection Failed',
+    checkConnection: 'Please check your internet connection and try again.',
     snapTradeOauthTitle: 'SnapTrade OAuth Gateway',
     snapTradeDesc: 'Connect your Zerodha, Angel One, Dhan, Upstox, Groww, or Interactive Brokers account with 1-tap OAuth. Your credentials are never shared with us.',
     requiredFields: 'Required Fields',

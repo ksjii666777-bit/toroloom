@@ -15,6 +15,7 @@ export default {
     sell: 'बेचें',
     sip: 'SIP',
     learn: 'सीखें',
+    moreTools: 'और टूल्स',
     marketBreadth: 'बाज़ार विस्तार',
     marketIndices: 'बाज़ार सूचकांक',
     sectorPerformance: 'सेक्टर प्रदर्शन 🔥',

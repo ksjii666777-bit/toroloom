@@ -1,6 +1,7 @@
 // Auto-generated from hi.ts — watchlist namespace
 export default {
     title: 'वॉचलिस्ट',
+    loadError: 'आपकी वॉचलिस्ट लोड नहीं हो सकी',
     subtitle: 'अपने पसंदीदा स्टॉक पर नज़र रखें',
     all: 'सभी ({{count}})',
     create: 'बनाएं',

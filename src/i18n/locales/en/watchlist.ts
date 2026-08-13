@@ -1,6 +1,7 @@
 // Auto-generated from en.ts — watchlist namespace
 export default {
     title: 'Watchlist',
+    loadError: "Couldn't load your watchlist",
     subtitle: 'Monitor your favorite stocks',
     all: 'All ({{count}})',
     create: 'Create',

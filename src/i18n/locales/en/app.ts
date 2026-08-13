@@ -5,6 +5,8 @@ export default {
     loading: 'Loading...',
     error: 'Something went wrong',
     retry: 'Retry',
+    checkConnection: 'Please check your internet connection and try again.',
+    showingCached: 'Showing the latest cached data',
     cancel: 'Cancel',
     confirm: 'Confirm',
     save: 'Save',

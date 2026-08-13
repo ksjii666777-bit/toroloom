@@ -15,6 +15,7 @@ export default {
     sell: 'Sell',
     sip: 'SIP',
     learn: 'Learn',
+    moreTools: 'More Tools',
     marketBreadth: 'Market Breadth',
     marketIndices: 'Market Indices',
     sectorPerformance: 'Sector Performance 🔥',

@@ -2,6 +2,7 @@
 export default {
     title: 'बाज़ार',
     subtitle: 'रीयल-टाइम शेयर बाज़ार डेटा',
+    refreshError: 'बाज़ार डेटा रीफ़्रेश नहीं हो सका',
     screener: 'स्क्रीनर',
     searchPlaceholder: 'नाम या सिंबल से स्टॉक खोजें...',
     filterStocks: 'स्टॉक फ़िल्टर करें...',

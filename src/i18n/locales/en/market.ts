@@ -2,6 +2,7 @@
 export default {
     title: 'Markets',
     subtitle: 'Real-time stock market data',
+    refreshError: "Couldn't refresh market data",
     screener: 'Screener',
     searchPlaceholder: 'Search stocks by name or symbol...',
     filterStocks: 'Filter stocks...',
