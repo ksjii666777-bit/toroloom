@@ -83,7 +83,8 @@ export default function ReportHeader({ navigation, hasAnalytics, isExporting, on
 
 const createStyles = (colors: any) => StyleSheet.create({
   header: {
-    paddingTop: 56,
+    // AppScreen (PeriodReportScreen) already pads for the status-bar inset
+    paddingTop: SPACING.lg,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.lg,
     borderBottomLeftRadius: BORDER_RADIUS.xl,

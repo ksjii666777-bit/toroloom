@@ -25,13 +25,6 @@ import * as Haptics from 'expo-haptics';
 import { useConnectivity } from '../../hooks/useConnectivity';
 import { useConnectivityStore } from '../../store/connectivityStore';
 import { useOfflineStore, type CacheNamespace } from '../../store/offlineStore';
-import { usePortfolioStore } from '../../store/portfolioStore';
-import { useWatchlistStore } from '../../store/watchlistStore';
-import { useMarketStore } from '../../store/marketStore';
-import { useEducationStore } from '../../store/educationStore';
-import { useFnoStore } from '../../store/fnoStore';
-import { useCommunityStore } from '../../store/communityStore';
-import { useAIStore } from '../../store/aiStore';
 import { offlineMutationQueue } from '../../services/offlineMutationQueue';
 import { offlineCache } from '../../services/offlineCache';
 import { log } from '../../utils/logger';
@@ -39,25 +32,10 @@ import { analytics } from '../../services/analytics';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
-// ──── Synchronised re-fetch across all offline-aware stores ────────────────
-async function refreshAllStores(): Promise<boolean> {
-  try {
-    const results = await Promise.allSettled([
-      usePortfolioStore.getState().refreshPortfolio(),
-      useWatchlistStore.getState().fetchWatchlists(),
-      useMarketStore.getState().refreshMarket(),
-      useEducationStore.getState().fetchCourses(),
-      useFnoStore.getState().fetchPositions(),
-      useFnoStore.getState().fetchSpotPrices(),
-      useCommunityStore.getState().fetchPosts(),
-      useAIStore.getState().fetchInsights(),
-    ]);
-    return results.some(r => r.status === 'fulfilled');
-  } catch (err) {
-    log.warn('[OfflineBanner] refreshAllStores error:', err);
-    return false;
-  }
-}
+// Synchronised re-fetch moved to services/offlineRefresh to decouple
+// OfflineModal from OfflineBanner. Re-exported for backward compat.
+import { refreshAllStores } from '../../services/offlineRefresh';
+export { refreshAllStores };
 
 const SNOOZE_DURATION_MS = 30 * 60 * 1000;
 const RECONNECT_DEBOUNCE_MS = 5_000;
@@ -241,8 +219,9 @@ export default function OfflineBanner() {
     };
   }, [setPendingGroups, refreshFreshness]);
 
-  // Show banner if offline or pending mutations
-  const isEffectivelyOffline = combinedOffline || pendingCount > 0;
+  // Show banner only for pending mutations while ONLINE — the full offline
+  // state is presented by OfflineModal (clean bottom sheet + dark backdrop).
+  const isEffectivelyOffline = pendingCount > 0 && !combinedOffline;
 
   // Auto-dismiss snoozed state when back online
   useEffect(() => {

@@ -99,6 +99,9 @@ export const Dimensions = {
   removeEventListener: () => {},
 };
 
+// ── useWindowDimensions ———————————————————————————————————————
+export const useWindowDimensions = () => Dimensions.get('window');
+
 // ── Platform —————————————————————————————————————————————————
 export const Platform = {
   OS: 'ios' as const,
@@ -364,6 +367,7 @@ const ReactNative = {
   Linking,
   StyleSheet,
   Dimensions,
+  useWindowDimensions,
   Platform,
   Animated,
   PixelRatio,

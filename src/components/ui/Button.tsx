@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from './AnimatedPressable';
 
-interface ButtonProps {
+export interface ButtonProps {
   title: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';

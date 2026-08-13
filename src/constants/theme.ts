@@ -9,15 +9,15 @@ const { width, height } = Dimensions.get('window');
 
 export const COLORS = {
   // Background — Deep midnight canvas
-  bg: '#05070D',
-  bgSecondary: '#0E111A',
-  surface: '#0E111A',
-  surfaceElevated: '#141824',
-  bgCard: 'rgba(255,255,255,0.03)',
-  bgCardLight: 'rgba(255,255,255,0.045)',
-  bgInput: '#0E111A',
-  bgDark: '#040608',
-  bgOverlay: 'rgba(5,7,13,0.88)',
+  bg: '#090B12',
+  bgSecondary: '#121826',
+  surface: '#121826',
+  surfaceElevated: '#171E2D',
+  bgCard: '#121826',
+  bgCardLight: '#171E2D',
+  bgInput: '#0F1420',
+  bgDark: '#06090F',
+  bgOverlay: 'rgba(9,11,18,0.88)',
 
   // Brand — Electric Blue
   primary: '#3B82F6',
@@ -56,13 +56,22 @@ export const COLORS = {
   textOnPrimary: '#FFFFFF',
 
   // UI — Subtle micro-borders
-  border: 'rgba(255,255,255,0.08)',
-  borderLight: 'rgba(255,255,255,0.14)',
-  divider: 'rgba(255,255,255,0.06)',
+  border: '#263041',
+  borderLight: '#334155',
+  borderSubtle: '#1E2735',
+  divider: '#1E2735',
   shadow: '#000000',
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
+
+  // Translucent emphasis (dim fills), press states, overlay scrim
+  primaryDim: 'rgba(59,130,246,0.14)',
+  primaryPress: '#2F6FDB',
+  successDim: 'rgba(34,197,94,0.14)',
+  dangerDim: 'rgba(239,68,68,0.14)',
+  warningDim: 'rgba(245,158,11,0.14)',
+  scrim: 'rgba(3,6,12,0.72)',
 
   // Categories (kept for sector data — not container backgrounds)
   tech: '#3B82F6',
@@ -117,11 +126,20 @@ export const LIGHT_COLORS = {
 
   border: '#E2E8F0',
   borderLight: '#CBD5E1',
+  borderSubtle: 'rgba(15,23,42,0.06)',
   divider: '#E2E8F0',
   shadow: '#0F172A',
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
+
+  // Translucent emphasis (dim fills), press states, overlay scrim
+  primaryDim: 'rgba(59,130,246,0.14)',
+  primaryPress: '#2F6FDB',
+  successDim: 'rgba(34,197,94,0.14)',
+  dangerDim: 'rgba(239,68,68,0.14)',
+  warningDim: 'rgba(245,158,11,0.14)',
+  scrim: 'rgba(3,6,12,0.72)',
 
   tech: '#3B82F6',
   finance: '#00E676',
@@ -159,6 +177,7 @@ export const SPACING = {
   xs: 4,
   sm: 8,
   md: 12,
+  base: 16,
   lg: 16,
   xl: 20,
   xxl: 24,
@@ -178,6 +197,23 @@ export const FONTS = {
   extraBold: { fontFamily: 'Inter-ExtraBold', fontWeight: '800' as const, letterSpacing: 0 },
   black: { fontFamily: 'Inter-Black', fontWeight: '900' as const, letterSpacing: -0.5 },
   mono: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontWeight: '400' as const, letterSpacing: 0 },
+
+  // Semantic type scale — hierarchy-driven aliases (compatible with existing FONTS API)
+  display:    { fontFamily: 'Inter-ExtraBold', fontSize: 30, lineHeight: 36, fontWeight: '800' as const, letterSpacing: -0.5 },
+  title:      { fontFamily: 'Inter-Bold', fontSize: 22, lineHeight: 28, fontWeight: '700' as const, letterSpacing: 0.05 },
+  section:    { fontFamily: 'Inter-SemiBold', fontSize: 18, lineHeight: 24, fontWeight: '600' as const, letterSpacing: 0.1 },
+  bodyLg:     { fontFamily: 'Inter-Regular', fontSize: 16, lineHeight: 24, fontWeight: '400' as const, letterSpacing: 0.2 },
+  body:       { fontFamily: 'Inter-Regular', fontSize: 15, lineHeight: 22, fontWeight: '400' as const, letterSpacing: 0.2 },
+  bodyStrong: { fontFamily: 'Inter-SemiBold', fontSize: 15, lineHeight: 22, fontWeight: '600' as const, letterSpacing: 0.1 },
+  caption:    { fontFamily: 'Inter-Regular', fontSize: 13, lineHeight: 18, fontWeight: '400' as const, letterSpacing: 0.2 },
+  micro:      { fontFamily: 'Inter-SemiBold', fontSize: 11, lineHeight: 15, fontWeight: '600' as const, letterSpacing: 0.1 },
+
+  // Tabular numerals for money — prevents digit jitter on live prices
+  // NOTE: tuple cast (not `as const`) keeps fontVariant mutable-typed so it stays
+  // assignable to RN's `FontVariant[]` when spread into TextStyle styles.
+  money:   { fontFamily: 'Inter-Bold', fontSize: 32, lineHeight: 38, fontWeight: '700' as const, letterSpacing: 0, fontVariant: ['tabular-nums'] as ['tabular-nums'] },
+  moneySm: { fontFamily: 'Inter-SemiBold', fontSize: 16, lineHeight: 22, fontWeight: '600' as const, letterSpacing: 0, fontVariant: ['tabular-nums'] as ['tabular-nums'] },
+
   size: {
     xs: 10,
     sm: 12,
@@ -228,7 +264,19 @@ export const BORDER_RADIUS = {
   lg: 16,
   xl: 20,
   xxl: 28,
+  pill: 999,
   full: 999,
+};
+
+// Layout tokens — screen padding, chrome heights, min touch targets, content width
+// maxContentWidth used to cap content on tablets/foldables
+// NOTE: keep in sync with navigation tab bar height (tabs config)
+export const LAYOUT = {
+  screenX: 16,          // horizontal screen padding
+  tabBarHeight: 60,     // excluding safe-area inset
+  fabSize: 56,
+  minTouch: 48,
+  maxContentWidth: 520, // tablets/foldables
 };
 
 export const ICON_SIZE = {

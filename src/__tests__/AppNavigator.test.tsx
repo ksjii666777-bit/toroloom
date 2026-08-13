@@ -215,6 +215,7 @@ vi.mock('../components/AvatarWidget', () => ({ default: NullComponent }));
 vi.mock('../components/IronLockOverlay', () => ({ default: NullComponent }));
 vi.mock('../components/UpgradePromptModal', () => ({ default: NullComponent }));
 vi.mock('../components/ui/OfflineBanner', () => ({ default: NullComponent }));
+vi.mock('../components/ui/OfflineModal', () => ({ default: NullComponent }));
 vi.mock('../components/ui/SyncStatusIndicator', () => ({ default: NullComponent }));
 vi.mock('../components/ui/SyncConflictModal', () => ({ default: NullComponent }));
 
