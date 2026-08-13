@@ -157,6 +157,7 @@ vi.mock('@react-navigation/native', () => ({
 }));
 
 vi.mock('../constants/theme', () => ({
+  LAYOUT: { screenX: 16, tabBarHeight: 60, fabSize: 56, minTouch: 48, maxContentWidth: 520 },
   SPACING: { xs: 4, sm: 8, md: 12, lg: 16, xl: 20 },
   FONTS: {
     bold: { fontWeight: '700' },
