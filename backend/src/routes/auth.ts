@@ -1,7 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { generateToken, authMiddleware } from '../middleware/auth';
 import { inputSanitizer, InputValidationError, sanitizeInput } from '../middleware/inputSanitizer';
-import { mockUser } from '../data/mockData';
+import {
+  authenticateUser,
+  registerUser,
+  findUserByEmail,
+  toPublicUser,
+  DEMO_EMAIL,
+  DEMO_PASSWORD,
+} from '../data/userStore';
 
 const router = Router();
 
@@ -63,22 +70,30 @@ router.post('/login', (req: Request, res: Response) => {
     return;
   }
 
-  // Simulate auth — in production, validate against DB
-  // role can be 'admin' for dev/testing — only works in mock mode
-  const effectiveRole = (role === 'admin' ? 'admin' : 'user') as 'user' | 'admin';
-  const token = generateToken({ userId: mockUser.id, email, role: effectiveRole });
+  // Authenticate against the user store (scrypt password hash).
+  // role can be 'admin' for dev/testing — only works in mock mode and ONLY
+  // when the credentials themselves are valid.
+  const user = authenticateUser(email, password);
+  if (!user) {
+    // Don't reveal whether the email or the password was wrong.
+    res.status(401).json({ error: 'Invalid email or password' });
+    return;
+  }
+
+  const effectiveRole = (role === 'admin' ? 'admin' : user.role) as 'user' | 'admin';
+  const token = generateToken({ userId: user.id, email: user.email, role: effectiveRole });
   res.json({
     token,
-    user: { ...mockUser, role: effectiveRole },
+    user: { ...toPublicUser(user), role: effectiveRole },
   });
 });
 
 // POST /api/auth/signup
 router.post('/signup', (req: Request, res: Response) => {
-  let { name, email, phone } = req.body;
+  let { name, email, phone, password } = req.body;
 
-  if (!name || !email || !phone) {
-    res.status(400).json({ error: 'Name, email, and phone are required' });
+  if (!name || !email || !phone || !password) {
+    res.status(400).json({ error: 'Name, email, phone, and password are required' });
     return;
   }
 
@@ -86,6 +101,7 @@ router.post('/signup', (req: Request, res: Response) => {
     name = sanitizeInput(String(name), 'name');
     email = sanitizeInput(String(email), 'email');
     phone = sanitizeInput(String(phone), 'phone');
+    password = sanitizeInput(String(password), 'password');
   } catch (err) {
     if (err instanceof InputValidationError) {
       res.status(400).json({ error: err.message, code: err.code });
@@ -108,18 +124,40 @@ router.post('/signup', (req: Request, res: Response) => {
     return;
   }
 
-  // Single shared id so the token subject and the returned user always match
-  const userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-  const token = generateToken({ userId, email });
+  // Validate password strength (minimum 8 chars)
+  if (password.length < 8) {
+    res.status(400).json({ error: 'Password must be at least 8 characters' });
+    return;
+  }
+
+  // Register the user in the in-memory store (password hashed with scrypt).
+  let user;
+  try {
+    user = registerUser({ name, email, phone, password });
+  } catch (err) {
+    if (err instanceof Error && err.message === 'EMAIL_ALREADY_REGISTERED') {
+      res.status(409).json({ error: 'An account with this email already exists' });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to create account' });
+    return;
+  }
+
+  const token = generateToken({ userId: user.id, email: user.email });
   res.json({
     token,
-    user: { ...mockUser, id: userId, name, email, phone },
+    user: toPublicUser(user),
   });
 });
 
 // GET /api/auth/profile
 router.get('/profile', authMiddleware, (req: Request, res: Response) => {
-  res.json({ ...mockUser, email: req.user!.email });
+  const user = req.user ? findUserByEmail(req.user.email) : undefined;
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+  res.json(toPublicUser(user));
 });
 
 // PUT /api/auth/profile
@@ -138,12 +176,19 @@ router.put('/profile', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  res.json({
-    ...mockUser,
-    email: req.user!.email,
-    ...(name ? { name } : {}),
-    ...(phone ? { phone } : {}),
-  });
+  const user = req.user ? findUserByEmail(req.user.email) : undefined;
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+
+  res.json(
+    toPublicUser({
+      ...user,
+      ...(name ? { name } : {}),
+      ...(phone ? { phone } : {}),
+    }),
+  );
 });
 
 // POST /api/auth/referral
@@ -173,6 +218,16 @@ router.post('/referral', authMiddleware, (req: Request, res: Response) => {
   res.json({
     success: true,
     message: `Referral source '${source}' recorded for your account. Thanks!`,
+  });
+});
+
+// GET /api/auth/demo — returns the documented demo credentials (mock mode only).
+// Helps testers log in after a backend restart.
+router.get('/demo', (_req: Request, res: Response) => {
+  res.json({
+    email: DEMO_EMAIL,
+    password: DEMO_PASSWORD,
+    note: 'Mock-mode demo account. In production, demo credentials are not exposed.',
   });
 });
 
