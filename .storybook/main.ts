@@ -3,7 +3,10 @@ import { fileURLToPath } from 'url';
 import type { StorybookConfig } from '@storybook/react-vite';
 
 const config: StorybookConfig = {
-  stories: ['../src/components/ui/**/*.stories.@(ts|tsx)'],
+  stories: [
+    '../src/components/ui/**/*.stories.@(ts|tsx)',
+    '../src/components/patterns/**/*.stories.@(ts|tsx)',
+  ],
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-a11y',

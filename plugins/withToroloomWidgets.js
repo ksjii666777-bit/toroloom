@@ -42,7 +42,9 @@ const WIDGET_IOS_SWIFT_SRC = path.join(WIDGET_IOS_DIR, 'ToroloomWidget.swift');
 const WIDGET_IOS_PLIST = path.join(WIDGET_IOS_DIR, 'Info.plist');
 const WIDGET_IOS_EXTENSION_NAME = 'ToroloomWidget';
 
-const WIDGET_ANDROID_SRC_DIR = 'app/src/main/java/com/toroloom/app/widget';
+// NOTE: WIDGET_ANDROID_SRC_DIR is derived from the app's Android package at
+// runtime (see withAndroidWidget) because preview/dev/production variants use
+// different packages (com.toroloom.app.preview, com.toroloom.app.dev, ...).
 const WIDGET_ANDROID_LAYOUT_DIR = 'app/src/main/res/layout';
 const WIDGET_ANDROID_XML_DIR = 'app/src/main/res/xml';
 
@@ -658,8 +660,10 @@ function withAndroidWidget(config) {
       try {
         const projectDir = modConfig.modRequest.platformProjectRoot;
 
-        // ── Widget Java source ──
-        const widgetDir = path.join(projectDir, WIDGET_ANDROID_SRC_DIR);
+        // ── Widget Java source (dir mirrors the variant package: e.g.
+        //    com.toroloom.app.preview -> app/src/main/java/com/toroloom/app/preview/widget)
+        const widgetSrcRel = `app/src/main/java/${androidPackage.replace(/\./g, '/')}/widget`;
+        const widgetDir = path.join(projectDir, widgetSrcRel);
         if (!fs.existsSync(widgetDir)) {
           fs.mkdirSync(widgetDir, { recursive: true });
         }
@@ -673,7 +677,7 @@ function withAndroidWidget(config) {
         // ── Widget update service ──
         const servicePath = path.join(widgetDir, 'WidgetUpdateService.java');
         if (!fs.existsSync(servicePath)) {
-          fs.writeFileSync(servicePath, getAndroidWidgetUpdateService(), 'utf-8');
+          fs.writeFileSync(servicePath, getAndroidWidgetUpdateService(androidPackage), 'utf-8');
           console.log(`[${PLUGIN_NAME}] Created Android Widget update service`);
         }
 
@@ -755,6 +759,12 @@ function withAndroidWidget(config) {
           fs.writeFileSync(testReceiverPath, getAndroidWidgetTestReceiver(androidPackage), 'utf-8');
           console.log(`[${PLUGIN_NAME}] Created WidgetTestReceiver`);
         }
+
+        // ── Register ToroloomWidgetPackage in MainApplication.kt ──
+        // The generated ToroloomWidgetPackage must be added to the ReactHost
+        // packageList, otherwise NativeModules.ToroloomWidgetBridge is never
+        // available at runtime (widgets silently fall back to AsyncStorage mode).
+        registerWidgetPackageInMainApplication(projectDir, androidPackage);
       } catch (error) {
         console.warn(`[${PLUGIN_NAME}] Android widget setup failed: ${error.message}`);
       }
@@ -1132,8 +1142,56 @@ function getAndroidWidgetInfoXml() {
 `;
 }
 
-function getAndroidWidgetUpdateService() {
-  return `package com.toroloom.app.widget;
+/**
+ * Registers ToroloomWidgetPackage in MainApplication.kt's packageList so the
+ * native bridge module (NativeModules.ToroloomWidgetBridge) is available at
+ * runtime. Runs inside the same withDangerousMod as source generation.
+ * @param {string} projectDir - Android platform project root
+ * @param {string} androidPackage - The Android package name
+ */
+function registerWidgetPackageInMainApplication(projectDir, androidPackage) {
+  const mainAppPath = path.join(projectDir, 'app/src/main/java', androidPackage.replace(/\./g, '/'), 'MainApplication.kt');
+  try {
+    if (!fs.existsSync(mainAppPath)) {
+      console.warn(`[${PLUGIN_NAME}] MainApplication.kt not found at ${mainAppPath} — skipping package registration`);
+      return;
+    }
+    let kt = fs.readFileSync(mainAppPath, 'utf-8');
+    if (kt.includes('ToroloomWidgetPackage')) {
+      return; // already registered
+    }
+    const widgetPkgClass = `${androidPackage}.widget.ToroloomWidgetPackage`;
+    // 1) Add import after the last existing import line
+    const importLine = `import ${widgetPkgClass}`;
+    if (!kt.includes(importLine)) {
+      const importIdx = kt.lastIndexOf('import ');
+      if (importIdx !== -1) {
+        const endOfLine = kt.indexOf('\n', importIdx);
+        kt = kt.slice(0, endOfLine + 1) + importLine + '\n' + kt.slice(endOfLine + 1);
+      } else {
+        // No imports at all — prepend after package line
+        kt = kt.replace(/^(package [^\n]+\n)/, `$1\n${importLine}\n`);
+      }
+    }
+    // 2) Add package to the packageList apply block
+    kt = kt.replace(
+      /PackageList\(this\)\.packages\.apply \{/,
+      (match) => {
+        const addLine = `\n          add(${widgetPkgClass}())`;
+        // Only add if not already present (safety)
+        if (match.includes('add(ToroloomWidgetPackage')) return match;
+        return `PackageList(this).packages.apply {${addLine}`;
+      },
+    );
+    fs.writeFileSync(mainAppPath, kt, 'utf-8');
+    console.log(`[${PLUGIN_NAME}] Registered ${widgetPkgClass} in MainApplication.kt`);
+  } catch (error) {
+    console.warn(`[${PLUGIN_NAME}] Failed to register widget package in MainApplication.kt: ${error.message}`);
+  }
+}
+
+function getAndroidWidgetUpdateService(androidPackage) {
+  return `package ${androidPackage}.widget;
 
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;

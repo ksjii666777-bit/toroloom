@@ -96,13 +96,24 @@ docs/
 !README.md   # Keep README for context if needed
 
 # ===================== Backend Server =====================
-# The backend is a separate Node.js service — not needed for mobile app builds
-backend/
+# The backend is a separate Node.js service — not needed for mobile app builds.
+# Exception: src/hooks/useCacheInvalidation.ts imports ONE shared constants file
+# (backend/src/constants/cacheNamespaces.ts) — whitelist just that file via
+# gitignore negation chain so Metro can resolve it on the build server.
+backend/*
+!backend/src
+backend/src/*
+!backend/src/constants
+backend/src/constants/*
+!backend/src/constants/cacheNamespaces.ts
 
 # ===================== CI / Dev Tools =====================
 .github/
 .maestro/
-scripts/
+# Keep the postinstall razorpay-clean script (referenced by package.json postinstall -> npm ci fails without it);
+# everything else under scripts/ stays excluded
+scripts/*
+!scripts/clean-rn-razorpay-build.mjs
 
 # ===================== Git =====================
 # Git history is large and not needed by the build server
