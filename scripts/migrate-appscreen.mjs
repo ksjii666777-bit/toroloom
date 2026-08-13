@@ -480,13 +480,17 @@ function transformStaticReturn(content, openIdx, hasTabBar) {
     ? `      header={\n${reindent(headerText, 2)}\n      }\n`
     : '';
 
-  const isCentered = /justifyContent: 'center'|justifyContent: "center"|styles\.center/.test(openTag);
+  // Match a real centering style token (styles.center or styles.centerContent)
+  // without matching a longer name like styles.centerContent via prefix.
+  const centerRef = (openTag.match(/styles\.center[A-Za-z0-9_$]*\b/) || [null])[0];
+  const isCentered =
+    /justifyContent: 'center'|justifyContent: "center"/.test(openTag) || !!centerRef;
   let bodyOut = body.trim();
   if (!bodyOut && headerProp) bodyOut = '<View />';
   let innerOut;
   if (isCentered) {
-    const wrapStyle = /styles\.center/.test(openTag)
-      ? '[styles.center, { flex: 1 }]'
+    const wrapStyle = centerRef
+      ? `[${centerRef}, { flex: 1 }]`
       : "{ flex: 1, justifyContent: 'center', alignItems: 'center' }";
     innerOut = bodyOut ? `        <View style={${wrapStyle}}>\n${reindent(bodyOut, 2)}\n        </View>\n` : '';
   } else {
@@ -603,8 +607,10 @@ function fixHeaderPadding(content) {
   out = out.replace(
     /(\[styles\.header, \{[^}]*?)(,?\s*paddingTop:\s*(?:\d+\s*\+\s*insets\.top|insets\.top\s*\+\s*\d+))([^}]*?\})/g,
     (m, pre, _pad, post) => {
-      const cleaned = post.trim().replace(/^,/, '').trim();
-      return cleaned ? `${pre}, ${cleaned}` : pre;
+      // pre ends with the inline object's `{`; post is the remainder after
+      // paddingTop (starting with its trailing comma when more props follow).
+      const rest = post.trim().replace(/^,/, '').trim();
+      return `${pre}${rest}`;
     }
   );
   // collapse now-empty inline objects
