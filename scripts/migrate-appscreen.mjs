@@ -517,7 +517,26 @@ function transformKavReturn(content, openIdx, hasTabBar) {
   const closeEnd = closeIdx + '</KeyboardAvoidingView>'.length;
 
   const inner = content.slice(openTagEnd, closeIdx);
-  // Leading header View (the first direct child)
+  // Two KAV shapes exist:
+  //  A) header View + ScrollView as SIBLINGS (PostDetail) → header prop
+  //  B) a single ScrollView that CONTAINS the header (form screens like
+  //     CreateCourse) → wrap-only, keep the ScrollView + header in the body.
+  // Detect by looking at the first non-whitespace child of the KAV.
+  const firstChild = inner.match(/^\s*(?:\{\/\*[^*]*\*\/\s*)?<([A-Za-z][\w.]*)/);
+  if (firstChild && firstChild[1] === 'ScrollView') {
+    const openTagNew = openTag.replace(/style=\{styles\.container\}/, "style={{ flex: 1 }}");
+    const rebuiltInner =
+      `      <AppScreen scroll={false} padded={false}>\n${reindent(inner, 2)}\n      </AppScreen>`;
+    return (
+      content.slice(0, openIdx) +
+      openTagNew +
+      '\n' +
+      rebuiltInner +
+      content.slice(closeIdx)
+    );
+  }
+
+  // Shape A: leading header View (the first direct child)
   const hOpen = inner.indexOf('<View style=');
   if (hOpen === -1) return null;
   const absHOpen = openTagEnd + hOpen;
