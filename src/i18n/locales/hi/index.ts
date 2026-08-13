@@ -27,6 +27,7 @@ import createPoll from './createPoll';
 import community from './community';
 import contractNoteUpload from './contractNoteUpload';
 import correlationMatrix from './correlationMatrix';
+import coupons from './coupons';
 import cryptoDetail from './cryptoDetail';
 import currencyMarkets from './currencyMarkets';
 import currencyConverter from './currencyConverter';
@@ -136,6 +137,7 @@ const hi = {
   community,
   contractNoteUpload,
   correlationMatrix,
+  coupons,
   cryptoDetail,
   currencyMarkets,
   currencyConverter,

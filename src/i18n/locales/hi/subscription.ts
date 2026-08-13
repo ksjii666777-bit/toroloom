@@ -70,4 +70,6 @@ export default {
     disable: 'निष्क्रिय करें',
     dayFreeTrial: ' दिन का मुफ्त ट्रायल',
     rupeeOff: '₹ छूट',
+    accessDenied: 'पहुंच अस्वीकृत',
+    accessDeniedMsg: 'केवल एडमिन ही सब्सक्रिप्शन एनालिटिक्स तक पहुंच सकते हैं।',
 };

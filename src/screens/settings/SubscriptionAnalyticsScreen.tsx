@@ -311,8 +311,8 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
       <AppScreen scroll={false} padded={false}>
         <View style={[styles.center, { flex: 1 }]}>
           <Ionicons name="shield-checkmark" size={48} color={colors.danger} />
-          <Text style={[styles.errorText, { color: colors.text }]}>{t('education.accessDenied')}</Text>
-          <Text style={[styles.subText, { color: colors.textSecondary }]}>{t('education.accessDeniedMsg')}</Text>
+          <Text style={[styles.errorText, { color: colors.text }]}>{t('subscription.accessDenied')}</Text>
+          <Text style={[styles.subText, { color: colors.textSecondary }]}>{t('subscription.accessDeniedMsg')}</Text>
         </View>
       </AppScreen>
     );

@@ -70,4 +70,6 @@ export default {
     disable: 'Disable',
     dayFreeTrial: '-day free trial',
     rupeeOff: '₹ off',
+    accessDenied: 'Access Denied',
+    accessDeniedMsg: 'Only administrators can access Subscription Analytics.',
 };
