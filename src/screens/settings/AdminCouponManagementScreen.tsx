@@ -23,7 +23,6 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  RefreshControl,
   Modal,
   TextInput,
   Alert,
@@ -46,6 +45,7 @@ import { couponApi, AdminUsageResponse } from '../../services/api/coupons';
 import type {CouponCode, RootStackParamList} from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import { cacheDirectory, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -1346,64 +1346,60 @@ export default function AdminCouponManagementScreen({ navigation }: NativeStackS
   // ─── Render ─────────────────────────────────────────────────
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
+    <AppScreen
+      padded={false}
+      refreshing={activeTab === 'coupons' ? refreshing : usageLoading}
+      onRefresh={activeTab === 'coupons' ? () => loadCoupons(true) : loadUsageData}
+      contentStyle={styles.scrollContent}
+      header={
+        <>
+          <View style={styles.header}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
+              </View>
+            </AnimatedPressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('adminCoupon.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>Admin • {activeTab === 'coupons' ? `${coupons.length} coupons` : `${usageData?.summary.totalUsages || 0} uses`}</Text>
+            </View>
+            {activeTab === 'coupons' && (
+              <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.92}>
+                <LinearGradient colors={['#3B82F6', '#1D4ED8'] as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addBtn}>
+                  <Ionicons name="add" size={22} color="#fff" />
+                </LinearGradient>
+              </AnimatedPressable>
+            )}
           </View>
-        </AnimatedPressable>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.title, { color: colors.text }]}>{t('adminCoupon.title')}</Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>Admin • {activeTab === 'coupons' ? `${coupons.length} coupons` : `${usageData?.summary.totalUsages || 0} uses`}</Text>
-        </View>
-        {activeTab === 'coupons' && (
-          <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.92}>
-            <LinearGradient colors={['#3B82F6', '#1D4ED8'] as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addBtn}>
-              <Ionicons name="add" size={22} color="#fff" />
-            </LinearGradient>
-          </AnimatedPressable>
-        )}
-      </View>
 
-      {/* Tab Toggle */}
-      <View style={[styles.toggleRow, { backgroundColor: colors.bgInput }]}>
-        <AnimatedPressable
-          onPress={() => setActiveTab('coupons')}
-          haptic="light"
-          scaleTo={0.97}
-          style={{ flex: 1 }}
-        >
-          <View style={[styles.toggleBtn, activeTab === 'coupons' && { backgroundColor: colors.primary }]}>
-            <Ionicons name="pricetag" size={16} color={activeTab === 'coupons' ? '#fff' : colors.textMuted} />
-            <Text style={[styles.toggleText, { color: activeTab === 'coupons' ? '#fff' : colors.textMuted }]}>{t('adminCoupon.tabCoupons')}</Text>
+          {/* Tab Toggle */}
+          <View style={[styles.toggleRow, { backgroundColor: colors.bgInput }]}>
+            <AnimatedPressable
+              onPress={() => setActiveTab('coupons')}
+              haptic="light"
+              scaleTo={0.97}
+              style={{ flex: 1 }}
+            >
+              <View style={[styles.toggleBtn, activeTab === 'coupons' && { backgroundColor: colors.primary }]}>
+                <Ionicons name="pricetag" size={16} color={activeTab === 'coupons' ? '#fff' : colors.textMuted} />
+                <Text style={[styles.toggleText, { color: activeTab === 'coupons' ? '#fff' : colors.textMuted }]}>{t('adminCoupon.tabCoupons')}</Text>
+              </View>
+            </AnimatedPressable>
+            <AnimatedPressable
+              onPress={() => setActiveTab('usage')}
+              haptic="light"
+              scaleTo={0.97}
+              style={{ flex: 1 }}
+            >
+              <View style={[styles.toggleBtn, activeTab === 'usage' && { backgroundColor: colors.primary }]}>
+                <Ionicons name="analytics" size={16} color={activeTab === 'usage' ? '#fff' : colors.textMuted} />
+                <Text style={[styles.toggleText, { color: activeTab === 'usage' ? '#fff' : colors.textMuted }]}>{t('adminCoupon.tabUsage')}</Text>
+              </View>
+            </AnimatedPressable>
           </View>
-        </AnimatedPressable>
-        <AnimatedPressable
-          onPress={() => setActiveTab('usage')}
-          haptic="light"
-          scaleTo={0.97}
-          style={{ flex: 1 }}
-        >
-          <View style={[styles.toggleBtn, activeTab === 'usage' && { backgroundColor: colors.primary }]}>
-            <Ionicons name="analytics" size={16} color={activeTab === 'usage' ? '#fff' : colors.textMuted} />
-            <Text style={[styles.toggleText, { color: activeTab === 'usage' ? '#fff' : colors.textMuted }]}>{t('adminCoupon.tabUsage')}</Text>
-          </View>
-        </AnimatedPressable>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={activeTab === 'coupons' ? refreshing : usageLoading}
-            onRefresh={activeTab === 'coupons' ? () => loadCoupons(true) : loadUsageData}
-            tintColor={colors.primary}
-          />
-        }
-      >
+        </>
+      }
+    >
         {activeTab === 'coupons' ? (
           loading ? (
             <View style={styles.loadingContainer}>
@@ -1480,9 +1476,6 @@ export default function AdminCouponManagementScreen({ navigation }: NativeStackS
           /* ═══ Usage Analytics Tab ═══ */
           <UsageAnalyticsTab loading={usageLoading} data={usageData} colors={colors} styles={styles} />
         )}
-        <View style={{ height: 60 }} />
-      </ScrollView>
-
       {/* Coupon Form Modal */}
       <CouponFormModal
         visible={formModalVisible}
@@ -1490,7 +1483,7 @@ export default function AdminCouponManagementScreen({ navigation }: NativeStackS
         onSave={handleSave}
         onClose={handleCloseModal}
       />
-    </View>
+    </AppScreen>
   );
 }
 
@@ -1498,11 +1491,9 @@ export default function AdminCouponManagementScreen({ navigation }: NativeStackS
 
 const createStyles = (_colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-    },
     header: {
-      paddingTop: 60,
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       paddingHorizontal: SPACING.xl,
       flexDirection: 'row',
       alignItems: 'center',

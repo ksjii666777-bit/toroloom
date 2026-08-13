@@ -16,10 +16,9 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  RefreshControl, TextInput, Dimensions, Pressable,
+  TextInput, Dimensions, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
@@ -35,6 +34,7 @@ import { shareNative, showShareSheet } from '../../utils/share';
 import type { ShareContent } from '../../utils/share';
 import type { LiveFeedEvent } from '../../services/ai/sentimentLiveFeed';
 import AnimatedScaleButton from '../../components/AnimatedScaleButton';
+import AppScreen from '../../components/ui/AppScreen';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -545,7 +545,6 @@ const eventStyles = StyleSheet.create({
 export default function LiveFeedScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'LiveFeed'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // ── Events State ────────────────────────────────────────
@@ -619,115 +618,106 @@ export default function LiveFeedScreen({ navigation }: NativeStackScreenProps<Ro
   const deterioratingCount = totalCount - improvingCount;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => { triggerHaptic(); navigation.goBack(); }} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ai.liveFeed')}</Text>
-            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-              {totalCount} events · {improvingCount} ↑ {deterioratingCount} ↓
-            </Text>
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => { triggerHaptic(); navigation.goBack(); }} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ai.liveFeed')}</Text>
+              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
+                {totalCount} events · {improvingCount} ↑ {deterioratingCount} ↓
+              </Text>
+            </View>
+          </View>
+
+          {/* Sentiment Frequency Chart */}
+          <SentimentFrequencyChart events={events} />
+
+          {/* Search Bar */}
+          <View style={[styles.searchContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="search" size={16} color={colors.textMuted} />
+            <TextInput
+              ref={searchInputRef}
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder={t('ai.searchLiveFeed')}
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <Pressable testID="search-clear-btn" onPress={() => { triggerHaptic(); setSearchQuery(''); searchInputRef.current?.blur(); }}>
+                <Ionicons name="close-circle" size={16} color={colors.textMuted} />
+              </Pressable>
+            )}
+          </View>
+
+          {/* Source Filter Chips */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersRow}>
+            {SOURCE_FILTERS.map(f => {
+              const isActive = sourceFilter === f.key;
+              return (
+                <Pressable
+                  key={f.key}
+                  style={[styles.filterChip, {
+                    backgroundColor: isActive ? f.color + '20' : colors.bgCard,
+                    borderColor: isActive ? f.color : colors.border,
+                  }]}
+                  onPress={() => {
+                    triggerHaptic();
+                    setSourceFilter(f.key);
+                  }}
+                >
+                  <Ionicons name={f.icon as any} size={14} color={isActive ? f.color : colors.textMuted} />
+                  <Text style={[styles.filterChipText, { color: isActive ? f.color : colors.textSecondary }]}>
+                    {f.label}
+                  </Text>
+                  {isActive && sourceCounts[f.key] !== undefined && (
+                    <View style={[styles.filterCount, { backgroundColor: f.color + '30' }]}>
+                      <Text style={[styles.filterCountText, { color: f.color }]}>
+                        {f.key === 'all' ? totalCount : sourceCounts[f.key]}
+                      </Text>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* Direction Filter Row */}
+          <View style={styles.dirFilterRow}>
+            {DIRECTION_FILTERS.map(f => {
+              const isActive = directionFilter === f.key;
+              return (
+                <Pressable
+                  key={f.key}
+                  style={[styles.dirChip, {
+                    backgroundColor: isActive ? f.color + '20' : colors.bgCard,
+                    borderColor: isActive ? f.color : colors.border,
+                  }]}
+                  onPress={() => {
+                    triggerHaptic();
+                    setDirectionFilter(f.key);
+                  }}
+                >
+                  <Ionicons name={f.icon as any} size={13} color={isActive ? f.color : colors.textMuted} />
+                  <Text style={[styles.dirChipText, { color: isActive ? f.color : colors.textSecondary }]}>
+                    {f.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
-
-        {/* Sentiment Frequency Chart */}
-        <SentimentFrequencyChart events={events} />
-
-        {/* Search Bar */}
-        <View style={[styles.searchContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="search" size={16} color={colors.textMuted} />
-          <TextInput
-            ref={searchInputRef}
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('ai.searchLiveFeed')}
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-          />
-          {searchQuery.length > 0 && (
-            <Pressable testID="search-clear-btn" onPress={() => { triggerHaptic(); setSearchQuery(''); searchInputRef.current?.blur(); }}>
-              <Ionicons name="close-circle" size={16} color={colors.textMuted} />
-            </Pressable>
-          )}
-        </View>
-
-        {/* Source Filter Chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersRow}>
-          {SOURCE_FILTERS.map(f => {
-            const isActive = sourceFilter === f.key;
-            return (
-              <Pressable
-                key={f.key}
-                style={[styles.filterChip, {
-                  backgroundColor: isActive ? f.color + '20' : colors.bgCard,
-                  borderColor: isActive ? f.color : colors.border,
-                }]}
-                onPress={() => {
-                  triggerHaptic();
-                  setSourceFilter(f.key);
-                }}
-              >
-                <Ionicons name={f.icon as any} size={14} color={isActive ? f.color : colors.textMuted} />
-                <Text style={[styles.filterChipText, { color: isActive ? f.color : colors.textSecondary }]}>
-                  {f.label}
-                </Text>
-                {isActive && sourceCounts[f.key] !== undefined && (
-                  <View style={[styles.filterCount, { backgroundColor: f.color + '30' }]}>
-                    <Text style={[styles.filterCountText, { color: f.color }]}>
-                      {f.key === 'all' ? totalCount : sourceCounts[f.key]}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        {/* Direction Filter Row */}
-        <View style={styles.dirFilterRow}>
-          {DIRECTION_FILTERS.map(f => {
-            const isActive = directionFilter === f.key;
-            return (
-              <Pressable
-                key={f.key}
-                style={[styles.dirChip, {
-                  backgroundColor: isActive ? f.color + '20' : colors.bgCard,
-                  borderColor: isActive ? f.color : colors.border,
-                }]}
-                onPress={() => {
-                  triggerHaptic();
-                  setDirectionFilter(f.key);
-                }}
-              >
-                <Ionicons name={f.icon as any} size={13} color={isActive ? f.color : colors.textMuted} />
-                <Text style={[styles.dirChipText, { color: isActive ? f.color : colors.textSecondary }]}>
-                  {f.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
-      {/* Event List */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+      }
+    >
         {filteredEvents.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="pulse-outline" size={48} color={colors.textMuted} />
@@ -741,17 +731,19 @@ export default function LiveFeedScreen({ navigation }: NativeStackScreenProps<Ro
             <EventCard key={event.id} event={event} />
           ))
         )}
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
+  header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.sm,
+  },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginBottom: SPACING.md },
   backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.bgCard, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { fontSize: 20, fontWeight: '800' },

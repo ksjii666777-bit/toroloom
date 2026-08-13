@@ -3,9 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   ActivityIndicator,
-  RefreshControl,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +11,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { couponApi, CouponUsageDisplay } from '../../services/api/coupons';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import * as Haptics from 'expo-haptics';
 import { useT } from '../../hooks/useT';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -119,29 +118,23 @@ export default function CouponHistoryScreen({ navigation }: NativeStackScreenPro
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
-          </View>
-        </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>{t('coupons.myCoupons')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => loadHistory(true)}
-            tintColor={colors.primary}
-          />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={() => loadHistory(true)}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
+            </View>
+          </AnimatedPressable>
+          <Text style={[styles.title, { color: colors.text }]}>{t('coupons.myCoupons')}</Text>
+          <View style={{ width: 40 }} />
+        </View>
+      }
+    >
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
@@ -200,9 +193,7 @@ export default function CouponHistoryScreen({ navigation }: NativeStackScreenPro
             ))}
           </>
         )}
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -273,9 +264,9 @@ const s = StyleSheet.create({
 
 const createStyles = (_colors: any) =>
   StyleSheet.create({
-    container: { flex: 1 },
     header: {
-      paddingTop: 60,
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       paddingHorizontal: SPACING.xl,
       flexDirection: 'row',
       alignItems: 'center',

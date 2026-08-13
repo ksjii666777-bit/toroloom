@@ -16,9 +16,9 @@
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, TextInput,
+  View, Text, StyleSheet, Pressable, TextInput,
   Platform, ActivityIndicator, Alert,
-  Modal, Animated as RNAnimated, RefreshControl,
+  Modal, Animated as RNAnimated,
 } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,6 +32,7 @@ import { snapTradeApi, api } from '../../services/api';
 import { tickerProvider } from '../../services/tickerProvider';
 import { newIdempotencyKey } from '../../utils/idempotency';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -502,7 +503,6 @@ function TradeModal({
 export default function USStocksTradingScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'USStocksTrading'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
 
   const [stocks, setStocks] = useState<USStockDisplay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -652,78 +652,77 @@ export default function USStocksTradingScreen({ navigation }: NativeStackScreenP
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <LinearGradient
-        colors={['#1a2332', colors.bg]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: 50 + insets.top }]}
-      >
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('trading.usStocks')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {t('app.stocks', { count: stocks.length })} · {isBrokerConnected ? t('usMarkets.brokerConnected') : t('usMarkets.viewOnly')}
-            </Text>
-          </View>
-          {!isBrokerConnected && (
-            <Pressable
-              onPress={() => navigation.navigate('BrokerConnect')}
-              style={[styles.connectBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
-            >
-              <Ionicons name="link" size={16} color={colors.primary} />
-              <Text style={[styles.connectBtnText, { color: colors.primary }]}>{t('trading.connect')}</Text>
+    <AppScreen
+      padded={false}
+      refreshing={isRefreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <LinearGradient
+          colors={['#1a2332', colors.bg]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
-          )}
-        </View>
-
-        {/* Search */}
-        <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-          <Ionicons name="search" size={18} color={colors.textMuted} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('usMarkets.searchStocksBy')}
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCapitalize="characters"
-            autoCorrect={false}
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </Pressable>
-          )}
-        </View>
-
-        {/* Tabs */}
-        <View style={styles.tabRow}>
-          {tabs.map(tab => {
-            const isActive = selectedTab === tab.key;
-            return (
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('trading.usStocks')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                {t('app.stocks', { count: stocks.length })} · {isBrokerConnected ? t('usMarkets.brokerConnected') : t('usMarkets.viewOnly')}
+              </Text>
+            </View>
+            {!isBrokerConnected && (
               <Pressable
-                key={tab.key}
-                onPress={() => setSelectedTab(tab.key)}
-                style={[styles.tabBtn, isActive && { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
+                onPress={() => navigation.navigate('BrokerConnect')}
+                style={[styles.connectBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
               >
-                <Ionicons name={tab.icon as any} size={16} color={isActive ? colors.primary : colors.textMuted} />
-                <Text style={[styles.tabText, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
+                <Ionicons name="link" size={16} color={colors.primary} />
+                <Text style={[styles.connectBtnText, { color: colors.primary }]}>{t('trading.connect')}</Text>
               </Pressable>
-            );
-          })}
-        </View>
-      </LinearGradient>
+            )}
+          </View>
 
-      {/* Content */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
-      >
+          {/* Search */}
+          <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+            <Ionicons name="search" size={18} color={colors.textMuted} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder={t('usMarkets.searchStocksBy')}
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+              </Pressable>
+            )}
+          </View>
+
+          {/* Tabs */}
+          <View style={styles.tabRow}>
+            {tabs.map(tab => {
+              const isActive = selectedTab === tab.key;
+              return (
+                <Pressable
+                  key={tab.key}
+                  onPress={() => setSelectedTab(tab.key)}
+                  style={[styles.tabBtn, isActive && { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
+                >
+                  <Ionicons name={tab.icon as any} size={16} color={isActive ? colors.primary : colors.textMuted} />
+                  <Text style={[styles.tabText, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </LinearGradient>
+      }
+    >
         {isLoading ? (
           <View style={{ paddingVertical: 60, alignItems: 'center' }}>
             <ActivityIndicator size="large" color={colors.primary} />
@@ -886,8 +885,6 @@ export default function USStocksTradingScreen({ navigation }: NativeStackScreenP
             <View style={{ height: 80 }} />
           </>
         )}
-      </ScrollView>
-
       {/* Trade Modal */}
       <TradeModal
         visible={tradeModalVisible}
@@ -895,7 +892,7 @@ export default function USStocksTradingScreen({ navigation }: NativeStackScreenP
         stock={selectedStock}
         action={tradeAction}
       />
-    </View>
+    </AppScreen>
   );
 }
 
@@ -904,10 +901,13 @@ export default function USStocksTradingScreen({ navigation }: NativeStackScreenP
 // ═════════════════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-
   // Header
-  header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.md },
+  header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.md,
+  },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   backBtn: { padding: 4 },
   title: { ...FONTS.bold, fontSize: FONTS.size.title },

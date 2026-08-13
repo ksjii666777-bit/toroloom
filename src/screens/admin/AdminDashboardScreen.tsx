@@ -17,9 +17,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Dimensions,
-  RefreshControl,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -36,6 +34,7 @@ import { useT } from '../../hooks/useT';
 import { useAdminStore, SystemService } from '../../store/adminStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import Badge from '../../components/ui/Badge';
 import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
 
@@ -188,38 +187,32 @@ export default function AdminDashboardScreen({ navigation }: any) {
   }, [refresh]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
+            </View>
+          </AnimatedPressable>
+          <View style={{ flex: 1, marginLeft: SPACING.md }}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminDashboard.title')}</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
+              Platform overview & management
+            </Text>
           </View>
-        </AnimatedPressable>
-        <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminDashboard.title')}</Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-            Platform overview & management
-          </Text>
+          <AnimatedPressable onPress={onRefresh} haptic="light" scaleTo={0.9}>
+            <View style={[styles.refreshBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="refresh" size={22} color={colors.primary} />
+            </View>
+          </AnimatedPressable>
         </View>
-        <AnimatedPressable onPress={onRefresh} haptic="light" scaleTo={0.9}>
-          <View style={[styles.refreshBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="refresh" size={22} color={colors.primary} />
-          </View>
-        </AnimatedPressable>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-          />
-        }
-      >
+      }
+    >
         {/* ── Overview Stats ─────────────────────────────────── */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('adminDashboard.overview')}</Text>
         <View style={styles.statsGrid}>
@@ -301,18 +294,16 @@ export default function AdminDashboardScreen({ navigation }: any) {
           <QuickLink icon="flask" label="A/B Tests" color="#FF6B6B" screen="ABTestRunner" navigation={navigation} delay={660} />
         </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',

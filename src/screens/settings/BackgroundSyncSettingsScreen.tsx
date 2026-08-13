@@ -22,15 +22,13 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Switch,
   Pressable,
   Animated as RNAnimated,
   ActivityIndicator,
-  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AppScreen from '../../components/ui/AppScreen';
 import {
   getBackgroundSyncEnabled,
   getBackgroundSyncIntervalMinutes,
@@ -80,7 +78,6 @@ function getIntervalLabel(minutes: number, t: (k: string, p?: Record<string, any
 // ──── Component ────────────────────────────────────────────────────────────
 
 export default function BackgroundSyncSettingsScreen({ navigation }: any) {
-  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useT();
   const styles = createStyles(colors);
@@ -177,36 +174,30 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
   // ── Loading state ──
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
+      <AppScreen scroll={false} padded={false}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* ── Header ── */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </Pressable>
-        <Text style={styles.headerTitle}>{t('syncSettings.title')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>{t('syncSettings.title')}</Text>
+          <View style={{ width: 40 }} />
+        </View>
+      }
+    >
         {/* ── Hero Card ── */}
         <View style={styles.heroCard}>
           <RNAnimated.View
@@ -404,9 +395,7 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
           </Text>
         </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -414,11 +403,9 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     header: {
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',

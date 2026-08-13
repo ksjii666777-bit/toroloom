@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
@@ -18,6 +17,7 @@ import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import type {NFOItem, NFOApplication, RootStackParamList} from '../../types';
 import { useNFOStore } from '../../store/nfoStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import InvestNfoModal from '../../components/nfo/InvestNfoModal';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -400,7 +400,6 @@ const appCardStyles = StyleSheet.create({
 export default function NFODashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'NFODashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
 
   const [activeTab, setActiveTab] = useState<DashboardTab>('active');
   const [activeFilter, setActiveFilter] = useState<NFOFilter>('open');
@@ -460,9 +459,8 @@ export default function NFODashboardScreen({ navigation }: NativeStackScreenProp
   }), [applications]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+    <AppScreen scroll={false} padded={false} header={
+      <View style={styles.header}>
         <View style={styles.headerTop}>
           <View>
             <Text style={[styles.title, { color: colors.text }]}>{t('nfo.dashboardTitle')}</Text>
@@ -508,6 +506,7 @@ export default function NFODashboardScreen({ navigation }: NativeStackScreenProp
           </TouchableOpacity>
         </View>
       </View>
+    }>
 
       {/* Investment Success Banner */}
       {lastInvestedNFO && (
@@ -688,15 +687,19 @@ export default function NFODashboardScreen({ navigation }: NativeStackScreenProp
           }
         }}
       />
-    </View>
+    </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
+  header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.sm,
+  },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING.md },
   title: { fontSize: 28, fontWeight: '800' },
   subtitle: { fontSize: 12, fontWeight: '500', marginTop: 2 },

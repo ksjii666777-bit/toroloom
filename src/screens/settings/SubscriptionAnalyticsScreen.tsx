@@ -17,9 +17,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Dimensions,
-  RefreshControl,
   ActivityIndicator,
 } from 'react-native';
 import _Animated from 'react-native-reanimated';
@@ -29,6 +27,7 @@ import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import Card from '../../components/ui/Card';
 import { api } from '../../services/api';
 
@@ -309,34 +308,40 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
 
   if (!isAdmin) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <Ionicons name="shield-checkmark" size={48} color={colors.danger} />
-        <Text style={[styles.errorText, { color: colors.text }]}>{t('education.accessDenied')}</Text>
-        <Text style={[styles.subText, { color: colors.textSecondary }]}>{t('education.accessDeniedMsg')}</Text>
-      </View>
+      <AppScreen scroll={false} padded={false}>
+        <View style={[styles.center, { flex: 1 }]}>
+          <Ionicons name="shield-checkmark" size={48} color={colors.danger} />
+          <Text style={[styles.errorText, { color: colors.text }]}>{t('education.accessDenied')}</Text>
+          <Text style={[styles.subText, { color: colors.textSecondary }]}>{t('education.accessDeniedMsg')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
   if (loading && !data) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t('subscriptionAnalytics.loading')}</Text>
-      </View>
+      <AppScreen scroll={false} padded={false}>
+        <View style={[styles.center, { flex: 1 }]}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t('subscriptionAnalytics.loading')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
   if (error) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <Ionicons name="alert-circle" size={48} color={colors.danger} />
-        <Text style={[styles.errorText, { color: colors.text }]}>{error}</Text>
-        <AnimatedPressable onPress={() => loadData()} haptic="light" scaleTo={0.95}>
-          <View style={[styles.retryBtn, { backgroundColor: colors.primary }]}>
-            <Text style={styles.retryBtnText}>{t('app.retry')}</Text>
-          </View>
-        </AnimatedPressable>
-      </View>
+      <AppScreen scroll={false} padded={false}>
+        <View style={[styles.center, { flex: 1 }]}>
+          <Ionicons name="alert-circle" size={48} color={colors.danger} />
+          <Text style={[styles.errorText, { color: colors.text }]}>{error}</Text>
+          <AnimatedPressable onPress={() => loadData()} haptic="light" scaleTo={0.95}>
+            <View style={[styles.retryBtn, { backgroundColor: colors.primary }]}>
+              <Text style={styles.retryBtnText}>{t('app.retry')}</Text>
+            </View>
+          </AnimatedPressable>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -345,20 +350,12 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
   const tierColors = { free: '#6C63FF', pro: '#3B82F6', elite: '#10B981' };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => loadData(true)}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={() => loadData(true)}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
@@ -469,19 +466,13 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
           </View>
         </Card>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ──── Styles ──────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -493,7 +484,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   headerRow: {

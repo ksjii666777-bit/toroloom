@@ -16,12 +16,11 @@
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, ActivityIndicator,
-  RefreshControl, Platform,
+  View, Text, StyleSheet, ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { snapTradeApi } from '../../services/api';
@@ -30,6 +29,7 @@ import type { SnapTradeHolding, SnapTradePosition, SnapTradeStatus } from '../..
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -52,7 +52,6 @@ const formatCompactUSD = (n: number): string => {
 export default function SnapTradePortfolioScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SnapTradePortfolio'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -121,20 +120,22 @@ export default function SnapTradePortfolioScreen({ navigation }: NativeStackScre
   // ── Loading ────────────────────────────────────────────────
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.statusText, { color: colors.textMuted, marginTop: SPACING.md }]}>
-          Syncing portfolio...
-        </Text>
-      </View>
+      <AppScreen scroll={false} padded={false}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.statusText, { color: colors.textMuted, marginTop: SPACING.md }]}>
+            Syncing portfolio...
+          </Text>
+        </View>
+      </AppScreen>
     );
   }
 
   // ── Not connected ──────────────────────────────────────────
   if (!connectionStatus?.connected) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg }]}>
-        <View style={[styles.header, { backgroundColor: colors.bgSecondary, paddingTop: 60 + insets.top }]}>
+      <AppScreen padded={false} header={
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
           <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </AnimatedPressable>
@@ -142,6 +143,7 @@ export default function SnapTradePortfolioScreen({ navigation }: NativeStackScre
             <Text style={[styles.title, { color: colors.text }]}>{t('snaptrade.usPortfolio')}</Text>
           </View>
         </View>
+      }>
         <View style={styles.emptyContainer}>
           <Ionicons name="briefcase-outline" size={64} color={colors.textMuted} />
           <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('snaptrade.noBrokerConnected')}</Text>
@@ -157,48 +159,40 @@ export default function SnapTradePortfolioScreen({ navigation }: NativeStackScre
             <Text style={styles.connectBtnText}>{t('snaptrade.connectBroker')}</Text>
           </AnimatedPressable>
         </View>
-      </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary, paddingTop: 60 + insets.top }]}>
-        <View style={styles.headerRow}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text, flex: 1, marginLeft: SPACING.md }]}>{t('snaptrade.usPortfolio')}</Text>
-          <AnimatedPressable onPress={() => navigation.navigate('SnapTradeOrder')} haptic="medium" scaleTo={0.93}>
-            <View style={[styles.headerAction, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
-            </View>
-          </AnimatedPressable>
-        </View>
-        {connectionStatus && (
-          <View style={styles.brokerRow}>
-            <View style={[styles.brokerDot, { backgroundColor: '#00E676' }]} />
-            <Text style={[styles.brokerLabel, { color: colors.textMuted }]}>
-              {connectionStatus.brokerName || 'Connected'} · {connectionStatus.accountName || 'US Brokerage'}
-            </Text>
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerRow}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </AnimatedPressable>
+            <Text style={[styles.title, { color: colors.text, flex: 1, marginLeft: SPACING.md }]}>{t('snaptrade.usPortfolio')}</Text>
+            <AnimatedPressable onPress={() => navigation.navigate('SnapTradeOrder')} haptic="medium" scaleTo={0.93}>
+              <View style={[styles.headerAction, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
+              </View>
+            </AnimatedPressable>
           </View>
-        )}
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+          {connectionStatus && (
+            <View style={styles.brokerRow}>
+              <View style={[styles.brokerDot, { backgroundColor: '#00E676' }]} />
+              <Text style={[styles.brokerLabel, { color: colors.textMuted }]}>
+                {connectionStatus.brokerName || 'Connected'} · {connectionStatus.accountName || 'US Brokerage'}
+              </Text>
+            </View>
+          )}
+        </View>
+      }
+    >
         {/* ── Portfolio Summary Card ── */}
         <LinearGradient
           colors={['#3B82F6', '#1D4ED8']}
@@ -443,15 +437,14 @@ export default function SnapTradePortfolioScreen({ navigation }: NativeStackScre
           </Text>
         </View>
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.md,
   },

@@ -18,6 +18,7 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   KeyboardAvoidingView, Platform, RefreshControl, Dimensions,
 } from 'react-native';
+import AppScreen from '../../components/ui/AppScreen';
 import Animated, {
   FadeIn, useSharedValue, useAnimatedStyle, withSpring,
   withSequence,
@@ -241,24 +242,26 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
 
   if (!post) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Animated.View entering={FadeIn.duration(400)} style={{ alignItems: 'center' }}>
-          <View style={[styles.notFoundIcon, { backgroundColor: colors.textMuted + '15' }]}>
-            <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-          </View>
-          <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('community.postNotFound')}</Text>
-          <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
-            This post may have been deleted or doesn't exist.
-          </Text>
-          <Pressable
-            style={[styles.goBackBtn, { backgroundColor: colors.primary }]}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={16} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.goBackText}>{t('community.goBack')}</Text>
-          </Pressable>
-        </Animated.View>
-      </View>
+      <AppScreen scroll={false} padded={false}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Animated.View entering={FadeIn.duration(400)} style={{ alignItems: 'center' }}>
+            <View style={[styles.notFoundIcon, { backgroundColor: colors.textMuted + '15' }]}>
+              <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
+            </View>
+            <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('community.postNotFound')}</Text>
+            <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
+              This post may have been deleted or doesn't exist.
+            </Text>
+            <Pressable
+              style={[styles.goBackBtn, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={16} color="#FFF" style={{ marginRight: 6 }} />
+              <Text style={styles.goBackText}>{t('community.goBack')}</Text>
+            </Pressable>
+          </Animated.View>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -269,20 +272,21 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <View style={[styles.header, { borderBottomColor: colors.divider }]}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </Pressable>
-        <Text style={styles.headerTitle}>{t('community.post')}</Text>
-        <Pressable onPress={handleShare} style={styles.shareBtn}>
-          <Ionicons name="share-outline" size={20} color={colors.text} />
-        </Pressable>
-      </View>
+      <AppScreen scroll={false} padded={false} header={
+        <View style={[styles.header, { borderBottomColor: colors.divider }]}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>{t('community.post')}</Text>
+          <Pressable onPress={handleShare} style={styles.shareBtn}>
+            <Ionicons name="share-outline" size={20} color={colors.text} />
+          </Pressable>
+        </View>
+      }>
 
       <ScrollView
         ref={scrollRef}
@@ -482,6 +486,7 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
           </Pressable>
         </View>
       </View>
+      </AppScreen>
     </KeyboardAvoidingView>
   );
 }
@@ -490,10 +495,11 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
     header: {
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      paddingTop: 60, paddingHorizontal: SPACING.xl, paddingBottom: SPACING.md,
+      paddingHorizontal: SPACING.xl, paddingBottom: SPACING.md,
       borderBottomWidth: 1,
     },
     backBtn: {

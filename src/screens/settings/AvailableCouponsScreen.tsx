@@ -3,9 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   ActivityIndicator,
-  RefreshControl,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -23,6 +21,7 @@ import { useSubscriptionStore } from '../../store/subscriptionStore';
 import type {CouponCode, RootStackParamList} from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -264,42 +263,38 @@ export default function AvailableCouponsScreen({ navigation }: NativeStackScreen
   // ── Render ──────────────────────────────────────────────────
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={() => loadCoupons(true)}
+      contentStyle={styles.scrollContent}
+      header={
+        <>
+          <View style={styles.header}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
+              </View>
+            </AnimatedPressable>
+            <Text style={[styles.title, { color: colors.text }]}>{t('coupons.availableTitle')}</Text>
+            <View style={{ width: 40 }} />
           </View>
-        </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>{t('coupons.availableTitle')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
 
-      {/* Selected Coupon Toast */}
-      {selectedCode && (
-        <Animated.View
-          entering={FadeInDown.springify()}
-          style={[styles.selectedToast, { backgroundColor: colors.marketUp + '15', borderColor: colors.marketUp + '30' }]}
-        >
-          <Ionicons name="checkmark-circle" size={20} color={colors.marketUp} />
-          <Text style={[styles.selectedToastText, { color: colors.marketUp }]}>
-            Coupon <Text style={styles.selectedToastCode}>{selectedCode}</Text> applied! Returning to subscription...
-          </Text>
-        </Animated.View>
-      )}
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => loadCoupons(true)}
-            tintColor={colors.primary}
-          />
-        }
-      >
+          {/* Selected Coupon Toast */}
+          {selectedCode && (
+            <Animated.View
+              entering={FadeInDown.springify()}
+              style={[styles.selectedToast, { backgroundColor: colors.marketUp + '15', borderColor: colors.marketUp + '30' }]}
+            >
+              <Ionicons name="checkmark-circle" size={20} color={colors.marketUp} />
+              <Text style={[styles.selectedToastText, { color: colors.marketUp }]}>
+                Coupon <Text style={styles.selectedToastCode}>{selectedCode}</Text> applied! Returning to subscription...
+              </Text>
+            </Animated.View>
+          )}
+        </>
+      }
+    >
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
@@ -343,9 +338,7 @@ export default function AvailableCouponsScreen({ navigation }: NativeStackScreen
             </View>
           </>
         )}
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -495,11 +488,9 @@ const createCouponCardStyles = (_colors: any) =>
 
 const createStyles = (_colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-    },
     header: {
-      paddingTop: 60,
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       paddingHorizontal: SPACING.xl,
       flexDirection: 'row',
       alignItems: 'center',

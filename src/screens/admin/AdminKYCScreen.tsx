@@ -16,9 +16,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TextInput,
-  RefreshControl,
   Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -28,6 +26,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useAdminStore, AdminUser } from '../../store/adminStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import AppScreen from '../../components/ui/AppScreen';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import _Badge from '../../components/ui/Badge';
 import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
@@ -158,49 +157,48 @@ export default function AdminKYCScreen({ navigation }: any) {
   }, [t]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.listContent}
+      header={
+        <>
+          <View style={styles.header}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
+              </View>
+            </AnimatedPressable>
+            <View style={{ flex: 1, marginLeft: SPACING.md }}>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminKyc.queueTitle')}</Text>
+              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
+                {pendingUsers.length} pending verification{pendingUsers.length !== 1 ? 's' : ''}
+              </Text>
+            </View>
           </View>
-        </AnimatedPressable>
-        <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminKyc.queueTitle')}</Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-            {pendingUsers.length} pending verification{pendingUsers.length !== 1 ? 's' : ''}
-          </Text>
-        </View>
-      </View>
 
-      {/* Search */}
-      <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-        <Ionicons name="search" size={18} color={colors.textMuted} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
-          value={search}
-          onChangeText={setSearch}
-          placeholder={t('adminKyc.searchUsers')}
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {search.length > 0 && (
-          <AnimatedPressable onPress={() => setSearch('')} haptic="light" scaleTo={0.9}>
-            <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-          </AnimatedPressable>
-        )}
-      </View>
-
-      {/* List */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
-        }
-      >
+          {/* Search */}
+          <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+            <Ionicons name="search" size={18} color={colors.textMuted} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t('adminKyc.searchUsers')}
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            {search.length > 0 && (
+              <AnimatedPressable onPress={() => setSearch('')} haptic="light" scaleTo={0.9}>
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+              </AnimatedPressable>
+            )}
+          </View>
+        </>
+      }
+    >
         {isLoading && pendingUsers.length === 0 ? (
           <View style={{ padding: SPACING.xl, gap: SPACING.md }}>
             {[1, 2, 3].map((i) => (
@@ -231,16 +229,14 @@ export default function AdminKYCScreen({ navigation }: any) {
           </View>
         )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',

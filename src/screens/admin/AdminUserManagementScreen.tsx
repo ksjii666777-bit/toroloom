@@ -19,7 +19,6 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  RefreshControl,
   Alert,
 } from 'react-native';
 import Animated, {
@@ -36,6 +35,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useAdminStore, AdminUser } from '../../store/adminStore';
+import AppScreen from '../../components/ui/AppScreen';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Badge from '../../components/ui/Badge';
@@ -283,122 +283,117 @@ export default function AdminUserManagementScreen({ navigation }: any) {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.listContent}
+      header={
+        <>
+          <View style={styles.header}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
+              </View>
+            </AnimatedPressable>
+            <View style={{ flex: 1, marginLeft: SPACING.md }}>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminUser.title')}</Text>
+              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
+                {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
+              </Text>
+            </View>
           </View>
-        </AnimatedPressable>
-        <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminUser.title')}</Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-            {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
-          </Text>
-        </View>
-      </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-          <Ionicons name="search" size={18} color={colors.textMuted} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            value={search}
-            onChangeText={setSearch}
-            placeholder={t('adminUser.searchUsers')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          {search.length > 0 && (
-            <AnimatedPressable onPress={() => setSearch('')} haptic="light" scaleTo={0.9}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </AnimatedPressable>
-          )}
-        </View>
-      </View>
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+              <Ionicons name="search" size={18} color={colors.textMuted} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                value={search}
+                onChangeText={setSearch}
+                placeholder={t('adminUser.searchUsers')}
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {search.length > 0 && (
+                <AnimatedPressable onPress={() => setSearch('')} haptic="light" scaleTo={0.9}>
+                  <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+                </AnimatedPressable>
+              )}
+            </View>
+          </View>
 
-      {/* Filter Chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterRow}
-      >
-        <View style={styles.filterGroup}>
-          {FILTER_PLANS.map((f) => (
-            <AnimatedPressable
-              key={f.key}
-              onPress={() => setPlanFilter(f.key)}
-              haptic="light"
-              scaleTo={0.95}
-            >
-              <View
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: planFilter === f.key ? colors.primary + '20' : colors.bgCard,
-                    borderColor: planFilter === f.key ? colors.primary : colors.border,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    { color: planFilter === f.key ? colors.primary : colors.textMuted },
-                  ]}
+          {/* Filter Chips */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+          >
+            <View style={styles.filterGroup}>
+              {FILTER_PLANS.map((f) => (
+                <AnimatedPressable
+                  key={f.key}
+                  onPress={() => setPlanFilter(f.key)}
+                  haptic="light"
+                  scaleTo={0.95}
                 >
-                  {f.label}
-                </Text>
-              </View>
-            </AnimatedPressable>
-          ))}
-        </View>
-        <View style={[styles.filterDivider, { backgroundColor: colors.divider }]} />
-        <View style={styles.filterGroup}>
-          {FILTER_STATUSES.map((f) => (
-            <AnimatedPressable
-              key={f.key}
-              onPress={() => setStatusFilter(f.key)}
-              haptic="light"
-              scaleTo={0.95}
-            >
-              <View
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: statusFilter === f.key ? colors.primary + '20' : colors.bgCard,
-                    borderColor: statusFilter === f.key ? colors.primary : colors.border,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    { color: statusFilter === f.key ? colors.primary : colors.textMuted },
-                  ]}
+                  <View
+                    style={[
+                      styles.filterChip,
+                      {
+                        backgroundColor: planFilter === f.key ? colors.primary + '20' : colors.bgCard,
+                        borderColor: planFilter === f.key ? colors.primary : colors.border,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        { color: planFilter === f.key ? colors.primary : colors.textMuted },
+                      ]}
+                    >
+                      {f.label}
+                    </Text>
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </View>
+            <View style={[styles.filterDivider, { backgroundColor: colors.divider }]} />
+            <View style={styles.filterGroup}>
+              {FILTER_STATUSES.map((f) => (
+                <AnimatedPressable
+                  key={f.key}
+                  onPress={() => setStatusFilter(f.key)}
+                  haptic="light"
+                  scaleTo={0.95}
                 >
-                  {f.label}
-                </Text>
-              </View>
-            </AnimatedPressable>
-          ))}
-        </View>
-      </ScrollView>
-
-      {/* User List */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-          />
-        }
-      >
+                  <View
+                    style={[
+                      styles.filterChip,
+                      {
+                        backgroundColor: statusFilter === f.key ? colors.primary + '20' : colors.bgCard,
+                        borderColor: statusFilter === f.key ? colors.primary : colors.border,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        { color: statusFilter === f.key ? colors.primary : colors.textMuted },
+                      ]}
+                    >
+                      {f.label}
+                    </Text>
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </View>
+          </ScrollView>
+        </>
+      }
+    >
         {isLoading && filteredUsers.length === 0 ? (
           <View style={{ padding: SPACING.xl, gap: SPACING.md }}>
             {[1, 2, 3, 4, 5].map((i) => (
@@ -430,18 +425,16 @@ export default function AdminUserManagementScreen({ navigation }: any) {
           </View>
         )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',

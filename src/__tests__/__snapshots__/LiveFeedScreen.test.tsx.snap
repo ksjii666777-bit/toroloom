@@ -14,11 +14,17 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
     ]
   }
 >
+  <StatusBar
+    backgroundColor="transparent"
+    barStyle="dark-content"
+    translucent={true}
+  />
   <View
     style={
       {
         "paddingBottom": 8,
         "paddingHorizontal": 20,
+        "paddingTop": 20,
       }
     }
   >
@@ -1030,12 +1036,26 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
   </View>
   <ScrollView
     contentContainerStyle={
+      [
+        {
+          "paddingBottom": 36,
+          "paddingHorizontal": 0,
+        },
+        null,
+        {
+          "paddingHorizontal": 20,
+          "paddingTop": 12,
+        },
+        undefined,
+      ]
+    }
+    keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
+    style={
       {
-        "paddingHorizontal": 20,
-        "paddingTop": 12,
+        "flex": 1,
       }
     }
-    showsVerticalScrollIndicator={false}
   >
     <RefreshControl
       colors={
@@ -1044,9 +1064,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         ]
       }
       onRefresh={[Function]}
-      progressBackgroundColor="#161B2A"
       refreshing={false}
-      tintColor="#3B82F6"
+      tintColor="#B0B8D1"
     />
     <View
       style={
@@ -3146,13 +3165,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         </Pressable>
       </View>
     </View>
-    <View
-      style={
-        {
-          "height": 40,
-        }
-      }
-    />
   </ScrollView>
 </View>
 `;
@@ -3171,11 +3183,17 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
     ]
   }
 >
+  <StatusBar
+    backgroundColor="transparent"
+    barStyle="dark-content"
+    translucent={true}
+  />
   <View
     style={
       {
         "paddingBottom": 8,
         "paddingHorizontal": 20,
+        "paddingTop": 20,
       }
     }
   >
@@ -4187,12 +4205,26 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
   </View>
   <ScrollView
     contentContainerStyle={
+      [
+        {
+          "paddingBottom": 36,
+          "paddingHorizontal": 0,
+        },
+        null,
+        {
+          "paddingHorizontal": 20,
+          "paddingTop": 12,
+        },
+        undefined,
+      ]
+    }
+    keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
+    style={
       {
-        "paddingHorizontal": 20,
-        "paddingTop": 12,
+        "flex": 1,
       }
     }
-    showsVerticalScrollIndicator={false}
   >
     <RefreshControl
       colors={
@@ -4201,9 +4233,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         ]
       }
       onRefresh={[Function]}
-      progressBackgroundColor="#161B2A"
       refreshing={false}
-      tintColor="#3B82F6"
+      tintColor="#B0B8D1"
     />
     <View
       style={
@@ -6303,13 +6334,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         </Pressable>
       </View>
     </View>
-    <View
-      style={
-        {
-          "height": 40,
-        }
-      }
-    />
   </ScrollView>
 </View>
 `;
@@ -6328,11 +6352,17 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
     ]
   }
 >
+  <StatusBar
+    backgroundColor="transparent"
+    barStyle="dark-content"
+    translucent={true}
+  />
   <View
     style={
       {
         "paddingBottom": 8,
         "paddingHorizontal": 20,
+        "paddingTop": 20,
       }
     }
   >
@@ -7354,12 +7384,26 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
   </View>
   <ScrollView
     contentContainerStyle={
+      [
+        {
+          "paddingBottom": 36,
+          "paddingHorizontal": 0,
+        },
+        null,
+        {
+          "paddingHorizontal": 20,
+          "paddingTop": 12,
+        },
+        undefined,
+      ]
+    }
+    keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
+    style={
       {
-        "paddingHorizontal": 20,
-        "paddingTop": 12,
+        "flex": 1,
       }
     }
-    showsVerticalScrollIndicator={false}
   >
     <RefreshControl
       colors={
@@ -7368,9 +7412,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         ]
       }
       onRefresh={[Function]}
-      progressBackgroundColor="#161B2A"
       refreshing={false}
-      tintColor="#3B82F6"
+      tintColor="#B0B8D1"
     />
     <View
       style={
@@ -7633,13 +7676,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         </Pressable>
       </View>
     </View>
-    <View
-      style={
-        {
-          "height": 40,
-        }
-      }
-    />
   </ScrollView>
 </View>
 `;

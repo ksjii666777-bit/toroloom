@@ -13,8 +13,8 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable,
-  TextInput, RefreshControl, Dimensions, Platform,
+  View, Text, StyleSheet, Pressable,
+  TextInput, Dimensions, Platform,
 } from 'react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +23,7 @@ import { useT } from '../../hooks/useT';
 import { useNavigation } from '@react-navigation/native';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { globalMarketsApi, type GlobalStockData, type USStockData, type GlobalIndexData, type CryptoAssetData } from '../../services/api/globalMarkets';
+import AppScreen from '../../components/ui/AppScreen';
 import {
   mockUSIndices, mockGlobalIndices, mockUSStocks, mockEuropeanStocks, mockAsianStocks, mockUSETFs, mockCryptoAssets,
 } from '../../constants/mockData';
@@ -458,89 +459,84 @@ export default function USMarketsScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <AppScreen scroll={false} padded={false} header={
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>{t('usMarkets.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('usMarkets.loadingSubtitle')}</Text>
         </View>
-      </View>
+      }>
+        <View />
+      </AppScreen>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.titleRow}>
-          <Text style={[styles.title, { color: colors.text }]}>{t('usMarkets.title')}</Text>
-          {apiStatus && (
-            <View style={[styles.liveBadge, { backgroundColor: isLive ? colors.success + '20' : colors.warning + '20', borderColor: isLive ? colors.success + '40' : colors.warning + '40' }]}>
-              <View style={[styles.liveDot, { backgroundColor: isLive ? colors.success : colors.warning }]} />
-              <Text style={[styles.liveBadgeText, { color: isLive ? colors.success : colors.warning }]}>{isLive ? t('usMarkets.live') : t('usMarkets.mock')}</Text>
-            </View>
-          )}
-        </View>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('usMarkets.regions')}</Text>
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.titleRow}>
+            <Text style={[styles.title, { color: colors.text }]}>{t('usMarkets.title')}</Text>
+            {apiStatus && (
+              <View style={[styles.liveBadge, { backgroundColor: isLive ? colors.success + '20' : colors.warning + '20', borderColor: isLive ? colors.success + '40' : colors.warning + '40' }]}>
+                <View style={[styles.liveDot, { backgroundColor: isLive ? colors.success : colors.warning }]} />
+                <Text style={[styles.liveBadgeText, { color: isLive ? colors.success : colors.warning }]}>{isLive ? t('usMarkets.live') : t('usMarkets.mock')}</Text>
+              </View>
+            )}
+          </View>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('usMarkets.regions')}</Text>
 
-        {/* Search Bar */}
-        <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-          <Ionicons name="search" size={16} color={colors.textMuted} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('usMarkets.searchPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={16} color={colors.textMuted} />
-            </Pressable>
-          )}
-        </View>
-
-        {/* Tabs */}
-        <View style={styles.tabRow}>
-          {TABS.map(tab => {
-            const isActive = activeTab === tab.key;
-            return (
-              <Pressable
-                key={tab.key}
-                onPress={() => setActiveTab(tab.key)}
-                style={[
-                  styles.tabBtn,
-                  {
-                    backgroundColor: isActive ? colors.primary + '20' : 'transparent',
-                    borderColor: isActive ? colors.primary + '40' : 'transparent',
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={tab.icon as any}
-                  size={14}
-                  color={isActive ? colors.primary : colors.textMuted}
-                />
-                <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>
-                  {tab.label}
-                </Text>
+          {/* Search Bar */}
+          <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+            <Ionicons name="search" size={16} color={colors.textMuted} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder={t('usMarkets.searchPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={16} color={colors.textMuted} />
               </Pressable>
-            );
-          })}
-        </View>
-      </View>
+            )}
+          </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+          {/* Tabs */}
+          <View style={styles.tabRow}>
+            {TABS.map(tab => {
+              const isActive = activeTab === tab.key;
+              return (
+                <Pressable
+                  key={tab.key}
+                  onPress={() => setActiveTab(tab.key)}
+                  style={[
+                    styles.tabBtn,
+                    {
+                      backgroundColor: isActive ? colors.primary + '20' : 'transparent',
+                      borderColor: isActive ? colors.primary + '40' : 'transparent',
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={tab.icon as any}
+                    size={14}
+                    color={isActive ? colors.primary : colors.textMuted}
+                  />
+                  <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>
+                    {tab.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      }
+    >
         {/* ── US INDICES TAB ── */}
         {activeTab === 'indices' && (
           <Animated.View entering={FadeInDown.duration(300)}>
@@ -774,16 +770,13 @@ export default function USMarketsScreen() {
             </Text>
           </View>
         )}
-        <View style={{ height: 20 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -810,8 +803,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   header: {
-    padding: SPACING.xl,
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
     borderBottomLeftRadius: BORDER_RADIUS.xl,
     borderBottomRightRadius: BORDER_RADIUS.xl,
   },

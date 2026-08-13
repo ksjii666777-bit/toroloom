@@ -21,15 +21,13 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Switch,
   Pressable,
   Alert,
-  RefreshControl,
   Animated as _RNAnimated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AppScreen from '../../components/ui/AppScreen';
 import { useFeatureFlagStore } from '../../store/featureFlagStore';
 import {
   FeatureFlagKey,
@@ -77,7 +75,6 @@ const EXPERIMENT_COLORS: Record<ExperimentVariant, string> = {
 // ──── Component ────────────────────────────────────────────────────────────
 
 export default function FeatureFlagsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'FeatureFlags'>) {
-  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useT();
   const styles = createStyles(colors);
@@ -182,56 +179,50 @@ export default function FeatureFlagsScreen({ navigation }: NativeStackScreenProp
   // ── Loading State ──
   if (!hydrated) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <View style={styles.loadingPulse}>
-          <Ionicons name="flask" size={32} color={colors.primary} />
+      <AppScreen scroll={false} padded={false}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={styles.loadingPulse}>
+            <Ionicons name="flask" size={32} color={colors.primary} />
+          </View>
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+            {t('featureFlags.loading')}
+          </Text>
         </View>
-        <Text style={[styles.loadingText, { color: colors.textMuted }]}>
-          {t('featureFlags.loading')}
-        </Text>
-      </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* ── Header ── */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>{t('featureFlags.title')}</Text>
-          <Text style={styles.headerSubtitle}>
-            {t('featureFlags.subtitle', { active: flagsData.activeCount, overridden: flagsData.overriddenCount })}
-          </Text>
+    <AppScreen
+      padded={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+      header={
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>{t('featureFlags.title')}</Text>
+            <Text style={styles.headerSubtitle}>
+              {t('featureFlags.subtitle', { active: flagsData.activeCount, overridden: flagsData.overriddenCount })}
+            </Text>
+          </View>
+          <Pressable
+            onPress={handleResetOverrides}
+            style={({ pressed }) => [
+              styles.resetBtn,
+              { opacity: flagsData.overriddenCount > 0 ? (pressed ? 0.7 : 1) : 0.3 },
+            ]}
+            disabled={flagsData.overriddenCount === 0}
+          >
+            <Ionicons name="refresh-outline" size={14} color="#EF4444" />
+            <Text style={styles.resetBtnText}>{t('featureFlags.reset')}</Text>
+          </Pressable>
         </View>
-        <Pressable
-          onPress={handleResetOverrides}
-          style={({ pressed }) => [
-            styles.resetBtn,
-            { opacity: flagsData.overriddenCount > 0 ? (pressed ? 0.7 : 1) : 0.3 },
-          ]}
-          disabled={flagsData.overriddenCount === 0}
-        >
-          <Ionicons name="refresh-outline" size={14} color="#EF4444" />
-          <Text style={styles.resetBtnText}>{t('featureFlags.reset')}</Text>
-        </Pressable>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+      }
+    >
         {/* ── Info Banner ── */}
         <View style={styles.infoBanner}>
           <Ionicons name="information-circle" size={16} color="#3B82F6" />
@@ -464,9 +455,7 @@ export default function FeatureFlagsScreen({ navigation }: NativeStackScreenProp
           </Text>
         </View>
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -492,11 +481,9 @@ function getCategoryColor(category: string, alpha: number): string {
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     header: {
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',

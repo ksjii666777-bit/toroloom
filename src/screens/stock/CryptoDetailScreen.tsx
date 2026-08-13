@@ -18,8 +18,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, Dimensions,
-  Platform, Linking, RefreshControl, ActivityIndicator,
+  View, Text, StyleSheet, Pressable, Dimensions,
+  Platform, Linking, ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,6 +29,7 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import TradingViewChart from '../../components/TradingViewChart';
+import AppScreen from '../../components/ui/AppScreen';
 import { toTradingViewCryptoSymbol, toTradingViewInterval } from '../../utils/tradingView';
 import type { CryptoDetailData } from '../../services/api/globalMarkets';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -250,29 +251,31 @@ export default function CryptoDetailScreen({ route, navigation }: NativeStackScr
   // Loading state
   if (isLoading && !data) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <AppScreen scroll={false} padded={false} header={
         <View style={styles.header}>
           <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
         </View>
+      }>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('cryptoDetail.loading')}</Text>
         </View>
-      </View>
+      </AppScreen>
     );
   }
 
   // Error state
   if (error && !data) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <AppScreen scroll={false} padded={false} header={
         <View style={styles.header}>
           <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
         </View>
+      }>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: SPACING.xl }}>
           <Ionicons name="warning" size={48} color="#FFAB40" />
           <Text style={[styles.errorText, { color: colors.text }]}>{error}</Text>
@@ -283,27 +286,19 @@ export default function CryptoDetailScreen({ route, navigation }: NativeStackScr
             <Text style={styles.retryBtnText}>{t('cryptoDetail.retry')}</Text>
           </Pressable>
         </View>
-      </View>
+      </AppScreen>
     );
   }
 
   if (!data) return null;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
+    <AppScreen
+      padded={false}
+      refreshing={isRefreshing}
+      onRefresh={onRefresh}
+      contentStyle={styles.scrollContent}
+    >
         {/* Header */}
         <Animated.View entering={FadeInRight.duration(300)} style={styles.header}>
           <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
@@ -482,25 +477,23 @@ export default function CryptoDetailScreen({ route, navigation }: NativeStackScr
           </Text>
         </View>
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 60,
     marginBottom: SPACING.lg,
   },
   backBtn: {
