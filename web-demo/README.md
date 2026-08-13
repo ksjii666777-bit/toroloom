@@ -89,6 +89,30 @@ can be verified live — without booting the full native app.
     Display-only — real prices come from TradingView (no key needed for
     embedding). (`web-demo/TradingViewWidgetDemo.tsx`)
 
+## Screens harness (`web-demo/screens/`)
+
+A second standalone harness that renders **16 migrated screens** (the ones that
+switched from raw `<View style={styles.container}>` + `RefreshControl`
+ScrollViews to the shared `<AppScreen>` scaffold) so the migration can be
+verified visually in a browser — headers pinned, pull-to-refresh, loading /
+empty states — without booting the native app.
+
+Rendered screens: AdminDashboard, AdminKYC, AdminUserManagement,
+AdminCouponManagement, AvailableCoupons, CouponHistory, BackgroundSyncSettings,
+FeatureFlags, SubscriptionAnalytics, USMarkets, NFODashboard,
+SnapTradePortfolio, CryptoDetail, CryptoTrading, USStocksTrading, LiveFeed,
+PostDetail.
+
+```bash
+npx vite build --config web-demo/screens/vite.config.ts
+npx vite preview --config web-demo/screens/vite.config.ts --port 4176
+# open http://localhost:4176
+```
+
+> This harness surfaced two real i18n bugs (unwired `coupons` namespace, wrong
+> `accessDenied` key namespace) — both fixed in the app. `web-demo/screens/dist/`
+> is build output and is gitignored.
+
 ### Scripted verification (no clicks needed)
 
 Append query params to pre-select state on load — handy for URL-driven checks:
