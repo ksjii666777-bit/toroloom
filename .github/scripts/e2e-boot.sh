@@ -122,7 +122,11 @@ echo "Animations disabled."
 # APK installs on the emulator fine. This was the fix for the CI boot
 # failure where the dev launcher wedged blank: JS ran, UI never appeared.
 echo "Building and installing release APK (expo run:android --variant release)..."
-if ! npx expo run:android --variant release --no-bundler 2>&1 | tee /tmp/expobuild.log; then
+# SENTRY_DISABLE_AUTO_UPLOAD: the release build runs Sentry's
+# createBundleReleaseJsAndAssets_SentryUpload task which needs an auth token
+# (sentry.properties has none in CI) — without this the build fails with
+# "Auth token is required for this request". E2E doesn't need source maps.
+if ! SENTRY_DISABLE_AUTO_UPLOAD=true npx expo run:android --variant release --no-bundler 2>&1 | tee /tmp/expobuild.log; then
   echo "::error::expo run:android failed to build/install the release APK."
   tail -80 /tmp/expobuild.log || true
   exit 1
