@@ -103,6 +103,14 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
   // ── Bootstrapping state ──
   const [diagnosticIndex, setDiagnosticIndex] = useState(0);
 
+  // ── Finish guard: onFinish must fire EXACTLY once. Some environments
+  // (e.g. emulators with reduced-motion enabled) never run the Reanimated
+  // withTiming completion callback, which previously left the splash
+  // stuck on screen forever. A hard setTimeout fallback below guarantees
+  // dismissal, and this ref dedupes the two possible firing paths.
+  const onFinishRef = useRef(onFinish);
+  const finishedRef = useRef(false);
+
   // ── Particle/star positions (deterministic for performance) ──
   const particles = useRef(
     Array.from({ length: 20 }, (_, i) => ({
@@ -117,6 +125,15 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
 
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+
+    // Keep the latest onFinish prop so the fallback always fires the current one.
+    onFinishRef.current = onFinish;
+
+    const finishSplash = () => {
+      if (finishedRef.current) return;
+      finishedRef.current = true;
+      onFinishRef.current?.();
+    };
 
     // ── 1. Shield entrance: scale up + fade in ──
     shieldScale.value = withSpring(1, { stiffness: 80, damping: 10 });
@@ -158,12 +175,18 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       -1, // infinite repeat
     );
 
-    // ── 8. Progress bar fill ──
+    // ── 8. Progress bar fill (primary path: animation completion) ──
     progressWidth.value = withTiming(1, { duration: minDuration }, (finished) => {
-      if (finished && onFinish) {
-        runOnJS(onFinish)();
+      if (finished) {
+        runOnJS(finishSplash)();
       }
     });
+
+    // ── 8b. Hard timeout fallback ──
+    // Guarantees onFinish even when the animation completion callback never
+    // runs (reduced-motion / animation-disabled environments). Buffer of 2s
+    // past minDuration so the primary animation path wins on normal devices.
+    timeoutIds.push(setTimeout(finishSplash, minDuration + 2000));
 
     // ── Cleanup on unmount ──
     return () => {

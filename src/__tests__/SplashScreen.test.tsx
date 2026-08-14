@@ -14,6 +14,7 @@
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as Reanimated from 'react-native-reanimated';
 import { render } from './testUtils';
 import SplashScreen from '../screens/SplashScreen';
 
@@ -129,6 +130,30 @@ describe('SplashScreen — onFinish Callback', () => {
     const { getByText } = render(<SplashScreen onFinish={onFinish} minDuration={100} />);
     expect(getByText('Toroloom')).toBeDefined();
     expect(onFinish).toHaveBeenCalled();
+  });
+
+  it('falls back to the hard timeout when the animation callback never fires (reduced-motion)', () => {
+    const onFinish = vi.fn();
+    // Simulate reduced-motion environments where Reanimated never runs the
+    // withTiming completion callback.
+    const withTimingSpy = vi
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((_toValue: any, _config: any, _callback?: any) => 1);
+
+    render(<SplashScreen onFinish={onFinish} minDuration={1000} />);
+
+    // No animation callback fired → onFinish must NOT have been called yet.
+    expect(onFinish).not.toHaveBeenCalled();
+
+    // The hard fallback (minDuration + 2s buffer) must still fire it once.
+    act(() => { vi.advanceTimersByTime(1000 + 2000 + 10); });
+    expect(onFinish).toHaveBeenCalledTimes(1);
+
+    // Advancing further must not double-fire.
+    act(() => { vi.advanceTimersByTime(10000); });
+    expect(onFinish).toHaveBeenCalledTimes(1);
+
+    withTimingSpy.mockRestore();
   });
 });
 
