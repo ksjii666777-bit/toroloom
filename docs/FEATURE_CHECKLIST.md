@@ -2,12 +2,12 @@
 
 > **Buyer ke liye:** Yeh document Toroloom app ke sabhi features ka high-level overview hai. Har feature implement ho chuka hai aur tests cover karte hain.
 
-**Stats (as of August 2026):**
-- **Frontend Screens:** 58 | **Stores:** 26 | **Services:** 23
-- **Backend Routes:** 28 | **Backend Modules:** 16
-- **Frontend Tests:** 215 files | **Backend Tests:** 103 files (71 unit + 32 integration)
-- **E2E Flows (Maestro):** 32 files
-- **Total Tests:** 7,965 passing (318 test files + 32 E2E flows)
+**Stats (as of August 14, 2026):**
+- **Frontend Screens:** 144 | **Stores:** 46 | **Services:** 74
+- **Backend Routes:** 50 | **Backend Modules:** 16
+- **Frontend Tests:** 228 files | **Backend Tests:** 106 files (74 unit + 32 integration)
+- **E2E Flows (Maestro):** 33 files
+- **Total Tests:** 8,202 passing (334 test files + 33 E2E flows)
 
 ---
 
@@ -194,21 +194,21 @@
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Frontend unit tests | 215 files (5,388 tests) | ✅ |
-| Backend unit + cross-file + stress | 71 files (1,822 tests) | ✅ |
+| Frontend unit tests | 228 files (5,597 tests) | ✅ |
+| Backend unit + cross-file + stress | 74 files (1,850 tests) | ✅ |
 | Backend integration (PG + Mongo) | 32 files (755 tests) | ✅ |
-| E2E (Maestro) | 32 flows | ✅ |
-| **Total** | **7,965 tests passing** | ✅ |
+| E2E (Maestro) | 33 flows | ✅ |
+| **Total** | **8,202 tests passing** | ✅ |
 
 ---
 
 ## 📊 Summary
 
 ```
-Frontend Screens:     58 ✅     Backend Routes:     28 ✅
-Zustand Stores:       26 ✅     Backend Modules:    16 ✅
-UI Components:        24 ✅     Tests:          7,965 ✅
-Services:             23 ✅     E2E Flows:         32 ✅
+Frontend Screens:     144 ✅     Backend Routes:     50 ✅
+Zustand Stores:       46 ✅     Backend Modules:    16 ✅
+UI Components:        35 ✅     Tests:          8,202 ✅
+Services:             74 ✅     E2E Flows:         33 ✅
 ```
 
 > **App 95%+ complete hai.** Buyer ko sirf deploy karna hai (Railway ya Docker) aur production DB (RDS) setup karna hai.
