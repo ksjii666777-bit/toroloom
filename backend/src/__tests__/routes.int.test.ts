@@ -32,6 +32,7 @@ import { generateToken } from '../middleware/auth';
 // ──── Route imports ─────────────────────────────────────────────────────────
 
 import authRoutes from '../routes/auth';
+import { registerUser, DEMO_EMAIL, DEMO_PASSWORD } from '../data/userStore';
 import marketRoutes from '../routes/market';
 import portfolioRoutes from '../routes/portfolio';
 import watchlistRoutes from '../routes/watchlist';
@@ -161,6 +162,15 @@ beforeAll(async () => {
       resolve();
     });
   });
+
+  // Register the profile-test user so AUTH_HEADER (test@toroloom.com) resolves
+  // against the scrypt-backed user store introduced with the auth refactor.
+  registerUser({
+    name: 'Route Test User',
+    email: 'test@toroloom.com',
+    phone: '9999999999',
+    password: 'password123',
+  });
 });
 
 afterAll(() => {
@@ -184,8 +194,8 @@ describe('POST /api/auth', () => {
 
   it('should login with valid credentials', async () => {
     const { status, body } = await post('/api/auth/login', {
-      email: 'test@example.com',
-      password: 'password123',
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
     });
 
     expect(status).toBe(200);
@@ -215,6 +225,7 @@ describe('POST /api/auth', () => {
       name: 'Test User',
       email: 'new@toroloom.com',
       phone: '9876543210',
+      password: 'password123',
     });
 
     expect(status).toBe(200);
