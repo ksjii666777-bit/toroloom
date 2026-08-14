@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Toroloom E2E — Android emulator boot + Expo/Metro + Maestro flow runner
+# Toroloom E2E — Android emulator boot + release APK + Maestro flow runner
 # =============================================================================
 # Extracted from .github/workflows/ci.yml so the Wandalen/wretry.action
 # `with: |` string block stays a single-line invocation. Inline multi-line
 # scripts with embedded single-quoted `bash -c '...'` blocks were mangled by
 # wretry's YAML-string re-parsing, producing:
 #   /usr/bin/sh: 1: Syntax error: end of file unexpected (expecting "done")
+#
+# Strategy: build the RELEASE variant (JS bundle embedded in the APK) and
+# launch it directly via `am start`. The previous debug dev-client flow
+# (expo run:android --no-bundler + expo start + deep-link relaunch) left the
+# app wedged on expo-dev-client's launcher in the headless emulator: the JS
+# bundle loaded and ran (CacheWarming logs) but the RN UI never appeared on
+# screen — the login screen was never visible, so the boot check always
+# timed out. Release builds skip the dev launcher entirely and render the
+# login screen straight from the embedded bundle, with no Metro needed.
 #
 # Usage (called from ci.yml android-emulator-runner `script:` input):
 #   bash .github/scripts/e2e-boot.sh <flow-target> [flow-target ...]
@@ -105,101 +114,37 @@ adb shell settings put global transition_animation_scale 0.0 || true
 adb shell settings put global animator_duration_scale 0.0 || true
 echo "Animations disabled."
 
-# ── 4. Build & install the dev client (Gradle) ──────────────────────────────
-# The project uses expo-dev-client (bundle id com.toroloom.app); Maestro can
-# only drive the app once a dev build is installed on the emulator.
-echo "Building and installing dev client (expo run:android)..."
-if ! npx expo run:android --no-bundler 2>&1 | tee /tmp/expobuild.log; then
-  echo "::error::expo run:android failed to build/install the dev client."
+# ── 4. Build & install the RELEASE APK (JS bundle embedded) ────────────────
+# Release variant bakes the JS bundle + assets into the APK and (unlike the
+# debug dev-client) does NOT show expo-dev-client's launcher — the app
+# renders straight from the embedded bundle, so no Metro/dev server is
+# needed. Release signing uses the debug keystore (template default) so the
+# APK installs on the emulator fine. This was the fix for the CI boot
+# failure where the dev launcher wedged blank: JS ran, UI never appeared.
+echo "Building and installing release APK (expo run:android --variant release)..."
+if ! npx expo run:android --variant release --no-bundler 2>&1 | tee /tmp/expobuild.log; then
+  echo "::error::expo run:android failed to build/install the release APK."
   tail -80 /tmp/expobuild.log || true
   exit 1
 fi
-echo "Dev client installed."
+echo "Release APK installed."
 
-# ── 5. Start Expo dev server (Metro) in the background ──────────────────────
-echo "Starting Expo dev server..."
-npx expo start 2>&1 | tee /tmp/expo.log &
-EXPO_PID=$!
-
-# Kill the background Expo/Metro process when this script exits (success or
-# failure). If we leak it, a wretry retry attempt re-runs the whole action on
-# the same runner and the orphaned Metro on :8081 poisons the second boot
-# (attempt 2 hung for 43 min until the 60-min job timeout).
-cleanup() {
-  if [ -n "${EXPO_PID:-}" ]; then
-    kill "$EXPO_PID" 2>/dev/null || true
-    # also kill the npm/node children of the expo pipeline
-    pkill -f 'expo start' 2>/dev/null || true
-    pkill -f 'metro' 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-# ── 6. Wait for Metro to be ready (max 180s) ────────────────────────────────
-# Plain loop (no nested bash -c): the nested single-quoted form has been
-# mangled by wretry's YAML re-parse in CI before, breaking the whole boot.
-echo "Waiting for Metro bundler..."
-METRO_READY=0
-for i in $(seq 1 36); do
-  if grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; then
-    METRO_READY=1
-    break
-  fi
-  sleep 5
-  printf "."
-done
-echo ""
-if [ "$METRO_READY" = "1" ]; then
-  echo "Expo/Metro server is ready!"
-else
-  echo "::error::Metro bundler did not become ready within 180s."
-  tail -50 /tmp/expo.log || true
-  kill "$EXPO_PID" 2>/dev/null || true
-  exit 1
-fi
-
-# ── 6a. (Re)launch the app against the RUNNING dev server ──────────────────
-# `expo run:android` fires the dev-client deep link BEFORE Metro is up, so the
-# app's first connect attempt fails and the dev launcher sits on a blank
-# screen forever (seen repeatedly in CI: JS bundle loads + runs, but the UI
-# stays on the launcher). Force-stop and cold-start the app with an explicit
-# deep link to the emulator's host alias (10.0.2.2) now that Metro is ready.
+# ── 5. Launch the app directly (no Metro, no dev server) ────────────────────
 APP_ID="com.toroloom.app"
-DEV_URL="exp+toroloom://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
 relaunch_app() {
   adb shell am force-stop "$APP_ID" 2>/dev/null || true
   sleep 2
-  adb shell am start -W -a android.intent.action.VIEW -d "$DEV_URL" >/dev/null 2>&1 \
-    || echo "::warning::App relaunch intent failed - relying on existing launcher state."
+  adb shell am start -W -n "$APP_ID/.MainActivity" >/dev/null 2>&1 \
+    || echo "::warning::App launch intent failed."
   sleep 5
 }
-echo "Relaunching app against the running dev server ($DEV_URL)..."
+echo "Launching the app ($APP_ID)..."
 relaunch_app
 
-# ── 6b. Wait for the first JS bundle + login screen (max ~7 min) ─────────────
-# "Metro ready" only means the dev server is listening; the first native
-# bundle build takes ~60s+ (seen: 65.9s in CI) and the app only shows the
-# login UI once it has received the bundle. Starting Maestro before that
-# makes every flow fail with "Welcome Back!/login-email-input is visible".
-echo "Waiting for the first Android bundle to complete..."
-BUNDLED=0
-for i in $(seq 1 60); do
-  if grep -qi "Android Bundled" /tmp/expo.log 2>/dev/null; then
-    echo "Android bundle built!"
-    BUNDLED=1
-    break
-  fi
-  sleep 5
-done
-if [ "$BUNDLED" != "1" ]; then
-  echo "::warning::No 'Android Bundled' line seen in expo.log after 300s - continuing anyway."
-  tail -20 /tmp/expo.log || true
-fi
-
-# Let the JS render, then confirm the login screen is actually on screen.
-# Poll up to 3 min; if the login screen hasn't appeared after ~60s, cold-start
-# the app once more (dev clients occasionally wedge on the launcher even after
-# a clean relaunch).
+# ── 6. Confirm the login screen is actually on screen (max 3 min) ───────────
+# Give the release app a few seconds to start (embedded bundle, no network
+# fetch), then poll the UI hierarchy. If the login screen hasn't appeared
+# after ~60s, cold-start the app once more before giving up.
 sleep 10
 echo "Confirming the login screen is visible..."
 RELAUNCHED=0
@@ -217,11 +162,10 @@ for i in $(seq 1 36); do
   fi
   sleep 5
   if [ $i -eq 36 ]; then
-    echo "::error::Login screen never appeared after bundle - dumping UI + logcat."
+    echo "::error::Login screen never appeared - dumping UI + logcat."
     adb shell uiautomator dump /sdcard/ui.xml 2>/dev/null || true
     adb shell cat /sdcard/ui.xml 2>/dev/null | head -c 2000 || true
-    adb logcat -d -t 100 2>/dev/null | grep -iE "ReactNativeJS|FATAL|Exception" | tail -20 || true
-    kill "$EXPO_PID" 2>/dev/null || true
+    adb logcat -d -t 100 2>/dev/null | grep -iE "ReactNativeJS|FATAL|Exception|AndroidRuntime" | tail -20 || true
     exit 1
   fi
 done

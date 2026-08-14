@@ -582,10 +582,13 @@ jobs:
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
             disable-animations: true
-            # Boot/Expo/Maestro logic lives in .github/scripts/e2e-boot.sh
+            # Boot/Maestro logic lives in .github/scripts/e2e-boot.sh
             # (standalone file) — inline multi-line scripts with embedded
             # single-quoted bash -c blocks get mangled by wretry.action's
             # YAML-string re-parsing ("Syntax error: expecting done").
+            # The script builds the RELEASE APK (embedded JS bundle) and
+            # launches it directly — no Metro/dev-client launcher, which
+            # previously wedged blank in the headless emulator.
             script: |
               bash .github/scripts/e2e-boot.sh .maestro
 
@@ -704,10 +707,13 @@ jobs:
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
             disable-animations: true
-            # Boot/Expo/Maestro logic lives in .github/scripts/e2e-boot.sh
+            # Boot/Maestro logic lives in .github/scripts/e2e-boot.sh
             # (standalone file) — inline multi-line scripts with embedded
             # single-quoted bash -c blocks get mangled by wretry.action's
             # YAML-string re-parsing ("Syntax error: expecting done").
+            # The script builds the RELEASE APK (embedded JS bundle) and
+            # launches it directly — no Metro/dev-client launcher, which
+            # previously wedged blank in the headless emulator.
             script: |
               bash .github/scripts/e2e-boot.sh .maestro/flows/smoke/smokeTest.yaml .maestro/flows/navigation/tabNavigation.yaml .maestro/flows/trade/placeOrder.yaml .maestro/flows/kyc/bankLinking.yaml .maestro/flows/stock/stockDetail.yaml .maestro/flows/settings/twoFactorSetup.yaml .maestro/flows/trade/fnoOptionsChain.yaml .maestro/flows/ui/calculators.yaml .maestro/flows/ai/aiInsights.yaml
 
