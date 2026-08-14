@@ -141,15 +141,33 @@ if ! timeout 180 bash -c '
   until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
     sleep 5
     printf "."
-  done
-  echo ""
+  done  echo ""
   echo "Expo/Metro server is ready!"
-'; then
+';
+then
   echo "::error::Metro bundler did not become ready within 180s."
   tail -50 /tmp/expo.log || true
   kill "$EXPO_PID" 2>/dev/null || true
   exit 1
 fi
+
+# ── 6a. (Re)launch the app against the RUNNING dev server ──────────────────
+# `expo run:android` fires the dev-client deep link BEFORE Metro is up, so the
+# app's first connect attempt fails and the dev launcher sits on a blank
+# screen forever (seen repeatedly in CI: JS bundle loads + runs, but the UI
+# stays on the launcher). Force-stop and cold-start the app with an explicit
+# deep link to the emulator's host alias (10.0.2.2) now that Metro is ready.
+APP_ID="com.toroloom.app"
+DEV_URL="exp+toroloom://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+relaunch_app() {
+  adb shell am force-stop "$APP_ID" 2>/dev/null || true
+  sleep 2
+  adb shell am start -W -a android.intent.action.VIEW -d "$DEV_URL" >/dev/null 2>&1 \
+    || echo "::warning::App relaunch intent failed - relying on existing launcher state."
+  sleep 5
+}
+echo "Relaunching app against the running dev server ($DEV_URL)..."
+relaunch_app
 
 # ── 6b. Wait for the first JS bundle + login screen (max ~7 min) ─────────────
 # "Metro ready" only means the dev server is listening; the first native
@@ -172,16 +190,26 @@ if [ "$BUNDLED" != "1" ]; then
 fi
 
 # Let the JS render, then confirm the login screen is actually on screen.
+# Poll up to 3 min; if the login screen hasn't appeared after ~60s, cold-start
+# the app once more (dev clients occasionally wedge on the launcher even after
+# a clean relaunch).
 sleep 10
 echo "Confirming the login screen is visible..."
-for i in $(seq 1 24); do
+RELAUNCHED=0
+for i in $(seq 1 36); do
   UI=$(adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 && adb shell cat /sdcard/ui.xml 2>/dev/null || true)
   if echo "$UI" | grep -qiE "login-email-input|Welcome Back|Login"; then
     echo "Login screen is visible!"
     break
   fi
+  # Not visible after ~60s of polling → bounce the app once more.
+  if [ $i -eq 12 ] && [ "$RELAUNCHED" = "0" ]; then
+    echo "Login screen not visible yet - force-restarting the app..."
+    relaunch_app
+    RELAUNCHED=1
+  fi
   sleep 5
-  if [ $i -eq 24 ]; then
+  if [ $i -eq 36 ]; then
     echo "::error::Login screen never appeared after bundle - dumping UI + logcat."
     adb shell uiautomator dump /sdcard/ui.xml 2>/dev/null || true
     adb shell cat /sdcard/ui.xml 2>/dev/null | head -c 2000 || true
