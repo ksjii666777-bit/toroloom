@@ -623,7 +623,6 @@ export default function SecurityAuditLogScreen({ navigation }: NativeStackScreen
       t('securityAudit.logOutAllTitle'),
       t('securityAudit.logOutAllMsg', {
         count: otherSessions.length,
-        s: otherSessions.length !== 1 ? 's' : '',
       }),
       [
         { text: t('securityAudit.cancel'), style: 'cancel' },

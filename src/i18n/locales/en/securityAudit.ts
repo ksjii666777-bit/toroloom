@@ -53,7 +53,7 @@ export default {
     logOutDeviceTitle: 'Log Out Device',
     logOutDeviceMsg: 'This will log out "{{device}}" ({{location}}).\n\nThey will need to sign in again to access your account.',
     logOutAllTitle: 'Log Out All Other Devices',
-    logOutAllMsg: 'This will log out {{count}} other device{{s}}.\n\nYou will only remain signed in on this device.',
+    logOutAllMsg: 'This will log out {{count}} other device(s).\n\nYou will only remain signed in on this device.',
     cancel: 'Cancel',
     logOut: 'Log Out',
     logOutAllConfirm: 'Log Out All',
