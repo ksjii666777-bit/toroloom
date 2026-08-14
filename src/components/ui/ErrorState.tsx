@@ -72,7 +72,7 @@ export function ErrorState({
   );
 }
 
-const createStyles = (colors: any) =>
+const createStyles = (_colors: any) =>
   StyleSheet.create({
     wrap: {
       alignItems: 'center',

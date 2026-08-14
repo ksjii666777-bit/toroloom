@@ -594,7 +594,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
 
 // ──── Styles ──────────────────────────────────────────────────────────────
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (_colors: any) => StyleSheet.create({
   center: {
     justifyContent: 'center',
     alignItems: 'center',

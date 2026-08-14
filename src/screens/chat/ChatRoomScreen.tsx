@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import AppScreen from '../../components/ui/AppScreen';
@@ -34,7 +33,6 @@ function formatTime(iso: string): string {
 export default function ChatRoomScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'ChatRoom'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const roomId: string = route?.params?.roomId ?? '';
   const [inputText, setInputText] = React.useState('');
 

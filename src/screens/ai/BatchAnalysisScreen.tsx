@@ -418,7 +418,7 @@ export default function BatchAnalysisScreen({ navigation }: any) {
 
 // ──── Styles ──────────────────────────────────────────────────────────────
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (_colors: any) => StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

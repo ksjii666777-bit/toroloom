@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
@@ -27,7 +26,6 @@ type TransferTab = 'internal' | 'external';
 export default function TransferScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Transfer'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const { user, updateBalance } = useAuthStore();
   const { addTransaction } = useFundStore();
   const styles = useMemo(() => createStyles(colors), [colors]);

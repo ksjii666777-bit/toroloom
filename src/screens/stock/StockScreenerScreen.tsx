@@ -36,7 +36,6 @@ import * as ExpoSharing from 'expo-sharing';
 import { writeAsStringAsync, cacheDirectory, EncodingType } from 'expo-file-system/legacy';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useMarketStore, getMarketCapCategory, parseMarketCap, type ScreenerFilters } from '../../store/marketStore';
@@ -478,7 +477,6 @@ function generateId(): string {
 export default function StockScreenerScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'StockScreener'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const {
     stocks,
     screenerFilters,

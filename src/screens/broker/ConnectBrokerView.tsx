@@ -34,7 +34,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useT } from '../../hooks/useT';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -139,7 +138,6 @@ const BROKERS: BrokerMeta[] = [
 export default function ConnectBrokerView({ navigation }: NativeStackScreenProps<RootStackParamList, 'BrokerConnect'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // Connection state

@@ -23,7 +23,6 @@ import {
   Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeStore, type ThemeOverride } from '../../store/themeStore';
 import { useT } from '../../hooks/useT';

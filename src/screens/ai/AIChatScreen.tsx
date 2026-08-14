@@ -4,7 +4,6 @@ import {
   Platform, ActivityIndicator, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import AppScreen from '../../components/ui/AppScreen';
@@ -249,7 +248,6 @@ function generateResponse(query: string, ctx: PortfolioContext, t: any): string 
 export default function AIChatScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AIChat'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {

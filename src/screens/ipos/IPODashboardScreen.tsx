@@ -11,7 +11,6 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useT } from '../../hooks/useT';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { useIPOStore } from '../../store/ipoStore';
