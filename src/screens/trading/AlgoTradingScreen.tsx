@@ -28,6 +28,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -350,19 +351,18 @@ export default function AlgoTradingScreen() {
   }, []);
 
   return (
-    <View style={[screenStyles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
+    <AppScreen scroll={false} padded={false} header={
       <View style={[screenStyles.header, { borderBottomColor: colors.border, backgroundColor: colors.bgSecondary }]}>
         <Pressable onPress={() => navigation.goBack()} style={screenStyles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <View style={screenStyles.headerInfo}>
-          <Text style={[screenStyles.headerTitle, { color: colors.text }]}>{t('trading.algoTrading')}</Text>
-          <Text style={[screenStyles.headerSubtitle, { color: colors.textMuted }]}>
+          <Text style={[screenStyles.headerTitle, { color: colors.text }]}>{t('trading.algoTrading')}</Text>            <Text style={[screenStyles.headerSubtitle, { color: colors.textMuted }]}>
             {t('trading.strategyBacktesting')}
           </Text>
         </View>
       </View>
+    }>
 
       <ScrollView
         style={screenStyles.scroll}
@@ -707,7 +707,7 @@ export default function AlgoTradingScreen() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -716,7 +716,6 @@ export default function AlgoTradingScreen() {
 // ============================================================================
 
 const screenStyles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: SPACING.md, paddingVertical: SPACING.md,

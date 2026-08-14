@@ -28,6 +28,7 @@ import {
   type CustomIndicator,
 } from '../../store/customIndicatorStore';
 import { useNavigation } from '@react-navigation/native';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ============================================================================
@@ -303,8 +304,7 @@ export default function CustomIndicatorManagerScreen() {
   }, [navigation]);
 
   return (
-    <View style={[containerStyles.screen, { backgroundColor: colors.bg }]}>
-      {/* Header */}
+    <AppScreen scroll={false} padded={false} header={
       <View style={[containerStyles.header, { borderBottomColor: colors.border }]}>
         <Pressable onPress={() => navigation.goBack()} style={containerStyles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -321,6 +321,7 @@ export default function CustomIndicatorManagerScreen() {
           <Ionicons name="add" size={22} color="#fff" />
         </Pressable>
       </View>
+    }>
 
       <ScrollView
         style={containerStyles.scroll}
@@ -393,7 +394,7 @@ export default function CustomIndicatorManagerScreen() {
           </>
         )}
       </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -402,9 +403,6 @@ export default function CustomIndicatorManagerScreen() {
 // ============================================================================
 
 const containerStyles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

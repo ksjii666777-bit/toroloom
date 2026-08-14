@@ -1,9 +1,0 @@
-# key={i} audit — ALL FIXED ✅
-#
-# All key={i} occurrences listed here previously have been replaced with
-# proper stable keys (e.g. item.id, content-derived keys, or prefixed
-# skeleton keys). Run the following to re-audit:
-#
-#   grep -rn -E 'key=\{[ ]?i[ ]?\}' src/ --include='*.tsx'
-#
-# Last updated: 2026-08-06

@@ -38,6 +38,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 import { api } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -295,21 +296,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
   }
 
   return (
-    <View style={s.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={s.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.bgSecondary}
-          />
-        }
-      >
-        {/* Header */}
+    <AppScreen scroll={false} padded={false} header={
         <View style={s.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.md }}>
             <View style={[s.headerIcon, { backgroundColor: colors.primary + '20' }]}>
@@ -329,7 +316,20 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
             </View>
           )}
         </View>
-
+      }>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={s.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.bgSecondary}
+          />
+        }
+      >
         {/* ── Health Stat Cards ───────────────────────────────────── */}
         <Animated.View entering={FadeInUp.delay(100).springify()}>
           <View style={s.statsRow}>
@@ -609,7 +609,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
         {/* Bottom spacer */}
         <View style={{ height: 60 }} />
       </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -628,9 +628,9 @@ const createStyles = (colors: any) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingTop: 60,
-      marginBottom: SPACING.lg,
+      paddingTop: SPACING.lg,
       paddingHorizontal: SPACING.xl,
+      paddingBottom: SPACING.md,
     },
     headerIcon: {
       width: 44,

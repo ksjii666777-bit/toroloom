@@ -23,8 +23,8 @@ import {
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import AppScreen from '../../components/ui/AppScreen';
 import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { mockSentimentData } from '../../constants/mockData';
@@ -415,7 +415,6 @@ const articleStyles = StyleSheet.create({
 
 export default function SentimentAnalysisScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SentimentAnalysis'>) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -499,9 +498,8 @@ export default function SentimentAnalysisScreen({ navigation }: NativeStackScree
   }, [selectedSentiment]);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+    <AppScreen scroll={false} padded={false} header={
+      <View style={[styles.header, { paddingTop: SPACING.lg }]}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -540,6 +538,7 @@ export default function SentimentAnalysisScreen({ navigation }: NativeStackScree
           }}
         />
       </View>
+    }>
 
       <FlashList
         showsVerticalScrollIndicator={false}
@@ -732,7 +731,7 @@ export default function SentimentAnalysisScreen({ navigation }: NativeStackScree
           </View>
         }
       />
-    </View>
+    </AppScreen>
   );
 }
 

@@ -17,8 +17,8 @@ import {
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import AppScreen from '../../components/ui/AppScreen';
 import { useWidgetStore } from '../../store/widgetStore';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { getWidgetsByCategory } from '../../components/widgets/WidgetRegistry';
@@ -48,7 +48,6 @@ const CATEGORY_ICONS: Record<string, string> = {
 export default function WidgetGalleryScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { addWidget, layout } = useWidgetStore();
   const userTier = useSubscriptionStore(s => s.subscription.tier);
@@ -71,9 +70,8 @@ export default function WidgetGalleryScreen({ navigation }: any) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+    <AppScreen scroll={false} padded={false} header={
+      <View style={[styles.header, { paddingTop: SPACING.lg }]}>
         <TouchableOpacity
           style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
           onPress={() => navigation.goBack()}
@@ -87,6 +85,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
           </Text>
         </View>
       </View>
+    }>
 
       <FlashList
         data={Object.entries(grouped)}
@@ -249,14 +248,13 @@ export default function WidgetGalleryScreen({ navigation }: any) {
           </View>
         }
       />
-    </View>
+    </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
 const createStyles = (_colors: any) => StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

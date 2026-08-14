@@ -21,6 +21,7 @@ import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS} from '../../constants/theme';
 import { MarketNewsItem } from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import { newsApi } from '../../services/api';
 import { mockNews } from '../../constants/mockData';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -512,7 +513,6 @@ const detailStyles = StyleSheet.create({
 export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'NewsFeed'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<NewsCategory>('all');
   const [news, setNews] = useState<MarketNewsItem[]>([]);
@@ -649,9 +649,8 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
   }, [showSearch]);
 
   return (
-    <View style={[feedStyles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[feedStyles.header, { paddingTop: insets.top + 12 }]}>
+    <AppScreen scroll={false} padded={false} header={
+      <View style={[feedStyles.header, { paddingTop: SPACING.lg }]}>
         <View style={feedStyles.headerTop}>
           <View>
             <Text style={[feedStyles.title, { color: colors.text }]}>{t('news.marketNews')}</Text>
@@ -779,7 +778,9 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
             />
           ))}
         </ScrollView>
-      </View>        {/* Trending Symbols + Sentiment Analysis */}
+      </View>
+    }>
+        {/* Trending Symbols + Sentiment Analysis */}
         {trendingSymbols.length > 0 && !showSearch && (
           <View style={feedStyles.trendingSection}>
             <View style={feedStyles.trendingHeader}>
@@ -943,7 +944,7 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
         onClose={() => setModalVisible(false)}
         onBookmark={() => selectedArticle && toggleBookmark(selectedArticle.id)}
       />
-    </View>
+    </AppScreen>
   );
 }
 

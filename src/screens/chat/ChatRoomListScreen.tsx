@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import AppScreen from '../../components/ui/AppScreen';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -28,7 +29,7 @@ export default function ChatRoomListScreen({ navigation }: NativeStackScreenProp
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+    <AppScreen scroll={false} padded={false} header={
       <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
         <Text style={[styles.title, { color: colors.text }]}>{t('community.chatRooms')}</Text>
         <TextInput
@@ -39,6 +40,7 @@ export default function ChatRoomListScreen({ navigation }: NativeStackScreenProp
           onChangeText={setSearch}
         />
       </View>
+    }>
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
@@ -66,13 +68,12 @@ export default function ChatRoomListScreen({ navigation }: NativeStackScreenProp
           </View>
         }
       />
-    </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { padding: SPACING.xl, paddingTop: 60, gap: SPACING.md },
+  header: { padding: SPACING.xl, gap: SPACING.md },
   title: { fontSize: FONTS.size.xl, fontWeight: '700' },
   searchInput: { height: 40, borderRadius: BORDER_RADIUS.md, borderWidth: 1, paddingHorizontal: SPACING.md, fontSize: FONTS.size.sm },
   list: { padding: SPACING.xl, gap: SPACING.sm },

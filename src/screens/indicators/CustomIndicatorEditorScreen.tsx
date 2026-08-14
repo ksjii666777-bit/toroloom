@@ -24,6 +24,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import AppScreen from '../../components/ui/AppScreen';
 import { validateFormula, evaluateFormula } from '../../utils/indicatorFormulaEngine';
 import {
   useCustomIndicatorStore,
@@ -407,8 +408,7 @@ export default function CustomIndicatorEditorScreen() {
   const highlightedTokens = useMemo(() => tokenizeHighlight(formula), [formula]);
 
   return (
-    <View style={[screenStyles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
+    <AppScreen scroll={false} padded={false} header={
       <View style={[screenStyles.header, { borderBottomColor: colors.border }]}>
         <Pressable onPress={() => navigation.goBack()} style={screenStyles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -420,6 +420,7 @@ export default function CustomIndicatorEditorScreen() {
           <Ionicons name="bookmark-outline" size={22} color={colors.primary} />
         </Pressable>
       </View>
+    }>
 
       <ScrollView
         style={screenStyles.scroll}
@@ -601,7 +602,7 @@ export default function CustomIndicatorEditorScreen() {
           )}
         </View>
       </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -610,9 +611,6 @@ export default function CustomIndicatorEditorScreen() {
 // ============================================================================
 
 const screenStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

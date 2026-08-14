@@ -30,6 +30,9 @@ vi.mock('react-native', () => {
     Platform: { OS: 'ios' },
     KeyboardAvoidingView: (props: any) => React.createElement('View', null, props.children),
     ActivityIndicator: (_props: any) => null,
+    StatusBar: (_props: any) => null,
+    RefreshControl: (_props: any) => null,
+    useWindowDimensions: () => ({ width: 400, height: 800 }),
     Modal: (props: any) => props.visible ? React.createElement('View', null, props.children) : null,
     TouchableOpacity: (props: any) => React.createElement('View', { onPress: props.onPress }, props.children),
     Animated: {
