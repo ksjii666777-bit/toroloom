@@ -136,15 +136,22 @@ cleanup() {
 trap cleanup EXIT
 
 # ── 6. Wait for Metro to be ready (max 180s) ────────────────────────────────
+# Plain loop (no nested bash -c): the nested single-quoted form has been
+# mangled by wretry's YAML re-parse in CI before, breaking the whole boot.
 echo "Waiting for Metro bundler..."
-if ! timeout 180 bash -c '
-  until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
-    sleep 5
-    printf "."
-  done  echo ""
+METRO_READY=0
+for i in $(seq 1 36); do
+  if grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; then
+    METRO_READY=1
+    break
+  fi
+  sleep 5
+  printf "."
+done
+echo ""
+if [ "$METRO_READY" = "1" ]; then
   echo "Expo/Metro server is ready!"
-';
-then
+else
   echo "::error::Metro bundler did not become ready within 180s."
   tail -50 /tmp/expo.log || true
   kill "$EXPO_PID" 2>/dev/null || true
