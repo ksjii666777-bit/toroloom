@@ -133,6 +133,7 @@ const menuItems: MenuSection[] = [
       { icon: 'sparkles', label: 'Trading Psychology', labelKey: 'profile.tradingPsychology', color: '#8B5CF6', screen: 'BehavioralJournal', testID: 'menu-trading-psychology' },
       { icon: 'trophy', label: 'Achievements', labelKey: 'profile.achievements', color: '#FF6B6B', screen: 'Achievements' },
       { icon: 'wallet', label: 'Revenue', labelKey: 'profile.revenue', color: '#FFC107', screen: 'RevenueDashboard' },
+      { icon: 'shield-checkmark', label: 'Advisors', labelKey: 'profile.advisors', color: '#00C853', screen: 'AdvisorList' },
     ],
   },
   {

@@ -83,6 +83,7 @@
 | `TELEGRAM_BOT_TOKEN` | Trading alerts via Telegram | [@BotFather](https://t.me/BotFather) |
 | `MARKETSTACK_KEY` | Real-time stock data | [marketstack.com](https://marketstack.com) |
 | `NEWSAPI_KEY` | Financial news | [newsapi.org](https://newsapi.org) |
+| `FMP_API_KEY` | Live economic calendar (250 req/day free) | [financialmodelingprep.com](https://financialmodelingprep.com) |
 | `FRED_API_KEY` | US Treasury yields / bonds | [fred.stlouisfed.org](https://fred.stlouisfed.org) |
 | `COMMODITY_API_KEY` | Commodity prices | [api-ninjas.com](https://api-ninjas.com) |
 | `UPSTOX_CLIENT_ID` / `_SECRET` / `REDIRECT_URI` | Upstox OAuth | Upstox developer console |
@@ -175,7 +176,7 @@ openssl rand -hex 32   # → JWT_SECRET, SNAPTRADE_ENCRYPTION_KEY, RAZORPAY_WEBH
 **Razorpay:** ☐ `RAZORPAY_KEY_ID` ☐ `RAZORPAY_KEY_SECRET` ☐ `RAZORPAY_WEBHOOK_SECRET` ☐ webhook URL configured
 **AI (≥1):** ☐ `OPENROUTER_API_KEY` ☐ or `GOOGLE_GEMINI_API_KEY` ☐ or `CHOREO_CLAUDE_API_KEY`
 **Security:** ☐ `CORS_ORIGIN` set to your domains
-**Optional:** ☐ `SENTRY_DSN` ☐ Redis ☐ `TELEGRAM_BOT_TOKEN` ☐ `MARKETSTACK_KEY` ☐ `NEWSAPI_KEY` ☐ `FRED_API_KEY` ☐ `RESEND_API_KEY`
+**Optional:** ☐ `SENTRY_DSN` ☐ Redis ☐ `TELEGRAM_BOT_TOKEN` ☐ `MARKETSTACK_KEY` ☐ `NEWSAPI_KEY` ☐ `FMP_API_KEY` ☐ `FRED_API_KEY` ☐ `RESEND_API_KEY`
 **Frontend:** ☐ `EXPO_PUBLIC_API_URL` = your Railway URL ☐ `EXPO_PUBLIC_SENTRY_DSN` replaced/cleared
 **Verify:** ☐ `/health` ☐ SnapTrade register ☐ Razorpay order ☐ AI insights
 

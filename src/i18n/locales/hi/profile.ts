@@ -103,6 +103,7 @@ export default {
     tabLearn: 'सीखें',
     tabAccount: 'खाता',
     referral: 'रेफर और कमाएं',
+    advisors: 'सलाहकार',
     homeWidget: 'होम विजेट',
     aiSettings: 'AI सेटिंग्स',
     abTests: 'A/B परीक्षण',

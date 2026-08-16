@@ -168,4 +168,5 @@ export const CACHE_TTL = {
   COMMODITY_SINGLE: 300_000,     // 5 minutes
   BONDS_ALL: 600_000,            // 10 minutes — mock data, no external API cost
   BONDS_SUMMARY: 600_000,        // 10 minutes
+  ECONOMIC_CALENDAR: 1_800_000,  // 30 minutes — FMP economic calendar (250 req/day free tier)
 } as const;

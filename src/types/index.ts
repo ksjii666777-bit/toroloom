@@ -2835,6 +2835,83 @@ export interface NFOApplication {
   returnPercent?: number;
 }
 
+// ============ Advisory Marketplace ============
+
+export type AdvisorStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
+export type AdvisorType = 'RIA' | 'RA'; // Registered Investment Advisor / Research Analyst
+
+/** A SEBI-registered investment advisor or research analyst listed on the marketplace. */
+export interface Advisor {
+  id: string;
+  name: string;
+  photoUrl?: string;
+  type: AdvisorType;
+  /** SEBI registration number, e.g. INA000012345 */
+  sebiRegNo: string;
+  firmName?: string;
+  bio: string;
+  specialties: string[]; // ['Equity', 'Mutual Funds', 'Tax Planning']
+  experienceYears: number;
+  /** Average rating 0–5 */
+  rating: number;
+  reviewCount: number;
+  /** Consultation fee in INR per slot */
+  consultationFee: number;
+  /** Next N available slots */
+  availableSlots: AdvisorSlot[];
+  /** SEBI check done by admin */
+  isVerified: boolean;
+  status: AdvisorStatus;
+  createdAt: string;
+}
+
+/** A bookable consultation slot for an advisor. */
+export interface AdvisorSlot {
+  id: string;
+  advisorId: string;
+  /** ISO start time */
+  startTime: string;
+  /** ISO end time */
+  endTime: string;
+  booked: boolean;
+}
+
+export type ConsultationStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
+
+/** A user's booked consultation with an advisor. */
+export interface Consultation {
+  id: string;
+  advisorId: string;
+  advisorName: string;
+  advisorPhotoUrl?: string;
+  advisorType: AdvisorType;
+  userId: string;
+  slotId: string;
+  /** ISO start time of the booked slot */
+  startTime: string;
+  /** ISO end time of the booked slot */
+  endTime: string;
+  /** Fee paid in INR */
+  amount: number;
+  status: ConsultationStatus;
+  /** Phase 2 — video call link */
+  meetingLink?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+/** A review left by a user after a completed consultation. */
+export interface AdvisorReview {
+  id: string;
+  advisorId: string;
+  userId: string;
+  userName: string;
+  /** Rating 1–5 */
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
 // ============ Navigation Route Params ============
 
 /** Params for the PlaceOrder (Indian broker) screen. */
@@ -3026,6 +3103,14 @@ export type RootStackParamList = {
   AadhaarVerification: undefined;
   DigiLocker: undefined;
   BankLinking: undefined;
+
+  // ── Advisory Marketplace ──
+  AdvisorList: undefined;
+  AdvisorDetail: { advisorId: string };
+  MyConsultations: undefined;
+  ConsultationDetail: { consultationId: string };
+  ReviewForm: { advisorId: string; consultationId?: string };
+  AdminAdvisor: undefined;
 
   // ── Admin ──
   AdminCouponManager: undefined;

@@ -103,6 +103,7 @@ export default {
     tabLearn: 'Learn',
     tabAccount: 'Account',
     referral: 'Refer & Earn',
+    advisors: 'Advisors',
     homeWidget: 'Home Widget',
     aiSettings: 'AI Settings',
     abTests: 'A/B Tests',

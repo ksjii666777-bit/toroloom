@@ -1,0 +1,119 @@
+# =============================================================================
+# Advisory Marketplace Flow — Browse Advisors & View Profile
+# =============================================================================
+# Tests the Advisory Marketplace screens:
+#   1. Login with test credentials
+#   2. Navigate: More → Advisors
+#   3. Verify Advisor List renders (title, SEBI compliance note, advisor cards)
+#   4. Search filter (e.g., "khanna") and clear
+#   5. Filter by type chip (RIA / RA)
+#   6. Open an advisor profile → verify SEBI badge + Book a Session
+#   7. Navigate back to the list, then back to More
+# =============================================================================
+
+appId: com.toroloom.app
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Advisors ──────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      id: "menu-AdvisorList"
+    direction: DOWN
+- tapOn:
+    id: "menu-AdvisorList"
+- waitForAnimationToEnd
+
+# ── 3. Verify Advisor List Screen ─────────────────────────────────────────
+- assertVisible:
+    text: "Advisors"
+
+# SEBI compliance note (i18n-safe partial match)
+- assertVisible:
+    text: "SEBI-registered"
+
+# An approved advisor card renders with a fee
+- assertVisible:
+    text: "Dr. Rajesh Khanna"
+- assertVisible:
+    text: "1500"
+
+# ── 4. Search filter ──────────────────────────────────────────────────────
+- tapOn:
+    id: "advisory-search"
+- inputText: "khanna"
+- waitForAnimationToEnd
+
+# Only the matching advisor remains
+- assertVisible:
+    text: "Dr. Rajesh Khanna"
+- assertNotVisible:
+    text: "Priya Sharma"
+
+# Clear the search
+- eraseText
+- waitForAnimationToEnd
+
+# ── 5. Filter by type chip (RA) ───────────────────────────────────────────
+- tapOn:
+    text: "RA"
+- waitForAnimationToEnd
+
+# RA advisors (Amit Verma) visible, RIA (Dr. Rajesh Khanna) hidden
+- assertVisible:
+    text: "Amit Verma"
+- assertNotVisible:
+    text: "Dr. Rajesh Khanna"
+
+# Reset back to All
+- tapOn:
+    text: "All"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Dr. Rajesh Khanna"
+
+# ── 6. Open an Advisor Profile ────────────────────────────────────────────
+- tapOn:
+    text: "Dr. Rajesh Khanna"
+- waitForAnimationToEnd
+
+# Verify detail screen
+- assertVisible:
+    text: "Advisor Profile"
+- assertVisible:
+    text: "SEBI RIA Reg."
+- assertVisible:
+    text: "Book a Session"
+
+# ── 7. Navigate back to the list, then back to More ───────────────────────
+- tapOn:
+    text: "Go back"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Advisors"
+
+- tapOn:
+    text: "Go back"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"

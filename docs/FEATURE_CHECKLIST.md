@@ -2,12 +2,12 @@
 
 > **Buyer ke liye:** Yeh document Toroloom app ke sabhi features ka high-level overview hai. Har feature implement ho chuka hai aur tests cover karte hain.
 
-**Stats (as of August 14, 2026):**
-- **Frontend Screens:** 144 | **Stores:** 46 | **Services:** 74
-- **Backend Routes:** 50 | **Backend Modules:** 16
-- **Frontend Tests:** 228 files | **Backend Tests:** 106 files (74 unit + 32 integration)
-- **E2E Flows (Maestro):** 33 files
-- **Total Tests:** 8,202 passing (334 test files + 33 E2E flows)
+**Stats (as of August 16, 2026):**
+- **Frontend Screens:** 150 | **Stores:** 49 | **Services:** 75
+- **Backend Routes:** 52 | **Backend Modules:** 16
+- **Frontend Tests:** 234 files | **Backend Tests:** 108 files (75 unit + 33 integration)
+- **E2E Flows (Maestro):** 34 files
+- **Total Tests:** 8,316 passing (342 test files + 34 E2E flows)
 
 ---
 
@@ -30,7 +30,7 @@
 ## 3. 📊 Market Data
 | Area | Features | Status |
 |------|----------|--------|
-| **Screens** | Home dashboard, Markets, Stock detail, Stock screener, News feed | ✅ |
+| **Screens** | Home dashboard, Markets, Stock detail, Stock screener, News feed, Economic calendar | ✅ |
 | **Charts** | Candlestick (SVG + Skia GPU), Line, Area, Heikin-Ashi, Crosshair, MA, Volume | ✅ |
 | **Tech Indicators** | RSI, MACD, Bollinger Bands, Drawing tools, Pattern detection | ✅ |
 | **Real-time** | WebSocket prices, Mock WS service, WS registry | ✅ |
@@ -194,21 +194,34 @@
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Frontend unit tests | 228 files (5,597 tests) | ✅ |
-| Backend unit + cross-file + stress | 74 files (1,850 tests) | ✅ |
-| Backend integration (PG + Mongo) | 32 files (755 tests) | ✅ |
-| E2E (Maestro) | 33 flows | ✅ |
-| **Total** | **8,202 tests passing** | ✅ |
+| Frontend unit tests | 234 files (5,645 tests) | ✅ |
+| Backend unit + cross-file + stress | 75 files (1,891 tests) | ✅ |
+| Backend integration (PG + Mongo) | 33 files (780 tests) | ✅ |
+| E2E (Maestro) | 34 flows | ✅ |
+| **Total** | **8,316 tests passing** | ✅ |
+
+## 29. 🧑‍⚖️ Advisory Marketplace
+
+| Area | Features | Status |
+|------|----------|--------|
+| **Screens** | Advisor list (search + filters), Advisor profile (SEBI badge, slots, fee), My consultations, Consultation detail, Review form, Admin panel | ✅ |
+| **Booking** | Slot lock + double-booking guard, Pending claim with 10-min stale release, Confirm after payment verify, Cancel + slot release | ✅ |
+| **Reviews** | Post-review (only after completed consultation), Duplicate prevention, Rating aggregate recompute | ✅ |
+| **Admin** | Approve/reject/suspend, Add/edit advisor, Pending-first list | ✅ |
+| **Backend** | `/api/advisors` + `/api/consultations` routes, In-memory service with storage hook, Unit + integration tests (real JWT auth) | ✅ |
+| **Frontend Tests** | `AdvisorListScreen`, `AdvisorDetailScreen`, `MyConsultationsScreen` + store — search/filter, booking flow, tabs, navigation, empty states | ✅ |
+| **Compliance** | SEBI RIA/RA reg. badge on every profile, market-risk disclaimers, admin-only approvals | ✅ |
+| **Payments** | Slot lock → pending → confirm flow wired; Razorpay checkout UI pending (Phase 1.5) | ⏳ |
 
 ---
 
 ## 📊 Summary
 
 ```
-Frontend Screens:     144 ✅     Backend Routes:     50 ✅
-Zustand Stores:       46 ✅     Backend Modules:    16 ✅
-UI Components:        35 ✅     Tests:          8,202 ✅
-Services:             74 ✅     E2E Flows:         33 ✅
+Frontend Screens:     150 ✅     Backend Routes:     52 ✅
+Zustand Stores:       49 ✅     Backend Modules:    16 ✅
+UI Components:        35 ✅     Tests:          8,316 ✅
+Services:             75 ✅     E2E Flows:         34 ✅
 ```
 
 > **App 95%+ complete hai.** Buyer ko sirf deploy karna hai (Railway ya Docker) aur production DB (RDS) setup karna hai.

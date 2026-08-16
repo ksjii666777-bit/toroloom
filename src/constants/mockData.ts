@@ -4,7 +4,7 @@ import {
   AIInsight, Badge, UserLevel, AppNotification, MarketNewsItem,
   ChatRoom, ChatMessage, IPOItem, NFOItem, NFOApplication, EconomicEvent, EarningsSummary, EarningsQuarter,
   StockSentiment, SentimentDataPoint, SentimentArticle, ReferralStats, ReferralReward,
-  Bond, CompanyFundamentals
+  Bond, CompanyFundamentals, Advisor, AdvisorSlot, AdvisorReview, Consultation
 } from '../types';
 
 // ============ Company Fundamentals ============
@@ -3587,6 +3587,220 @@ export const mockReferralStats: ReferralStats = {
   shareLink: 'App soon available on Play Store',
   rewards: mockReferralRewards,
 };
+
+// ============ Advisory Marketplace ============
+
+const slotFor = (advisorId: string, dayOffset: number, hour: number, minute: number = 0): AdvisorSlot => {
+  const start = new Date();
+  start.setDate(start.getDate() + dayOffset);
+  start.setHours(hour, minute, 0, 0);
+  const end = new Date(start.getTime() + 45 * 60 * 1000);
+  return {
+    id: `${advisorId}_slot_${dayOffset}_${hour}_${minute}`,
+    advisorId,
+    startTime: start.toISOString(),
+    endTime: end.toISOString(),
+    booked: false,
+  };
+};
+
+/** Mock SEBI-registered advisors for the advisory marketplace */
+export const mockAdvisors: Advisor[] = [
+  {
+    id: 'advisor_1',
+    name: 'Dr. Rajesh Khanna',
+    photoUrl: 'https://i.pravatar.cc/150?img=12',
+    type: 'RIA',
+    sebiRegNo: 'INA000001234',
+    firmName: 'Khanna Wealth Advisors',
+    bio: 'Certified Financial Planner with 15+ years of experience in wealth management, retirement planning, and tax-efficient investing. Former wealth head at a leading private bank.',
+    specialties: ['Wealth Management', 'Retirement Planning', 'Tax Planning'],
+    experienceYears: 15,
+    rating: 4.8,
+    reviewCount: 127,
+    consultationFee: 1500,
+    availableSlots: [slotFor('advisor_1', 1, 10), slotFor('advisor_1', 2, 11, 30), slotFor('advisor_1', 3, 16)],
+    isVerified: true,
+    status: 'approved',
+    createdAt: '2025-11-02T09:00:00.000Z',
+  },
+  {
+    id: 'advisor_2',
+    name: 'Priya Sharma',
+    photoUrl: 'https://i.pravatar.cc/150?img=47',
+    type: 'RIA',
+    sebiRegNo: 'INA000005678',
+    firmName: 'Sharma Financial Solutions',
+    bio: 'SEBI-registered investment advisor specialising in mutual fund portfolios, goal-based investing, and NRI taxation. Known for clear, jargon-free advice.',
+    specialties: ['Mutual Funds', 'Goal Planning', 'NRI Taxation'],
+    experienceYears: 9,
+    rating: 4.7,
+    reviewCount: 89,
+    consultationFee: 1200,
+    availableSlots: [slotFor('advisor_2', 1, 12), slotFor('advisor_2', 2, 15), slotFor('advisor_2', 4, 10, 30)],
+    isVerified: true,
+    status: 'approved',
+    createdAt: '2026-01-15T09:00:00.000Z',
+  },
+  {
+    id: 'advisor_3',
+    name: 'Amit Verma',
+    photoUrl: 'https://i.pravatar.cc/150?img=33',
+    type: 'RA',
+    sebiRegNo: 'INH000009876',
+    firmName: 'Verma Research Desk',
+    bio: 'Research analyst covering Indian equities and derivatives. Publishes detailed stock research with entry/exit levels, risk management, and portfolio construction.',
+    specialties: ['Equity Research', 'Technical Analysis', 'Derivatives'],
+    experienceYears: 11,
+    rating: 4.5,
+    reviewCount: 156,
+    consultationFee: 999,
+    availableSlots: [slotFor('advisor_3', 1, 14), slotFor('advisor_3', 2, 12, 30), slotFor('advisor_3', 3, 11)],
+    isVerified: true,
+    status: 'approved',
+    createdAt: '2025-08-20T09:00:00.000Z',
+  },
+  {
+    id: 'advisor_4',
+    name: 'Neha Gupta',
+    photoUrl: 'https://i.pravatar.cc/150?img=32',
+    type: 'RIA',
+    sebiRegNo: 'INA000003456',
+    firmName: 'Gupta & Co. Advisors',
+    bio: 'Family wealth advisor focusing on estate planning, insurance review, and behavioural finance. 7+ years helping first-generation investors build disciplined habits.',
+    specialties: ['Estate Planning', 'Insurance', 'Behavioural Finance'],
+    experienceYears: 7,
+    rating: 4.6,
+    reviewCount: 64,
+    consultationFee: 800,
+    availableSlots: [slotFor('advisor_4', 2, 10), slotFor('advisor_4', 3, 15, 30)],
+    isVerified: true,
+    status: 'approved',
+    createdAt: '2026-02-10T09:00:00.000Z',
+  },
+  {
+    id: 'advisor_5',
+    name: 'Suresh Iyer',
+    photoUrl: 'https://i.pravatar.cc/150?img=59',
+    type: 'RA',
+    sebiRegNo: 'INH000007890',
+    firmName: 'Iyer Market Insights',
+    bio: 'SEBI-registered research analyst with a focus on small-caps and turnaround stories. Combines fundamental deep-dives with catalyst-based investing.',
+    specialties: ['Small Caps', 'Value Investing', 'Campus-to-Career'],
+    experienceYears: 13,
+    rating: 4.4,
+    reviewCount: 203,
+    consultationFee: 1100,
+    availableSlots: [slotFor('advisor_5', 1, 9, 30), slotFor('advisor_5', 3, 14)],
+    isVerified: true,
+    status: 'approved',
+    createdAt: '2025-06-01T09:00:00.000Z',
+  },
+  {
+    id: 'advisor_6',
+    name: 'Kavita Nair',
+    photoUrl: 'https://i.pravatar.cc/150?img=20',
+    type: 'RIA',
+    sebiRegNo: 'INA000002345',
+    firmName: 'Nair Financial Planning',
+    bio: 'Fee-only advisor helping young professionals with first salaries, ESOPs, and salary structuring. Avid educator with a YouTube following of 250k+.',
+    specialties: ['First Job Investing', 'ESOPs', 'Salary Structuring'],
+    experienceYears: 6,
+    rating: 4.9,
+    reviewCount: 42,
+    consultationFee: 700,
+    availableSlots: [slotFor('advisor_6', 1, 13), slotFor('advisor_6', 2, 16, 30)],
+    isVerified: false,
+    status: 'pending',
+    createdAt: '2026-07-01T09:00:00.000Z',
+  },
+];
+
+/** Mock reviews for advisors */
+export const mockAdvisorReviews: AdvisorReview[] = [
+  {
+    id: 'review_1',
+    advisorId: 'advisor_1',
+    userId: 'user_1',
+    userName: 'Rohit Mehta',
+    rating: 5,
+    comment: 'Excellent retirement plan! Dr. Khanna explained everything patiently and the follow-up notes were very helpful.',
+    createdAt: '2026-05-12T10:00:00.000Z',
+  },
+  {
+    id: 'review_2',
+    advisorId: 'advisor_1',
+    userId: 'user_2',
+    userName: 'Sneha Reddy',
+    rating: 4,
+    comment: 'Very practical advice on tax planning. Would have loved a bit more time for Q&A.',
+    createdAt: '2026-06-03T10:00:00.000Z',
+  },
+  {
+    id: 'review_3',
+    advisorId: 'advisor_2',
+    userId: 'user_3',
+    userName: 'Arjun Kapoor',
+    rating: 5,
+    comment: 'Priya helped me restructure my mutual fund portfolio. The SIP plan she suggested is working great!',
+    createdAt: '2026-04-22T10:00:00.000Z',
+  },
+  {
+    id: 'review_4',
+    advisorId: 'advisor_3',
+    userId: 'user_4',
+    userName: 'Karan Malhotra',
+    rating: 4,
+    comment: 'Great technical calls on Nifty. Clear entry and exit levels with proper risk management.',
+    createdAt: '2026-06-20T10:00:00.000Z',
+  },
+];
+
+/** Mock consultations for the current user */
+export const mockConsultations: Consultation[] = [
+  {
+    id: 'consult_1',
+    advisorId: 'advisor_1',
+    advisorName: 'Dr. Rajesh Khanna',
+    advisorPhotoUrl: 'https://i.pravatar.cc/150?img=12',
+    advisorType: 'RIA',
+    userId: 'user_me',
+    slotId: 'advisor_1_slot_1',
+    startTime: slotFor('advisor_1', 1, 10).startTime,
+    endTime: slotFor('advisor_1', 1, 10).endTime,
+    amount: 1500,
+    status: 'confirmed',
+    createdAt: '2026-08-10T09:00:00.000Z',
+  },
+  {
+    id: 'consult_2',
+    advisorId: 'advisor_2',
+    advisorName: 'Priya Sharma',
+    advisorPhotoUrl: 'https://i.pravatar.cc/150?img=47',
+    advisorType: 'RIA',
+    userId: 'user_me',
+    slotId: 'advisor_2_slot_0',
+    startTime: slotFor('advisor_2', -3, 10).startTime,
+    endTime: slotFor('advisor_2', -3, 10).endTime,
+    amount: 1200,
+    status: 'completed',
+    createdAt: '2026-07-20T09:00:00.000Z',
+  },
+  {
+    id: 'consult_3',
+    advisorId: 'advisor_3',
+    advisorName: 'Amit Verma',
+    advisorPhotoUrl: 'https://i.pravatar.cc/150?img=33',
+    advisorType: 'RA',
+    userId: 'user_me',
+    slotId: 'advisor_3_slot_1',
+    startTime: slotFor('advisor_3', -10, 14).startTime,
+    endTime: slotFor('advisor_3', -10, 14).endTime,
+    amount: 999,
+    status: 'completed',
+    createdAt: '2026-07-05T09:00:00.000Z',
+  },
+];
 
 export const generateChartData = (days: number = 365, basePrice: number = 2500) => {
   const data: { date: string; price: number }[] = [];

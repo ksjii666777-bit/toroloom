@@ -106,6 +106,7 @@ Service → **Variables** tab. Railway var change par auto-redeploy karta hai �
 | 18 | `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` | Resend API keys |
 | 19 | `MARKETSTACK_KEY` | MarketStack free tier |
 | 20 | `NEWSAPI_KEY` | NewsAPI |
+| 20a | `FMP_API_KEY` | FMP — live economic calendar |
 | 21 | `FRED_API_KEY` | FRED |
 | 22 | `TELEGRAM_BOT_TOKEN` | @BotFather |
 | — | `UPSTOX_*`, `ANGEL_SMARTAPI_KEY`, `IBKR_*` | Broker extras (rarely needed) |

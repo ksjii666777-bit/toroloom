@@ -137,6 +137,14 @@ import { GoalCreateScreen, GoalDetailScreen } from '../screens/wealth/GoalBasedI
 import RetirementPlannerScreen from '../screens/wealth/RetirementPlannerScreen';
 import CryptoDetailScreen from '../screens/stock/CryptoDetailScreen';
 
+// Advisory Marketplace Screens
+import AdvisorListScreen from '../screens/advisory/AdvisorListScreen';
+import AdvisorDetailScreen from '../screens/advisory/AdvisorDetailScreen';
+import MyConsultationsScreen from '../screens/advisory/MyConsultationsScreen';
+import ConsultationDetailScreen from '../screens/advisory/ConsultationDetailScreen';
+import ReviewFormScreen from '../screens/advisory/ReviewFormScreen';
+import AdminAdvisorScreen from '../screens/advisory/AdminAdvisorScreen';
+
 // Calculator Screens
 import SIPCalculator from '../screens/calculators/SIPCalculator';
 import StepUpSipScreen from '../screens/calculators/StepUpSipScreen';
@@ -622,6 +630,12 @@ export default function AppNavigator() {
             <Stack.Screen name="AadhaarVerification" component={AadhaarVerificationScreen} />
             <Stack.Screen name="DigiLocker" component={DigiLockerScreen} />
             <Stack.Screen name="BankLinking" component={BankLinkingScreen} />
+            <Stack.Screen name="AdvisorList" component={AdvisorListScreen} />
+            <Stack.Screen name="AdvisorDetail" component={AdvisorDetailScreen} />
+            <Stack.Screen name="MyConsultations" component={MyConsultationsScreen} />
+            <Stack.Screen name="ConsultationDetail" component={ConsultationDetailScreen} />
+            <Stack.Screen name="ReviewForm" component={ReviewFormScreen} />
+            <Stack.Screen name="AdminAdvisor" component={AdminAdvisorScreen} />
           </>
         )}
       </Stack.Navigator>

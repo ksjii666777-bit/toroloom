@@ -34,6 +34,7 @@ import { startStockAlertPoller } from './services/queue';
 import { configureMarketStack } from './services/marketstack';
 import { configureCommodityApi } from './services/commodityService';
 import { configureBondApi } from './services/bondService';
+import { configureEconomicCalendarApi } from './services/economicCalendarService';
 import { configureTelegramBot, hydrateUserLinksFromStorage } from './services/telegramBot';
 
 // Routes
@@ -66,6 +67,7 @@ import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
 import fnoRoutes from './routes/fno';
 import newsRoutes from './routes/news';
+import economicCalendarRoutes from './routes/economicCalendar';
 import telegramRoutes from './routes/telegram';
 import dividendRoutes from './routes/dividends';
 import fundamentalsRoutes from './routes/fundamentals';
@@ -82,6 +84,7 @@ import bondsRoutes from './routes/bonds';
 import apiDocsRoutes from './routes/apiDocs';
 import apiKeyRoutes from './routes/apiKeys';
 import publicApiRoutes from './routes/publicApi';
+import { advisorsRoutes, consultationsRoutes } from './routes/advisors';
 import { setWSS, getFailureCount, SEND_FAILURE_THRESHOLD } from './services/syncInvalidationBridge';
 
 const app = express();
@@ -286,6 +289,9 @@ app.use('/api/user/api-keys', writeLimiter, apiKeyRoutes);
 // ── News — 100 req / min ──────────────────────────────────────────
 app.use('/api/news', readLimiter, newsRoutes);
 
+// ── Economic Calendar — 100 req / min ────────────────────────────────
+app.use('/api/economic-calendar', readLimiter, economicCalendarRoutes);
+
 // ── Dividends — 100 req / min ───────────────────────────────────────
 app.use('/api/dividends', readLimiter, dividendRoutes);
 
@@ -310,6 +316,10 @@ app.use('/api/v1', readLimiter, publicApiRoutes);
 
 // ── Analytics — 200 req / min — Redis-cached endpoints ─────────────────────
 app.use('/api/analytics', readLimiter, authMiddleware, requireSubscription('pro'), analyticsRoutes);
+
+// ── Advisory Marketplace — public reads + auth bookings ───────────────────
+app.use('/api/advisors', readLimiter, advisorsRoutes);
+app.use('/api/consultations', writeLimiter, consultationsRoutes);
 
 // ── Admin — 20 req / min ─────────────────────────────────────────────
 app.use('/metrics', adminLimiter, metricsRoutes);
@@ -447,6 +457,7 @@ async function start(): Promise<http.Server> {
   configureMarketStack({ marketstackKey: env.marketstackKey });
   configureCommodityApi({ commodityApiKey: env.commodityApiKey });
   configureBondApi({ fredApiKey: env.fredApiKey });
+  configureEconomicCalendarApi({ fmpApiKey: env.fmpApiKey });
   configureTelegramBot({ token: env.telegramBotToken });
 
   const missingVars = validateRequiredEnv();

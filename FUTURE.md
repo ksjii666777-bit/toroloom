@@ -9,22 +9,22 @@
 ### 1.1 Course Ecosystem
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| **Interactive Video Lessons** | High | Embed video players with transcripts, bookmarks, and speed controls |
-| **Progress Tracking** | High | Save lesson progress per user, show completion % per course |
-| **Quizzes & Assessments** | High | Auto-graded quizzes at end of each lesson with pass/fail thresholds |
-| **Certificates** | Medium | Generate shareable completion certificates (PDF via `expo-print`) |
-| **Learning Paths** | Medium | Curated sequences like "Beginners → Intermediate → Pro Trader" |
-| **User-Generated Courses** | Low | Let power users create and publish their own courses |
+| **Interactive Video Lessons** | High | ✅ Done — video players with transcripts, bookmarks, speed controls |
+| **Progress Tracking** | High | ✅ Done — lesson progress per user, completion % per course |
+| **Quizzes & Assessments** | High | ✅ Done — auto-graded quizzes with pass/fail thresholds |
+| **Certificates** | Medium | ✅ Done — shareable completion certificates (PDF via `expo-print`), grades + serial numbers |
+| **Learning Paths** | Medium | ✅ Done — curated sequences like "Beginners → Intermediate → Pro Trader" |
+| **User-Generated Courses** | Low | ✅ Done — CreateCourse + CommunityCourses + MyCourses screens |
 
 ### 1.2 Market Knowledge Hub
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| **Financial Calculators** | High | SIP calculator, Lumpsum calculator, EMI calculator, Tax calculator |
-| **Glossary** | High | Searchable financial terms with definitions and examples |
-| **News Feed** | Medium | Curated financial news with sentiment analysis |
-| **IPO Calendar** | Medium | Upcoming IPOs with details, GMP, and subscription status |
-| **Economic Calendar** | Medium | RBI meetings, inflation data, GDP releases |
-| **Company Fundamentals** | Medium | P/E, P/B, ROCE, debt ratios, quarterly results viewer |
+| **Financial Calculators** | High | ✅ Done — SIP, Lumpsum, EMI, Tax calculators |
+| **Glossary** | High | ✅ Done — searchable financial terms with definitions and examples |
+| **News Feed** | Medium | ✅ Done — financial news with sentiment analysis |
+| **IPO Calendar** | Medium | ✅ Done — IPO calendar/dashboard/detail with GMP + subscription status |
+| **Economic Calendar** | Medium | ✅ Done — RBI meetings, inflation, GDP, PMI releases (backend route `/api/economic-calendar` + full screen) |
+| **Company Fundamentals** | Medium | ✅ Done — P/E, P/B, ROCE, debt ratios, quarterly results viewer |
 
 ---
 
@@ -33,21 +33,21 @@
 ### 2.1 Social Features
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| **Post Reactions** | High | Like, bookmark, share posts beyond basic likes |
-| **User Profiles** | High | Public profiles with trade history, badges, follower count |
-| **Follow System** | Medium | Follow/unfollow traders and see their public activity |
-| **Feed Algorithm** | Medium | Smart feed sorting (trending, recent, popular) |
+| **Post Reactions** | High | ✅ Done — likes, bookmarks, shares |
+| **User Profiles** | High | ✅ Done — public profiles (TraderProfile) with trade history, badges, follower count |
+| **Follow System** | Medium | ✅ Done — follow/unfollow traders + copy trading |
+| **Feed Algorithm** | Medium | Smart feed sorting (trending, recent, popular) — partially done |
 | **Mentions & Notifications** | Medium | @mentions, reply notifications, post engagement alerts |
-| **Polls & Q&A** | Low | Community polls on market sentiment, Q&A threads |
+| **Polls & Q&A** | Low | ✅ Done — community polls on market sentiment (CreatePoll + Polls screens) |
 
 ### 2.2 Social Trading (Copy Trading)
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| **Top Traders Leaderboard** | High | Ranking by returns, consistency, risk score |
-| **Copy Portfolio** | High | Automatically mirror top traders' portfolios proportionally |
-| **Trade Visibility** | Medium | Public trade feed with P&L, entry/exit, strategy notes |
-| **Performance Analytics** | Medium | Sharpe ratio, max drawdown, win rate for public profiles |
-| **Revenue Share** | Low | Profit-sharing model for signal providers |
+| **Top Traders Leaderboard** | High | ✅ Done — ranking by returns, consistency, risk score |
+| **Copy Portfolio** | High | ✅ Done — automatically mirror top traders' portfolios proportionally |
+| **Trade Visibility** | Medium | ✅ Done — public trade feed with P&L, entry/exit, strategy notes |
+| **Performance Analytics** | Medium | ✅ Done — Sharpe ratio, max drawdown, win rate (CopyAnalytics) |
+| **Revenue Share** | Low | ✅ Done — profit-sharing dashboard (RevenueDashboard) |
 
 ---
 
@@ -58,7 +58,7 @@
 |---------|----------|-------------|
 | **Tax Reporting** | High | Capital gains summary (short-term/long-term) with estimated tax liability |
 | **Sector Allocation** | High | Pie chart showing sector-wise distribution with rebalancing suggestions |
-| **Dividend Tracker** | Medium | Upcoming and historical dividend income calendar |
+| **Dividend Tracker** | Medium | ✅ Done — upcoming + historical dividend income (backend `/api/dividends`) |
 | **Monte Carlo Simulation** | Medium | Portfolio risk simulation with 10k scenarios |
 | **Correlation Matrix** | Medium | Asset-to-asset correlation heatmap |
 | **Factor Analysis** | Medium | Exposures to momentum, value, size, volatility factors |
@@ -102,7 +102,7 @@
 | **UPI Autopay** | High | Recurring payments via UPI (Razorpay/PhonePe) |
 | **Card Payments** | High | Credit/debit card via Stripe or Razorpay |
 | **Trial Periods** | Medium | 7-day free trial for Pro tier |
-| **Coupon System** | Medium | Discount codes, festive offers, referral bonuses |
+| **Coupon System** | Medium | ✅ Done — discount codes, festive offers, referral bonuses (backend `/api/coupons`) |
 
 ---
 
@@ -125,7 +125,7 @@
 | **Historical Data API** | Medium | 10+ years of daily/minute data for backtesting |
 | **Options Chain** | Medium | Real-time options data with Greeks (delta, gamma, theta, vega) |
 | **Futures Curve** | Low | Futures price curve across expiries |
-| **Global Markets** | Low | US (S&P 500, NASDAQ), crypto prices |
+| **Global Markets** | Low | ✅ Done — US (S&P 500, NASDAQ), crypto, global stocks (backend `/api/global-stocks`) |
 
 ---
 
@@ -209,13 +209,13 @@
 ### 8.3 New Screens & Features
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| **IPO Dashboard** | Medium | Active IPOs, apply via UPI, allotment status |
-| **NFO Dashboard** | Low | New Fund Offers from AMCs |
-| **Bond Dashboard** | Low | Government and corporate bond yields |
-| **Currency Markets** | Low | USD/INR, EUR/INR real-time rates |
-| **Commodity Markets** | Low | Gold, Silver, Crude prices |
+| **IPO Dashboard** | Medium | ✅ Done — active IPOs, apply via UPI, allotment status |
+| **NFO Dashboard** | Low | ✅ Done — New Fund Offers from AMCs (NFO screens) |
+| **Bond Dashboard** | Low | ✅ Done — government + corporate bond yields (backend `/api/bonds`) |
+| **Currency Markets** | Low | ✅ Done — USD/INR, EUR/INR real-time rates (backend `/api/forex`) |
+| **Commodity Markets** | Low | ✅ Done — Gold, Silver, Crude prices (backend `/api/commodities`) |
 | **Tax Harvesting Tool** | Medium | Auto-detect loss-harvesting opportunities |
-| **SIP Management** | High | Create, modify, pause SIPs in mutual funds |
+| **SIP Management** | High | ✅ Done — create, modify, pause SIPs + step-up |
 | **Step-Up SIP** | Medium | Auto-increase SIP amount annually |
 
 ---
@@ -238,7 +238,7 @@
 
 ### 9.3 Long-Term (6-12 Months)
 - [ ] **Wealth management** — Goal-based investing, retirement planning
-- [ ] **Advisory marketplace** — SEBI-registered advisors on platform
+- [x] **Advisory marketplace** — SEBI-registered advisors on platform (Phase 1 MVP done: directory + search, profiles with SEBI badge, slot booking + cancel, consultations, reviews, admin approval — backend `/api/advisors` + `/api/consultations`; Razorpay checkout UI pending)
 - [ ] **API marketplace** — Third-party integrations via open API
 - [ ] **International markets** — US stocks, ETFs (via finvasia/Vested)
 - [ ] **Neobank integration** — Savings account, FD, insurance cross-sell
@@ -280,4 +280,4 @@
 
 ---
 
-*Last updated: June 15, 2026*
+*Last updated: August 15, 2026*

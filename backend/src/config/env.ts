@@ -167,6 +167,9 @@ export const env = {
   /** NewsAPI.org key for financial news articles */
   newsApiKey: process.env.NEWSAPI_KEY || '',
 
+  /** FMP (Financial Modeling Prep) key for the economic calendar API (https://financialmodelingprep.com) */
+  fmpApiKey: process.env.FMP_API_KEY || '',
+
   /** CORS allowed origins. Comma-separated list. Default: * (dev only — set in production!) */
   corsOrigin: process.env.CORS_ORIGIN || '*',
 

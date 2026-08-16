@@ -12,6 +12,7 @@ import ai from './ai';
 import alerts from './alerts';
 import apiKeyManagement from './apiKeyManagement';
 import achievements from './achievements';
+import advisory from './advisory';
 import app from './app';
 import auth from './auth';
 import bondDashboard from './bondDashboard';
@@ -122,6 +123,7 @@ const hi = {
   alerts,
   apiKeyManagement,
   achievements,
+  advisory,
   app,
   auth,
   bondDashboard,
