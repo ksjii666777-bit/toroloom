@@ -27,7 +27,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
-import { mockEarningsData } from '../../constants/mockData';
+import { earningsApi } from '../../services/api/earnings';
 import type {EarningsSummary, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AppScreen from '../../components/ui/AppScreen';
@@ -237,11 +237,22 @@ export default function EarningsCallScreen({ navigation }: NativeStackScreenProp
     history: true,
   });
 
-  const earningsData = useMemo(() => mockEarningsData, []);
+  const [earningsData, setEarningsData] = useState<EarningsSummary[]>([]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 400);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    async function load() {
+      try {
+        const { data } = await earningsApi.getEarningsSummaries();
+        if (!cancelled) setEarningsData(data);
+      } catch {
+        // Fallback handled inside earningsApi
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
   }, []);
   const selectedEarnings = earningsData.find(e => e.symbol === selectedSymbol);
   const companies = useMemo(() =>
