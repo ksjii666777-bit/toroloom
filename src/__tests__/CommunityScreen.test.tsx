@@ -47,7 +47,7 @@ beforeEach(() => {
     ],
     likedPostIds: [],
     bookmarkedPostIds: [],
-    feedSort: 'latest',
+    feedSort: 'hot',
     isRefreshing: false,
     loading: false,
     error: null,

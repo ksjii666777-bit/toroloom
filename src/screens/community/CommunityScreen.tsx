@@ -33,6 +33,8 @@ import { formatTimeAgo } from '../../utils/formatters';
 import { triggerHaptic } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { showShareSheet, ShareContent } from '../../utils/share';
+import { parseMentions } from '../../utils/mentions';
+import { communityApi, UserSearchResult } from '../../services/api/community';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 import AppScreen from '../../components/ui/AppScreen';
@@ -88,6 +90,39 @@ function LikeButton({
   );
 }
 
+// ─── Mention-Aware Text ─────────────────────────────────────────────────────
+
+function MentionText({
+  content,
+  colors,
+  onMentionPress,
+}: {
+  content: string;
+  colors: any;
+  onMentionPress: (username: string) => void;
+}) {
+  const segments = useMemo(() => parseMentions(content), [content]);
+
+  return (
+    <Text style={{ lineHeight: 22 }}>
+      {segments.map((seg, i) => {
+        if (seg.type === 'mention') {
+          return (
+            <Text
+              key={`m-${i}`}
+              style={{ color: colors.primary, fontWeight: '600' }}
+              onPress={() => onMentionPress(seg.username)}
+            >
+              {seg.text}
+            </Text>
+          );
+        }
+        return <Text key={`t-${i}`}>{seg.text}</Text>;
+      })}
+    </Text>
+  );
+}
+
 // ─── Post Card ──────────────────────────────────────────────────────────────
 
 function PostCard({
@@ -99,6 +134,7 @@ function PostCard({
   onUserPress,
   onPostPress,
   onShare,
+  onMentionPress,
   colors,
   styles,
 }: {
@@ -110,6 +146,7 @@ function PostCard({
   onUserPress: () => void;
   onPostPress: () => void;
   onShare: () => void;
+  onMentionPress: (username: string) => void;
   colors: any;
   styles: any;
 }) {
@@ -154,7 +191,9 @@ function PostCard({
       </View>
 
       {/* Content */}
-      <Text style={styles.postContent}>{post.content}</Text>
+      <View style={styles.postContent}>
+        <MentionText content={post.content} colors={colors} onMentionPress={onMentionPress} />
+      </View>
 
       {/* Tags */}
       {post.tags.length > 0 && (
@@ -196,6 +235,9 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
 
   const [showPostInput, setShowPostInput] = useState(false);
   const [postContent, setPostContent] = useState('');
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionSuggestions, setMentionSuggestions] = useState<UserSearchResult[]>([]);
+  const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
 
   // ── Handlers ──────────────────────────────────────────────────────────
 
@@ -204,9 +246,43 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
       addPost(postContent.trim(), []);
       setPostContent('');
       setShowPostInput(false);
+      setShowMentionSuggestions(false);
       notificationAsync(NotificationFeedbackType.Success);
     }
   }, [postContent, addPost]);
+
+  const handleContentChange = useCallback(async (text: string) => {
+    setPostContent(text);
+
+    // Detect @mention trigger
+    const lastAtIndex = text.lastIndexOf('@');
+    if (lastAtIndex >= 0) {
+      const afterAt = text.slice(lastAtIndex + 1);
+      // Only trigger if we're at the end of a word (no space after @query yet)
+      const hasSpaceAfterQuery = /\s/.test(afterAt);
+      if (!hasSpaceAfterQuery && afterAt.length > 0) {
+        setMentionQuery(afterAt);
+        setShowMentionSuggestions(true);
+        try {
+          const results = await communityApi.searchUsers(afterAt);
+          setMentionSuggestions(results.slice(0, 5));
+        } catch {
+          setMentionSuggestions([]);
+        }
+        return;
+      }
+    }
+    setShowMentionSuggestions(false);
+    setMentionSuggestions([]);
+  }, []);
+
+  const handleMentionSelect = useCallback((user: UserSearchResult) => {
+    const lastAtIndex = postContent.lastIndexOf('@');
+    const beforeAt = postContent.slice(0, lastAtIndex);
+    setPostContent(`${beforeAt}@${user.name} `);
+    setShowMentionSuggestions(false);
+    setMentionSuggestions([]);
+  }, [postContent]);
 
   const handleLike = useCallback((postId: string) => {
     likePost(postId);
@@ -271,10 +347,35 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
               placeholder={t('community.shareThoughts')}
               placeholderTextColor={colors.textMuted}
               value={postContent}
-              onChangeText={setPostContent}
+              onChangeText={handleContentChange}
               multiline
               autoFocus
             />
+            {/* @Mention Autocomplete Suggestions */}
+            {showMentionSuggestions && mentionSuggestions.length > 0 && (
+              <View style={styles.mentionSuggestions}>
+                {mentionSuggestions.map(user => (
+                  <Pressable
+                    key={user.id}
+                    style={styles.mentionItem}
+                    onPress={() => handleMentionSelect(user)}
+                  >
+                    <View style={[styles.mentionAvatar, { backgroundColor: colors.primary + '30' }]}>
+                      <Text style={{ color: colors.primary, ...FONTS.bold, fontSize: FONTS.size.sm }}>{user.name[0]}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.sm, color: colors.text }}>{user.name}</Text>
+                        {user.isVerified && (
+                          <Ionicons name="checkmark-circle" size={12} color="#00E676" />
+                        )}
+                      </View>
+                    </View>
+                    <Ionicons name="at" size={16} color={colors.textMuted} />
+                  </Pressable>
+                ))}
+              </View>
+            )}
             <View style={styles.createPostActions}>
               <View style={styles.tagRow}>
                 {['Stocks', 'Analysis', 'Question', 'Tips'].map(tag => (
@@ -351,6 +452,7 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
             onUserPress={() => handleUserPress(post.userId, post.userName)}
             onPostPress={() => handlePostPress(post.id)}
             onShare={() => handleShare(post)}
+            onMentionPress={(username) => navigation.navigate('TraderProfile', { traderId: username })}
             colors={colors}
             styles={styles}
           />
@@ -435,6 +537,29 @@ const createStyles = (colors: any) =>
       flexDirection: 'row',
       justifyContent: 'flex-end',
       gap: SPACING.sm,
+    },
+    mentionSuggestions: {
+      marginTop: SPACING.sm,
+      backgroundColor: colors.bgCard,
+      borderRadius: BORDER_RADIUS.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: 'hidden',
+    },
+    mentionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      gap: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.divider,
+    },
+    mentionAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     feedTabs: {
       flexDirection: 'row',
@@ -560,6 +685,7 @@ const createStyles = (colors: any) =>
       fontSize: FONTS.size.md,
       color: colors.text,
       lineHeight: 22,
+      marginTop: SPACING.sm,
     },
     postTags: {
       flexDirection: 'row',

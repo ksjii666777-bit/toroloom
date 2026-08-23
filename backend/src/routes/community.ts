@@ -9,11 +9,31 @@ router.get('/posts', optionalAuth, async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const tag = req.query.tag as string;
+  const sort = (req.query.sort as string) || 'hot';
 
   let posts = await getPosts();
 
   if (tag) {
     posts = posts.filter(p => p.tags.some(t => t.toLowerCase() === tag.toLowerCase()));
+  }
+
+  // ── Server-side sorting ────────────────────────────────────────────
+  if (sort === 'top') {
+    posts.sort((a, b) => b.likes - a.likes);
+  } else if (sort === 'new') {
+    posts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  } else {
+    // hot: engagement + time-decay (half-life = 6 hours)
+    const halfLifeMs = 6 * 60 * 60 * 1000;
+    posts.sort((a, b) => {
+      const engA = a.likes * 0.6 + a.comments * 0.4;
+      const engB = b.likes * 0.6 + b.comments * 0.4;
+      const ageA = Date.now() - new Date(a.timestamp).getTime();
+      const ageB = Date.now() - new Date(b.timestamp).getTime();
+      const scoreA = (engA + 0.01) * Math.pow(0.5, ageA / halfLifeMs);
+      const scoreB = (engB + 0.01) * Math.pow(0.5, ageB / halfLifeMs);
+      return scoreB - scoreA;
+    });
   }
 
   const start = (page - 1) * limit;

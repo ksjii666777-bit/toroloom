@@ -4,6 +4,8 @@ import { mockPosts } from '../constants/mockData';
 import { communityApi } from '../services/api/community';
 import { offlineCache } from '../services/offlineCache';
 import { registerCacheWarming } from '../services/cacheWarmingService';
+import { extractMentionedUsers } from '../utils/mentions';
+import { sendMentionNotification, sendReplyNotification } from '../services/notificationService';
 import { log } from '../utils/logger';
 
 /** Monotonic counter — keeps locally-created post/comment ids unique even when
@@ -12,6 +14,26 @@ let _communityIdSeq = 0;
 const genCommunityId = (prefix: string) => `${prefix}_${Date.now()}_${_communityIdSeq++}`;
 
 export type FeedSort = 'hot' | 'new' | 'top';
+
+// ─── Hot Algorithm: time-decay scoring ─────────────────────────────────────
+// Posts lose ~50% of their "score" every 6 hours (half-life = 6h).
+// score = (likes × 0.6 + comments × 0.4) × recencyMultiplier
+// recencyMultiplier = 2 ^ (-hoursAged / 6)
+//
+// This ensures fresh, engaging content surfaces while older viral
+// posts naturally slide down.
+// ────────────────────────────────────────────────────────────────────────────
+
+const HOT_HALF_LIFE_HOURS = 6;
+
+function hotScore(post: { likes: number; comments: number; timestamp: string }): number {
+  const engagement = post.likes * 0.6 + post.comments * 0.4;
+  const hoursAged = (Date.now() - new Date(post.timestamp).getTime()) / (1000 * 60 * 60);
+  const recencyMultiplier = Math.pow(0.5, hoursAged / HOT_HALF_LIFE_HOURS);
+  // Ensure even zero-engagement posts get a tiny base score so recency still
+  // matters as a tie-breaker.
+  return (engagement + 0.01) * recencyMultiplier;
+}
 
 interface CommunityState {
   posts: CommunityPost[];
@@ -50,7 +72,8 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   fetchPosts: async (page = 1, tag?: string) => {
     set({ isLoading: true });
     try {
-      const data = await communityApi.getPosts(page, 10, tag);
+      const { feedSort } = get();
+      const data = await communityApi.getPosts(page, 10, tag, feedSort);
       set({
         posts: data.posts,
         totalPages: data.totalPages,
@@ -75,7 +98,8 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   refreshPosts: async () => {
     set({ isRefreshing: true });
     try {
-      const data = await communityApi.getPosts(1, 10);
+      const { feedSort } = get();
+      const data = await communityApi.getPosts(1, 10, undefined, feedSort);
       set({
         posts: data.posts,
         totalPages: data.totalPages,
@@ -93,40 +117,61 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
       } else if (feedSort === 'new') {
         sorted.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       } else {
-        // hot: mix of recency + likes
-        sorted.sort((a, b) => (b.likes * 0.6 + b.comments * 0.4) - (a.likes * 0.6 + a.comments * 0.4));
+        // hot: time-decay scoring
+        sorted.sort((a, b) => hotScore(b) - hotScore(a));
       }
       set({ posts: sorted, isRefreshing: false });
     }
   },
 
   addPost: async (content, tags) => {
+    const postAuthor = 'Rahul Sharma';
+
+    let postId: string;
     try {
       const created = await communityApi.createPost(content, tags);
+      postId = created.id;
       set(state => ({
         posts: [created, ...state.posts],
       }));
       // Cache after mutation
       await offlineCache.save('community', { posts: get().posts, totalPages: get().totalPages });
-      return;
     } catch {
       // Backend unavailable — create locally
+      postId = genCommunityId('p');
+      set(state => ({
+        posts: [{
+          id: postId,
+          userId: 'user_1',
+          userName: postAuthor,
+          content,
+          likes: 0,
+          comments: 0,
+          timestamp: new Date().toISOString(),
+          tags,
+        }, ...state.posts],
+      }));
+      // Cache after local mutation
+      await offlineCache.save('community', { posts: get().posts, totalPages: get().totalPages });
     }
 
-    set(state => ({
-      posts: [{
-        id: genCommunityId('p'),
-        userId: 'user_1',
-        userName: 'Rahul Sharma',
-        content,
-        likes: 0,
-        comments: 0,
-        timestamp: new Date().toISOString(),
-        tags,
-      }, ...state.posts],
-    }));
-    // Cache after local mutation
-    await offlineCache.save('community', { posts: get().posts, totalPages: get().totalPages });
+    // ── Send @mention notifications ──────────────────────────────────
+    try {
+      const mentionedUsernames = extractMentionedUsers(content);
+      if (mentionedUsernames.length > 0) {
+        log.info(`[Community] Post ${postId} mentions: ${mentionedUsernames.join(', ')}`);
+        // Fire a local push notification for each mentioned user.
+        // In production this would be handled server-side; here we fire
+        // a local notification as a best-effort UX signal.
+        for (const username of mentionedUsernames) {
+          await sendMentionNotification(postAuthor, postId, content);
+          // Only send one notification per post to avoid spam
+          break;
+        }
+      }
+    } catch {
+      // Mention notifications are best-effort — don't break the post flow
+    }
   },
 
   likePost: async (postId) => {
@@ -172,8 +217,8 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
     } else if (sort === 'new') {
       sorted.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     } else {
-      // hot: mix of recency + engagement
-      sorted.sort((a, b) => (b.likes * 0.6 + b.comments * 0.4) - (a.likes * 0.6 + a.comments * 0.4));
+      // hot: time-decay scoring
+      sorted.sort((a, b) => hotScore(b) - hotScore(a));
     }
     set({ posts: sorted });
   },
@@ -205,11 +250,12 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   },
 
   addComment: async (postId, content) => {
+    const commentAuthor = 'Rahul Sharma';
     const newComment: Comment = {
       id: genCommunityId(`c_${postId}`),
       postId,
       userId: 'user_1',
-      userName: 'Rahul Sharma',
+      userName: commentAuthor,
       content,
       timestamp: new Date().toISOString(),
     };
@@ -223,6 +269,31 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
         p.id === postId ? { ...p, comments: p.comments + 1 } : p
       ),
     }));
+
+    // ── Send reply notification to post author ───────────────────────
+    try {
+      const post = get().posts.find(p => p.id === postId);
+      if (post && post.userId !== 'user_1') {
+        // Don't notify yourself when you reply to your own post
+        await sendReplyNotification(commentAuthor, postId, content);
+      }
+    } catch {
+      // Reply notifications are best-effort
+    }
+
+    // ── Send @mention notifications from comment ─────────────────────
+    try {
+      const mentionedUsernames = extractMentionedUsers(content);
+      if (mentionedUsernames.length > 0) {
+        log.info(`[Community] Comment on ${postId} mentions: ${mentionedUsernames.join(', ')}`);
+        for (const _username of mentionedUsernames) {
+          await sendMentionNotification(commentAuthor, postId, content);
+          break; // One notification per comment
+        }
+      }
+    } catch {
+      // Mention notifications are best-effort
+    }
   },
 }));
 
