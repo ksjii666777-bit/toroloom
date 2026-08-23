@@ -18,6 +18,8 @@ export interface NotificationPreferences {
   educationalReminders: boolean;
   systemUpdates: boolean;
   sentimentAlerts: boolean;
+  mentionNotifications: boolean;
+  replyNotifications: boolean;
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   quietHoursStart: string | null;
@@ -31,6 +33,8 @@ const defaultPreferences: NotificationPreferences = {
   educationalReminders: true,
   systemUpdates: true,
   sentimentAlerts: true,
+  mentionNotifications: true,
+  replyNotifications: true,
   soundEnabled: true,
   vibrationEnabled: true,
   quietHoursStart: null,
@@ -669,6 +673,8 @@ function getPreferenceKeyForType(type: AppNotification['type']): keyof Notificat
     case 'trade': return 'tradeConfirmations';
     case 'educational': return 'educationalReminders';
     case 'sentiment_alert': return 'sentimentAlerts';
+    case 'mention': return 'mentionNotifications';
+    case 'reply': return 'replyNotifications';
     case 'system':
     case 'news':
       return 'systemUpdates';

@@ -96,8 +96,8 @@ describe('Notification Service — setupChannels', () => {
     vi.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
     await setupChannels();
 
-    // 7 channels: price_alerts, trade_confirmations, educational_reminders, system_notifications, portfolio_alerts, sentiment_alerts, course_review
-    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledTimes(7);
+    // 8 channels: price_alerts, trade_confirmations, educational_reminders, system_notifications, portfolio_alerts, sentiment_alerts, course_review, community_mentions
+    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledTimes(8);
     expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledWith(
       'price_alerts',
       expect.objectContaining({ id: 'price_alerts' }),

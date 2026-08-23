@@ -260,6 +260,12 @@ const CHANNELS = {
     description: 'Notifications when your submitted course is approved or rejected',
     get importance() { return getImportanceValue('HIGH'); },
   },
+  COMMUNITY: {
+    id: 'community_mentions',
+    name: 'Community Mentions',
+    description: 'Notifications when someone mentions you in a community post',
+    get importance() { return getImportanceValue('DEFAULT'); },
+  },
 };
 
 async function setupChannels(): Promise<void> {
@@ -273,6 +279,7 @@ async function setupChannels(): Promise<void> {
       await N.setNotificationChannelAsync(CHANNELS.PORTFOLIO_ALERTS.id, CHANNELS.PORTFOLIO_ALERTS);
       await N.setNotificationChannelAsync(CHANNELS.SENTIMENT_ALERTS.id, CHANNELS.SENTIMENT_ALERTS);
       await N.setNotificationChannelAsync(CHANNELS.COURSE_REVIEW.id, CHANNELS.COURSE_REVIEW);
+      await N.setNotificationChannelAsync(CHANNELS.COMMUNITY.id, CHANNELS.COMMUNITY);
     }
   }
 }
@@ -389,6 +396,8 @@ function getChannelForType(type: AppNotification['type']): string | undefined {
     case 'portfolio_alert': return CHANNELS.PORTFOLIO_ALERTS.id;
     case 'sentiment_alert': return CHANNELS.SENTIMENT_ALERTS.id;
     case 'course_review': return CHANNELS.COURSE_REVIEW.id;
+    case 'mention': return CHANNELS.COMMUNITY.id;
+    case 'reply': return CHANNELS.COMMUNITY.id;
     case 'system':
     case 'news':
       return CHANNELS.SYSTEM.id;
@@ -407,6 +416,8 @@ export function getScreenForType(type: AppNotification['type']): string {
     case 'portfolio_alert': return 'Portfolio';
     case 'sentiment_alert': return 'SentimentAnalysis';
     case 'course_review': return 'MyCourses';
+    case 'mention': return 'Community';
+    case 'reply': return 'Community';
     default: return 'Home';
   }
 }
@@ -555,6 +566,46 @@ export async function sendSystemNotification(
     message,
     read: false,
     timestamp: new Date().toISOString(),
+  });
+}
+
+// =============================================================================
+// Community Mention Notification
+// =============================================================================
+
+export async function sendMentionNotification(
+  mentionerName: string,
+  postId: string,
+  preview: string,
+): Promise<string | undefined> {
+  return sendLocalNotification({
+    id: genNotificationId('mnt'),
+    type: 'mention',
+    title: `💬 ${mentionerName} mentioned you`,
+    message: preview.length > 80 ? preview.slice(0, 77) + '...' : preview,
+    read: false,
+    timestamp: new Date().toISOString(),
+    data: { postId, mentionerName },
+  });
+}
+
+// =============================================================================
+// Community Reply Notification
+// =============================================================================
+
+export async function sendReplyNotification(
+  commenterName: string,
+  postId: string,
+  commentPreview: string,
+): Promise<string | undefined> {
+  return sendLocalNotification({
+    id: genNotificationId('rpl'),
+    type: 'reply',
+    title: `💬 ${commenterName} replied to your post`,
+    message: commentPreview.length > 80 ? commentPreview.slice(0, 77) + '...' : commentPreview,
+    read: false,
+    timestamp: new Date().toISOString(),
+    data: { postId, commenterName },
   });
 }
 

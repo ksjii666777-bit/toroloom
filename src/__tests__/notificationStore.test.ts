@@ -51,6 +51,8 @@ const defaultPrefs: NotificationPreferences = {
   educationalReminders: true,
   systemUpdates: true,
   sentimentAlerts: true,
+  mentionNotifications: true,
+  replyNotifications: true,
   soundEnabled: true,
   vibrationEnabled: true,
   quietHoursStart: null,
