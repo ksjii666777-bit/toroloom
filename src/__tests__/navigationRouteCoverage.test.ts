@@ -88,7 +88,7 @@ describe('AppNavigator route ↔ param-list coverage', () => {
     // Route names must be unique — a duplicated registration is a bug.
     expect(new Set(stackScreens).size).toBe(stackScreens.length);
     // Tab order matches the registrations in AppNavigator.tsx.
-    expect(tabScreens).toEqual(['More', 'Home', 'Markets', 'Portfolio', 'Watchlist']);
+    expect(tabScreens).toEqual(['Home', 'Markets', 'Portfolio', 'Watchlist', 'More']);
   });
 
   it('every Stack.Screen route name exists in RootStackParamList', () => {

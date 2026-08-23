@@ -106,6 +106,10 @@ export class ApiError extends Error {
   }
 }
 
+/** Default fetch timeout (ms). Prevents indefinite hangs when the backend
+ *  is unreachable (e.g. on CI/local emulator with no backend).              */
+const FETCH_TIMEOUT_MS = 15_000;
+
 async function request<T>(
   method: string,
   path: string,
@@ -121,11 +125,25 @@ async function request<T>(
     throw new ApiError(0, { error: 'API base URL not configured. Call configureApi() first.' });
   }
 
-  const res = await fetch(`${baseUrl}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(`${baseUrl}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw new ApiError(0, { error: `Request timed out after ${FETCH_TIMEOUT_MS / 1000}s — backend may be unreachable.` });
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 
   // 204 No Content
   if (res.status === 204) return undefined as unknown as T;

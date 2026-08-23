@@ -202,7 +202,11 @@ export default function AvatarWidget() {
       style={[
         styles.container,
         {
-          bottom: 76 + insets.bottom,
+          // The widget rests at slideUp=80 (translateY), which pushes it 80px
+          // below this offset — add that back so the avatar sits 24px above
+          // the tab bar instead of overlapping it (overlap blocks taps on the
+          // rightmost tab, e.g. tab-more).
+          bottom: 156 + insets.bottom,
         },
         slideUpStyle,
       ]}

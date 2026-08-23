@@ -71,6 +71,7 @@ import economicCalendarRoutes from './routes/economicCalendar';
 import telegramRoutes from './routes/telegram';
 import dividendRoutes from './routes/dividends';
 import fundamentalsRoutes from './routes/fundamentals';
+import earningsRoutes from './routes/earnings';
 import brokerProxyRoutes from './routes/brokerProxy';
 import socialRoutes from './routes/social';
 import kycRoutes from './routes/kyc';
@@ -230,6 +231,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 // ── Reads — 200 req / min ────────────────────────────────────────────
 app.use('/api/market', readLimiter, marketRoutes);
 app.use('/api/market/fundamentals', authMiddleware, fundamentalsRoutes);
+app.use('/api/earnings', readLimiter, earningsRoutes);
 app.use('/api/portfolio', readLimiter, portfolioRoutes);
 app.use('/api/watchlist', readLimiter, watchlistRoutes);
 app.use('/api/mutual-funds', readLimiter, mutualFundsRoutes);
