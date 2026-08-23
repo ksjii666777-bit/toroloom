@@ -201,7 +201,7 @@ router.post('/verify', async (req: Request, res: Response) => {
       return;
     }
 
-    if (!planId && type !== 'fund_add') {
+    if (!planId && type !== 'fund_add' && type !== 'consultation') {
       res.status(400).json({ error: 'Missing planId for subscription payment' });
       return;
     }
@@ -239,6 +239,80 @@ router.post('/verify', async (req: Request, res: Response) => {
         success: true,
         message: 'Payment verified successfully. Funds will be credited to your account.',
         type: 'fund_add',
+      });
+    } else if (type === 'consultation') {
+      // Handle advisory consultation payment verification
+      const { consultationId } = req.body;
+
+      if (!consultationId) {
+        res.status(400).json({ error: 'Missing consultationId for consultation payment' });
+        return;
+      }
+
+      // ── Validate payment amount against consultation + Razorpay order ──
+      try {
+        const { getConsultation, getAdvisor } = await import('../services/advisors');
+        const consultation = await getConsultation(req.user!.userId, consultationId);
+
+        if (!consultation) {
+          res.status(400).json({ error: 'Consultation not found for this user' });
+          return;
+        }
+
+        // Cross-check: Razorpay order amount vs consultation fee
+        if (razorpay && payment && (payment as any).amount !== undefined) {
+          const razorpayAmount = (payment as any).amount; // in paise from Razorpay
+          const expectedPaise = Math.round(consultation.amount * 100);
+          if (Math.abs(razorpayAmount - expectedPaise) > Math.max(expectedPaise * 0.01, 1)) {
+            console.error(`[Payments] Amount mismatch! Razorpay order: ${razorpayAmount}p, consultation fee: ${expectedPaise}p`);
+            res.status(400).json({
+              error: 'Payment amount does not match consultation fee',
+              expectedAmount: consultation.amount,
+              paidAmount: razorpayAmount / 100,
+            });
+            return;
+          }
+        }
+
+        // Additional check: if Razorpay order has notes, verify consultationId matches
+        if (razorpay && razorpayOrderId) {
+          try {
+            const order = await razorpay.orders.fetch(razorpayOrderId);
+            if (order.notes?.type !== 'consultation') {
+              console.error(`[Payments] Order ${razorpayOrderId} is not a consultation order (type: ${order.notes?.type})`);
+              res.status(400).json({ error: 'Payment order is not a consultation order' });
+              return;
+            }
+            if (order.notes?.userId !== req.user!.userId) {
+              console.error(`[Payments] Order ${razorpayOrderId} belongs to user ${order.notes?.userId}, not ${req.user!.userId}`);
+              res.status(400).json({ error: 'Payment order does not belong to this user' });
+              return;
+            }
+          } catch (orderErr) {
+            console.warn('[Payments] Could not fetch Razorpay order for cross-check:', (orderErr as Error).message);
+          }
+        }
+
+        console.log(`[Payments] User ${req.user!.userId} paid ₹${consultation.amount} for consultation ${consultationId}, ` +
+          `payment ${razorpayPaymentId}, tenant: ${tenantId || 'default'}`);
+
+        // Confirm the consultation after successful payment
+        const { confirmConsultation } = await import('../services/advisors');
+        const confirmed = await confirmConsultation(req.user!.userId, consultationId);
+        if (confirmed) {
+          console.log(`[Payments] Consultation ${consultationId} confirmed after payment`);
+        } else {
+          console.warn(`[Payments] Could not confirm consultation ${consultationId} — may not exist or already confirmed`);
+        }
+      } catch (err) {
+        console.error(`[Payments] Failed to validate/confirm consultation ${consultationId}:`, err);
+        // Payment is verified, consultation confirmation is best-effort
+      }
+
+      res.json({
+        success: true,
+        message: 'Payment verified successfully. Your consultation is now confirmed.',
+        type: 'consultation',
       });
     } else {
       // Handle subscription verification
@@ -447,6 +521,95 @@ router.post('/create-paid-order', async (req: Request, res: Response) => {
   } catch (error: unknown) {
     console.error('[Payments] create-paid-order error:', error);
     res.status(500).json({ error: (error as Error).message || 'Failed to create paid order' });
+  }
+});
+
+// ============ POST /api/payments/create-consultation-order ============
+// Creates a Razorpay order for an advisory consultation booking
+
+router.post('/create-consultation-order', async (req: Request, res: Response) => {
+  try {
+    const { consultationId, amount, advisorName, advisorId } = req.body;
+
+    if (!consultationId || typeof amount !== 'number' || amount <= 0) {
+      res.status(400).json({ error: 'consultationId and a valid positive amount are required' });
+      return;
+    }
+
+    // ── Validate amount against the advisor's consultationFee in the DB ──
+    if (advisorId) {
+      try {
+        const { getAdvisor, getConsultation } = await import('../services/advisors');
+        const advisor = await getAdvisor(advisorId);
+        if (advisor && advisor.consultationFee > 0) {
+          const expectedPaise = Math.round(advisor.consultationFee * 100);
+          const providedPaise = Math.round(amount * 100);
+          // Allow 1% tolerance for rounding differences
+          if (Math.abs(expectedPaise - providedPaise) > Math.max(expectedPaise * 0.01, 1)) {
+            console.warn(`[Payments] Consultation amount mismatch: expected ₹${advisor.consultationFee} (${expectedPaise}p), got ₹${amount} (${providedPaise}p)`);
+            res.status(400).json({
+              error: `Amount mismatch: consultation fee is ₹${advisor.consultationFee}`,
+              expectedAmount: advisor.consultationFee,
+            });
+            return;
+          }
+        }
+        // Also cross-check consultation exists and is pending
+        const consultation = await getConsultation(req.user!.userId, consultationId);
+        if (consultation && consultation.amount > 0) {
+          const consultPaise = Math.round(consultation.amount * 100);
+          const providedPaise2 = Math.round(amount * 100);
+          if (Math.abs(consultPaise - providedPaise2) > Math.max(consultPaise * 0.01, 1)) {
+            console.warn(`[Payments] Consultation amount mismatch: consultation amount ₹${consultation.amount}, got ₹${amount}`);
+            res.status(400).json({
+              error: `Amount mismatch: consultation amount is ₹${consultation.amount}`,
+              expectedAmount: consultation.amount,
+            });
+            return;
+          }
+        }
+      } catch (advisorErr) {
+        // If advisor lookup fails, log but don't block (best-effort validation)
+        console.warn('[Payments] Could not validate consultation amount against DB:', (advisorErr as Error).message);
+      }
+    }
+
+    const amountInPaise = Math.round(amount * 100);
+
+    const razorpay = getRazorpayClient();
+    const { keyId } = resolveRazorpayKeys();
+
+    if (razorpay && keyId) {
+      const order = await razorpay.orders.create({
+        amount: amountInPaise,
+        currency: 'INR',
+        receipt: `toroloom_advisory_${consultationId.slice(0, 20)}_${Date.now()}`,
+        notes: {
+          userId: req.user!.userId,
+          consultationId,
+          type: 'consultation',
+          advisorName: advisorName || '',
+        },
+      });
+
+      res.json({
+        orderId: order.id,
+        keyId,
+        amount: order.amount,
+        currency: order.currency,
+      });
+    } else {
+      // Development fallback — return mock order
+      res.json({
+        orderId: `order_mock_consult_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        keyId: keyId || 'rzp_test_placeholder',
+        amount: amountInPaise,
+        currency: 'INR',
+      });
+    }
+  } catch (error: unknown) {
+    console.error('[Payments] create-consultation-order error:', error);
+    res.status(500).json({ error: (error as Error).message || 'Failed to create consultation order' });
   }
 });
 

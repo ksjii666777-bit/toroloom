@@ -72,8 +72,9 @@ export const paymentsApi = {
     razorpayOrderId: string;
     razorpaySignature: string;
     planId?: string;
-    type?: 'subscription' | 'fund_add';
+    type?: 'subscription' | 'fund_add' | 'consultation';
     tenantId?: string;
+    consultationId?: string;
   }): Promise<VerifyPaymentResponse & { type?: string }> => {
     return api.post<VerifyPaymentResponse & { type?: string }>('/payments/verify', params);
   },
@@ -116,5 +117,16 @@ export const paymentsApi = {
     receipt?: string;
   }): Promise<CreateOrderResponse & { status: string }> => {
     return api.post<CreateOrderResponse & { status: string }>('/payments/create-paid-order', params);
+  },
+
+  /**
+   * Creates a Razorpay order for an advisory consultation booking.
+   */
+  createConsultationOrder: async (params: {
+    consultationId: string;
+    amount: number;
+    advisorName?: string;
+  }): Promise<CreateOrderResponse> => {
+    return api.post<CreateOrderResponse>('/payments/create-consultation-order', params);
   },
 };
