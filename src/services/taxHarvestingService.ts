@@ -3,73 +3,73 @@
  * Toroloom — Tax Harvesting Service
  * ============================================================================
  *
- * Analyzes trades and holdings to identify tax-loss harvesting opportunities
- * following Indian Income Tax rules (FY 2025-26):
+ * Core logic for tax-loss harvesting:
+ *   - Scan holdings for unrealized losses (harvest opportunities)
+ *   - Compute realized losses from closed trades
+ *   - Generate tax year summary with estimated savings
+ *   - Wash-sale detection (30-day rule)
+ *   - Priority scoring for opportunities
  *
- *   - STCG: 15% on equity held ≤12 months
- *   - LTCG: 10% on gains exceeding ₹1L, held >12 months
- *   - Short-term losses can offset both STCG and LTCG
- *   - Long-term losses can only offset LTCG
- *   - Unused losses carry forward for 8 assessment years
- *   - Wash sale: Buying same/substantially-identical security within 30 days
- *     before or after the sale disallows the loss
- *
+ * Indian tax rules (FY 2025-26):
+ *   - STCG: taxed at slab rate (~30% for most traders)
+ *   - LTCG: 12.5% above ₹1.25L exemption
+ *   - STCL offsets both STCG + LTCG
+ *   - LTCL offsets only LTCG
+ *   - Losses can be carried forward 8 assessment years
  * ============================================================================
  */
 
-import type { Holding, Trade, RealizedLoss, TaxHarvestOpportunity, TaxYearSummary } from '../types';
+import type {
+  Holding,
+  Trade,
+  TaxHarvestOpportunity,
+  RealizedLoss,
+  TaxYearSummary,
+} from '../types';
 
-// ==================== Constants ====================
+// ─── Tax Constants (FY 2025-26) ───────────────────────────────────────────
 
-const STCG_TAX_RATE = 0.15;
-const LTCG_TAX_RATE = 0.10;
-const LTCG_EXEMPTION = 100000;
-const LONG_TERM_THRESHOLD_DAYS = 365;
-const WASH_SALE_WINDOW_DAYS = 30;
+const STCG_RATE = 0.20; // 20% for listed equity (slab rate approximation)
+const LTCG_RATE = 0.125; // 12.5% for listed equity
+const LTCG_EXEMPTION = 125_000; // ₹1.25L exemption per year
+const LONG_TERM_DAYS = 365; // 1 year for equity
+const WASH_SALE_DAYS = 30; // 30-day wash sale window
+const CURRENT_FY = 'FY 2025-26';
 
-// ==================== Helpers ====================
+// ─── Helpers ───────────────────────────────────────────────────────────────
 
 function daysBetween(a: string, b: string): number {
-  const ms = new Date(b).getTime() - new Date(a).getTime();
-  return Math.max(0, Math.round(ms / 86400000));
+  const ms = Math.abs(new Date(b).getTime() - new Date(a).getTime());
+  return Math.floor(ms / (1000 * 60 * 60 * 24));
 }
 
-/** Infer sector from stock name (mirrors portfolioAnalyticsStore) */
-function inferSector(name: string): string {
-  const n = name.toLowerCase();
-  if (n.includes('bank') || n.includes('finance') || n.includes('bajaj') || n.includes('hdfc') || n.includes('icici')) return 'Finance';
-  if (n.includes('tech') || n.includes('consultancy') || n.includes('infosys') || n.includes('wipro') || n.includes('tcs')) return 'Technology';
-  if (n.includes('energy') || n.includes('reliance') || n.includes('oil') || n.includes('power')) return 'Energy';
-  if (n.includes('consumer') || n.includes('unilever') || n.includes('itc') || n.includes('hul')) return 'Consumer';
-  if (n.includes('auto') || n.includes('tata motor') || n.includes('maruti')) return 'Automobile';
-  if (n.includes('telecom') || n.includes('airtel') || n.includes('idea')) return 'Telecom';
-  if (n.includes('pharma') || n.includes('sun') || n.includes('cipla') || n.includes('dr. reddy')) return 'Pharma';
-  if (n.includes('metal') || n.includes('tata steel') || n.includes('jsw') || n.includes('hindalco')) return 'Metals';
-  return 'Others';
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
 
-// ==================== Core Analysis ====================
+// ─── Compute Realized Losses from Trades ──────────────────────────────────
 
-/**
- * Analyze all trades to extract realized losses (both STCG and LTCG).
- */
 export function computeRealizedLosses(trades: Trade[]): RealizedLoss[] {
   const losses: RealizedLoss[] = [];
+
+  // Group trades by symbol to match buy/sell pairs
+  const buyTrades = trades.filter(t => t.type === 'buy');
   const sellTrades = trades.filter(t => t.type === 'sell');
 
   for (const sell of sellTrades) {
-    // Find corresponding buy trade
-    const buyTrade = trades.find(t => t.symbol === sell.symbol && t.type === 'buy');
-    if (!buyTrade) continue;
+    // Find a matching buy trade (FIFO matching)
+    const matchingBuy = buyTrades.find(
+      b => b.stockId === sell.stockId && b.quantity >= sell.quantity
+    );
 
-    const holdDays = daysBetween(buyTrade.timestamp, sell.timestamp);
-    const avgBuyPrice = buyTrade.price;
-    const pnl = sell.quantity * (sell.price - avgBuyPrice);
+    if (!matchingBuy) continue;
 
-    // Only record losses
-    if (pnl >= 0) continue;
+    const pnl = (sell.price - matchingBuy.price) * sell.quantity;
+    if (pnl >= 0) continue; // Not a loss
 
-    const holdingType = holdDays <= LONG_TERM_THRESHOLD_DAYS ? 'short_term' : 'long_term';
+    const holdingDays = daysBetween(matchingBuy.timestamp, sell.timestamp);
+    const holdingType: 'short_term' | 'long_term' =
+      holdingDays > LONG_TERM_DAYS ? 'long_term' : 'short_term';
 
     losses.push({
       tradeId: sell.id,
@@ -78,18 +78,19 @@ export function computeRealizedLosses(trades: Trade[]): RealizedLoss[] {
       loss: Math.abs(pnl),
       date: sell.timestamp,
       holdingType,
-      holdingDays: holdDays,
+      holdingDays,
       quantity: sell.quantity,
     });
+
+    // Reduce available buy quantity
+    matchingBuy.quantity -= sell.quantity;
   }
 
-  // Sort by loss magnitude descending
   return losses.sort((a, b) => b.loss - a.loss);
 }
 
-/**
- * Identify tax-loss harvesting opportunities from current holdings.
- */
+// ─── Find Harvest Opportunities from Holdings ─────────────────────────────
+
 export function findHarvestOpportunities(
   holdings: Holding[],
   trades: Trade[],
@@ -98,209 +99,188 @@ export function findHarvestOpportunities(
   const now = new Date();
 
   for (const h of holdings) {
-    // Only look at holdings with unrealized losses
+    // Only consider holdings with unrealized losses
     if (h.pnl >= 0) continue;
 
-    // Find the first buy trade for this stock to determine holding period
-    const buyTrade = trades.find(t => t.symbol === h.symbol && t.type === 'buy');
-    const holdingDays = buyTrade ? daysBetween(buyTrade.timestamp, now.toISOString()) : 0;
-    const daysToLT = Math.max(0, LONG_TERM_THRESHOLD_DAYS - holdingDays);
-
-    const lossPercent = Math.abs(h.pnlPercent);
     const unrealizedLoss = Math.abs(h.pnl);
+    const lossPercent = h.pnlPercent; // Already negative
+    const holdingDays = daysBetween(h.buyPrice > 0 ? now.toISOString() : now.toISOString(), now.toISOString());
+    const daysToLongTerm = Math.max(0, LONG_TERM_DAYS - holdingDays);
 
-    // Determine harvesting recommendation
-    let recommendation: 'harvest_now' | 'wait_long_term' | 'avoid';
-    let offsetsType: 'long_term_only' | 'both';
-    let potentialTaxSaved: number;
+    // Check wash sale risk: look for a buy trade within 30 days before/after today
+    const washSaleRisk = checkWashSaleRisk(h.stockId, trades, now);
 
-    if (holdingDays <= LONG_TERM_THRESHOLD_DAYS) {
-      // Short-term holding: selling now realizes STCL which offsets both STCG and LTCG
-      recommendation = 'harvest_now';
-      offsetsType = 'both';
-      // Tax saved = loss * STCG rate (maximum benefit)
-      potentialTaxSaved = unrealizedLoss * STCG_TAX_RATE;
-    } else if (unrealizedLoss > 50000) {
-      // Already long-term: selling realizes LTCL which only offsets LTCG
-      recommendation = 'harvest_now';
-      offsetsType = 'long_term_only';
-      potentialTaxSaved = unrealizedLoss * LTCG_TAX_RATE;
-    } else {
+    // Calculate potential tax saved
+    const isLongTerm = holdingDays > LONG_TERM_DAYS;
+    const potentialTaxSaved = isLongTerm
+      ? unrealizedLoss * LTCG_RATE // Would offset LTCG
+      : unrealizedLoss * STCG_RATE; // Would offset STCG (higher rate)
+
+    // Determine recommendation
+    let recommendation: TaxHarvestOpportunity['recommendation'];
+    if (washSaleRisk) {
       recommendation = 'avoid';
-      offsetsType = 'long_term_only';
-      potentialTaxSaved = unrealizedLoss * LTCG_TAX_RATE;
+    } else if (daysToLongTerm <= 30 && unrealizedLoss < 5000) {
+      // Close to long-term + small loss → wait
+      recommendation = 'wait_long_term';
+    } else if (daysToLongTerm > 90 && unrealizedLoss > 10000) {
+      // Far from long-term + large loss → harvest now
+      recommendation = 'harvest_now';
+    } else if (unrealizedLoss > 15000) {
+      recommendation = 'harvest_now';
+    } else if (daysToLongTerm <= 60) {
+      recommendation = 'wait_long_term';
+    } else {
+      recommendation = 'harvest_now';
     }
 
-    // Check wash sale risk: did we buy this stock within the last 30 days?
-    const recentBuys = trades.filter(t =>
-      t.symbol === h.symbol && t.type === 'buy' &&
-      daysBetween(t.timestamp, now.toISOString()) <= WASH_SALE_WINDOW_DAYS
-    );
-    const washSaleRisk = recentBuys.length > 0;
+    // Priority score: higher = better opportunity
+    // Factors: loss magnitude, days to LTCG, wash sale risk
+    const lossScore = clamp((unrealizedLoss / 50000) * 50, 0, 50); // 50% weight
+    const timeScore = clamp(((LONG_TERM_DAYS - daysToLongTerm) / LONG_TERM_DAYS) * 30, 0, 30); // 30% weight
+    const washPenalty = washSaleRisk ? -30 : 0;
+    const priorityScore = Math.round(clamp(lossScore + timeScore + washPenalty + 20, 0, 100));
 
-    // Priority score: combination of loss size, tax saved, and urgency
-    const lossFactor = Math.min(unrealizedLoss / 50000, 1);
-    const taxFactor = Math.min(potentialTaxSaved / 10000, 1);
-    const urgencyFactor = recommendation === 'harvest_now' ? 1 : 0;
-    const washPenalty = washSaleRisk ? 0.3 : 0;
-    const priorityScore = Math.round(
-      (lossFactor * 40 + taxFactor * 35 + urgencyFactor * 25) * (1 - washPenalty),
-    );
+    // Determine which gains this loss can offset
+    const offsetsType: TaxHarvestOpportunity['offsetsType'] = isLongTerm
+      ? 'long_term_only'
+      : 'both';
 
     opportunities.push({
-      id: `ho_${h.id}`,
+      id: `th_${h.stockId}_${Date.now()}`,
       symbol: h.symbol,
       name: h.name,
-      unrealizedLoss: Math.round(unrealizedLoss * 100) / 100,
-      lossPercent: Math.round(lossPercent * 100) / 100,
+      unrealizedLoss,
+      lossPercent: Math.abs(lossPercent),
       quantity: h.quantity,
       buyPrice: h.buyPrice,
       currentPrice: h.currentPrice,
-      daysToLongTerm: daysToLT,
+      daysToLongTerm,
       holdingDays,
-      potentialTaxSaved: Math.round(potentialTaxSaved * 100) / 100,
+      potentialTaxSaved,
       offsetsType,
       washSaleRisk,
       recommendation,
       priorityScore,
-      sector: inferSector(h.name),
+      sector: guessSector(h.symbol),
     });
   }
 
   return opportunities.sort((a, b) => b.priorityScore - a.priorityScore);
 }
 
-/**
- * Compute comprehensive tax year summary with harvesting insights.
- */
+// ─── Compute Tax Year Summary ──────────────────────────────────────────────
+
 export function computeTaxYearSummary(
   holdings: Holding[],
   trades: Trade[],
 ): TaxYearSummary {
-  const opportunities = findHarvestOpportunities(holdings, trades);
   const realizedLosses = computeRealizedLosses(trades);
+  const opportunities = findHarvestOpportunities(holdings, trades);
 
-  // Compute current-year realized gains from sell trades
+  // Calculate gains from sell trades
+  const buyTrades = trades.filter(t => t.type === 'buy');
   const sellTrades = trades.filter(t => t.type === 'sell');
+
   let shortTermGains = 0;
   let longTermGains = 0;
 
   for (const sell of sellTrades) {
-    const buyTrade = trades.find(t => t.symbol === sell.symbol && t.type === 'buy');
-    if (!buyTrade) continue;
-    const holdDays = daysBetween(buyTrade.timestamp, sell.timestamp);
-    const avgBuyPrice = buyTrade.price;
-    const pnl = sell.quantity * (sell.price - avgBuyPrice);
+    const matchingBuy = buyTrades.find(
+      b => b.stockId === sell.stockId && b.quantity >= sell.quantity
+    );
+    if (!matchingBuy) continue;
 
-    if (holdDays <= LONG_TERM_THRESHOLD_DAYS) {
-      shortTermGains += pnl;
-    } else {
+    const pnl = (sell.price - matchingBuy.price) * sell.quantity;
+    if (pnl <= 0) continue; // Skip losses
+
+    const holdingDays = daysBetween(matchingBuy.timestamp, sell.timestamp);
+    if (holdingDays > LONG_TERM_DAYS) {
       longTermGains += pnl;
+    } else {
+      shortTermGains += pnl;
     }
+
+    matchingBuy.quantity -= sell.quantity;
   }
 
-  // Total realized losses
   const totalRealizedLosses = realizedLosses.reduce((s, r) => s + r.loss, 0);
 
-  // Calculate potential tax savings from harvesting opportunities
-  const harvestableOpportunities = opportunities.filter(o => o.recommendation === 'harvest_now');
-  const totalHarvestableLoss = harvestableOpportunities.reduce((s, o) => s + o.unrealizedLoss, 0);
-  const totalEstimatedTaxSavings = harvestableOpportunities.reduce((s, o) => s + o.potentialTaxSaved, 0);
+  // Taxable LTCG after ₹1.25L exemption
+  const taxableLtcg = Math.max(0, longTermGains - LTCG_EXEMPTION);
+  const ltcgTax = taxableLtcg * LTCG_RATE;
 
-  // Apply losses: ST losses offset gains first, then LT losses
-  const stLosses = realizedLosses.filter(r => r.holdingType === 'short_term')
+  // STCG tax (can be offset by STCL)
+  const stclTotal = realizedLosses
+    .filter(r => r.holdingType === 'short_term')
     .reduce((s, r) => s + r.loss, 0);
-  const ltLosses = realizedLosses.filter(r => r.holdingType === 'long_term')
+  const ltclTotal = realizedLosses
+    .filter(r => r.holdingType === 'long_term')
     .reduce((s, r) => s + r.loss, 0);
 
-  // ST losses can offset any gains; LT losses only offset LTCG
-  const remainingStGains = Math.max(0, shortTermGains - stLosses);
-  const remainingLtGainsBeforeLtLoss = Math.max(0, longTermGains - ltLosses);
+  const netStcg = Math.max(0, shortTermGains - stclTotal);
+  const stcgTax = netStcg * STCG_RATE;
 
-  // Still remaining LTCG? Apply ₹1L exemption
-  const taxableLtcg = Math.max(0, remainingLtGainsBeforeLtLoss - LTCG_EXEMPTION);
-  const remainingStLoss = Math.max(0, stLosses - shortTermGains);
-  const remainingLtLoss = Math.max(0, ltLosses - longTermGains);
+  const netLtcg = Math.max(0, taxableLtcg - ltclTotal);
+  const netLtcgTax = netLtcg * LTCG_RATE;
 
-  // Tax liability after harvesting
-  const stcgTax = Math.max(0, remainingStGains) * STCG_TAX_RATE;
-  const ltcgTax = taxableLtcg * LTCG_TAX_RATE;
-  const estimatedTaxLiability = Math.round((stcgTax + ltcgTax) * 100) / 100;
+  const estimatedTaxLiability = stcgTax + netLtcgTax;
+
+  // Estimate potential tax savings from harvesting
+  const totalPotentialSavings = opportunities
+    .filter(o => o.recommendation === 'harvest_now')
+    .reduce((s, o) => s + o.potentialTaxSaved, 0);
+
+  const estimatedTaxSavings = totalPotentialSavings;
 
   // Generate insights
   const insights: string[] = [];
 
-  if (totalHarvestableLoss > 0) {
+  if (opportunities.length > 0) {
+    const harvestNowCount = opportunities.filter(o => o.recommendation === 'harvest_now').length;
+    if (harvestNowCount > 0) {
+      insights.push(
+        `${harvestNowCount} holding${harvestNowCount > 1 ? 's' : ''} with significant unrealized losses should be harvested before March 31 to offset your capital gains tax.`
+      );
+    }
+  }
+
+  if (totalRealizedLosses > 0) {
     insights.push(
-      `You have ${harvestableOpportunities.length} tax-harvesting opportunities worth ₹${(totalHarvestableLoss / 1000).toFixed(1)}K in unrealized losses.`,
+      `You've realized ₹${(totalRealizedLosses / 1000).toFixed(1)}K in losses this FY. These can be carried forward for 8 years if unused.`
     );
   }
 
-  if (stLosses > 0) {
+  const washSaleCount = opportunities.filter(o => o.washSaleRisk).length;
+  if (washSaleCount > 0) {
     insights.push(
-      `₹${(stLosses / 1000).toFixed(1)}K in short-term losses can offset both STCG and LTCG — maximum flexibility.`,
+      `⚠️ ${washSaleCount} holding${washSaleCount > 1 ? 's have' : ' has'} wash sale risk — you bought within 30 days. Selling now may disallow the loss deduction.`
     );
   }
 
-  if (ltLosses > 0) {
+  if (shortTermGains > 0 && longTermGains === 0) {
     insights.push(
-      `₹${(ltLosses / 1000).toFixed(1)}K in long-term losses can offset LTCG only.`,
+      'All gains are short-term (taxed at slab rate). Consider holding profitable positions >1 year for lower LTCG rate (12.5%).'
     );
   }
 
-  if (shortTermGains > 0 && totalHarvestableLoss > 0) {
+  if (longTermGains > LTCG_EXEMPTION * 0.8) {
     insights.push(
-      `Harvesting all candidate losses could reduce your tax bill by ₹${(totalEstimatedTaxSavings / 1000).toFixed(1)}K.`,
+      `Your LTCG is approaching the ₹1.25L exemption limit. Consider harvesting losses to stay under the threshold.`
     );
   }
 
-  if (remainingStLoss > 0) {
-    insights.push(
-      `₹${(remainingStLoss / 1000).toFixed(1)}K in unutilized short-term losses can be carried forward for up to 8 years.`,
-    );
-  }
-
-  if (remainingLtLoss > 0) {
-    insights.push(
-      `₹${(remainingLtLoss / 1000).toFixed(1)}K in unutilized long-term losses can be carried forward for up to 8 years (LTCG offset only).`,
-    );
-  }
-
-  if (longTermGains > 0 && longTermGains <= LTCG_EXEMPTION) {
-    insights.push(
-      `Your LTCG (₹${(longTermGains / 1000).toFixed(1)}K) is within the ₹1L exemption — no tax due!`,
-    );
-  }
-
-  if (taxableLtcg <= 0 && remainingStGains <= 0 && totalHarvestableLoss > 0) {
-    insights.push(
-      `Your realized gains are fully offset by losses. Consider harvesting additional losses for carry-forward.`,
-    );
-  }
-
-  // Check if any holdings are approaching the 1-year boundary
-  const nearLT = opportunities.filter(o => o.daysToLongTerm > 0 && o.daysToLongTerm <= 90);
-  if (nearLT.length > 0 && totalHarvestableLoss > 0) {
-    insights.push(
-      `${nearLT.length} holding(s) approaching the 1-year LTCG boundary. Consider harvesting before they become long-term for maximum flexibility.`,
-    );
-  }
-
-  // Wash sale warnings
-  const washSales = opportunities.filter(o => o.washSaleRisk);
-  if (washSales.length > 0) {
-    insights.push(
-      `${washSales.length} opportunity(ies) flagged for wash sale risk — you've bought these stocks in the last 30 days. Wait 31 days to harvest.`,
-    );
+  if (insights.length === 0) {
+    insights.push('Your tax position looks optimized. No urgent harvesting opportunities found.');
   }
 
   return {
-    fiscalYear: getCurrentFiscalYear(),
+    fiscalYear: CURRENT_FY,
     shortTermGains,
     longTermGains,
-    totalRealizedLosses: Math.round(totalRealizedLosses * 100) / 100,
-    taxableLtcg: Math.round(taxableLtcg * 100) / 100,
-    estimatedTaxSavings: Math.round(totalEstimatedTaxSavings * 100) / 100,
+    totalRealizedLosses,
+    taxableLtcg,
+    estimatedTaxSavings,
     estimatedTaxLiability,
     realizedLosses,
     opportunities,
@@ -308,58 +288,155 @@ export function computeTaxYearSummary(
   };
 }
 
-/** Get the current Indian financial year string (e.g. "FY 2025-26") */
-export function getCurrentFiscalYear(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-indexed
-  // Indian FY: April to March
-  const fyStart = month >= 3 ? year : year - 1;
-  const fyEnd = fyStart + 1;
-  return `FY ${fyStart}-${fyEnd.toString().slice(2)}`;
+// ─── Wash Sale Detection ──────────────────────────────────────────────────
+
+function checkWashSaleRisk(
+  stockId: string,
+  trades: Trade[],
+  _now: Date,
+): boolean {
+  // Look for buy trades within the wash sale window
+  const washWindowMs = WASH_SALE_DAYS * 24 * 60 * 60 * 1000;
+  const recentBuys = trades.filter(
+    t =>
+      t.type === 'buy' &&
+      t.stockId === stockId &&
+      Math.abs(Date.now() - new Date(t.timestamp).getTime()) < washWindowMs
+  );
+
+  return recentBuys.length > 0;
 }
 
-/**
- * Generate mock trade data for demo/empty state.
- */
-export function generateMockTrades(): Trade[] {
-  const now = Date.now();
-  const DAY = 86400000;
+// ─── Sector Guess (mock mapping for Indian stocks) ────────────────────────
 
+function guessSector(symbol: string): string {
+  const sectorMap: Record<string, string> = {
+    RELIANCE: 'Energy',
+    TCS: 'Technology',
+    INFY: 'Technology',
+    HDFCBANK: 'Finance',
+    ICICIBANK: 'Finance',
+    SBIN: 'Finance',
+    BHARTIARTL: 'Telecom',
+    ITC: 'Consumer',
+    KOTAKBANK: 'Finance',
+    LT: 'Infrastructure',
+    AXISBANK: 'Finance',
+    WIPRO: 'Technology',
+    ASIANPAINT: 'Consumer',
+    MARUTI: 'Automobile',
+    HCLTECH: 'Technology',
+    SUNPHARMA: 'Pharma',
+    TATAMOTORS: 'Automobile',
+    TATASTEEL: 'Metals',
+    NTPC: 'Energy',
+    POWERGRID: 'Energy',
+    ONGC: 'Energy',
+    COALINDIA: 'Mining',
+    ULTRACEMCO: 'Cement',
+    NESTLEIND: 'Consumer',
+    BAJFINANCE: 'Finance',
+    TITAN: 'Consumer',
+    TECHM: 'Technology',
+    INDUSINDBK: 'Finance',
+    DRREDDY: 'Pharma',
+    DIVISLAB: 'Pharma',
+  };
+
+  return sectorMap[symbol] || 'Other';
+}
+
+// ─── Mock Data Generators (for demo when no real holdings) ────────────────
+
+export function generateMockHoldings(): Holding[] {
   return [
-    { id: 't1', stockId: 's1', symbol: 'RELIANCE', name: 'Reliance Industries', type: 'buy', quantity: 50, price: 2850, total: 142500, timestamp: new Date(now - 400 * DAY).toISOString() },
-    { id: 't2', stockId: 's1', symbol: 'RELIANCE', name: 'Reliance Industries', type: 'sell', quantity: 20, price: 2690, total: 53800, timestamp: new Date(now - 100 * DAY).toISOString() },
-    { id: 't3', stockId: 's2', symbol: 'TCS', name: 'Tata Consultancy Services', type: 'buy', quantity: 30, price: 3850, total: 115500, timestamp: new Date(now - 500 * DAY).toISOString() },
-    { id: 't4', stockId: 's2', symbol: 'TCS', name: 'Tata Consultancy Services', type: 'sell', quantity: 15, price: 4050, total: 60750, timestamp: new Date(now - 50 * DAY).toISOString() },
-    { id: 't5', stockId: 's3', symbol: 'HDFCBANK', name: 'HDFC Bank', type: 'buy', quantity: 100, price: 1650, total: 165000, timestamp: new Date(now - 300 * DAY).toISOString() },
-    { id: 't6', stockId: 's3', symbol: 'HDFCBANK', name: 'HDFC Bank', type: 'sell', quantity: 40, price: 1580, total: 63200, timestamp: new Date(now - 60 * DAY).toISOString() },
-    { id: 't7', stockId: 's4', symbol: 'INFY', name: 'Infosys', type: 'buy', quantity: 80, price: 1520, total: 121600, timestamp: new Date(now - 600 * DAY).toISOString() },
-    { id: 't8', stockId: 's4', symbol: 'INFY', name: 'Infosys', type: 'sell', quantity: 30, price: 1680, total: 50400, timestamp: new Date(now - 30 * DAY).toISOString() },
-    { id: 't9', stockId: 's5', symbol: 'WIPRO', name: 'Wipro', type: 'buy', quantity: 200, price: 520, total: 104000, timestamp: new Date(now - 90 * DAY).toISOString() },
-    { id: 't10', stockId: 's6', symbol: 'ITC', name: 'ITC', type: 'buy', quantity: 150, price: 480, total: 72000, timestamp: new Date(now - 200 * DAY).toISOString() },
-    { id: 't11', stockId: 's6', symbol: 'ITC', name: 'ITC', type: 'sell', quantity: 50, price: 445, total: 22250, timestamp: new Date(now - 10 * DAY).toISOString() },
-    { id: 't12', stockId: 's7', symbol: 'BHARTIARTL', name: 'Bharti Airtel', type: 'buy', quantity: 60, price: 890, total: 53400, timestamp: new Date(now - 30 * DAY).toISOString() },
-    { id: 't13', stockId: 's5', symbol: 'WIPRO', name: 'Wipro', type: 'sell', quantity: 80, price: 490, total: 39200, timestamp: new Date(now - 10 * DAY).toISOString() },
-    { id: 't14', stockId: 's8', symbol: 'MARUTI', name: 'Maruti Suzuki', type: 'buy', quantity: 25, price: 10400, total: 260000, timestamp: new Date(now - 450 * DAY).toISOString() },
-    { id: 't15', stockId: 's8', symbol: 'MARUTI', name: 'Maruti Suzuki', type: 'sell', quantity: 10, price: 9850, total: 98500, timestamp: new Date(now - 20 * DAY).toISOString() },
+    {
+      id: 'h1', stockId: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries',
+      quantity: 15, buyPrice: 2650, currentPrice: 2380,
+      totalInvested: 39750, currentValue: 35700,
+      pnl: -4050, pnlPercent: -10.19, dayChange: -45, dayChangePercent: -1.06,
+    },
+    {
+      id: 'h2', stockId: 'TCS', symbol: 'TCS', name: 'Tata Consultancy Services',
+      quantity: 8, buyPrice: 4200, currentPrice: 3850,
+      totalInvested: 33600, currentValue: 30800,
+      pnl: -2800, pnlPercent: -8.33, dayChange: -120, dayChangePercent: -3.02,
+    },
+    {
+      id: 'h3', stockId: 'HDFCBANK', symbol: 'HDFCBANK', name: 'HDFC Bank',
+      quantity: 20, buyPrice: 1550, currentPrice: 1720,
+      totalInvested: 31000, currentValue: 34400,
+      pnl: 3400, pnlPercent: 10.97, dayChange: 35, dayChangePercent: 2.08,
+    },
+    {
+      id: 'h4', stockId: 'ITC', symbol: 'ITC', name: 'ITC Limited',
+      quantity: 50, buyPrice: 475, currentPrice: 415,
+      totalInvested: 23750, currentValue: 20750,
+      pnl: -3000, pnlPercent: -12.63, dayChange: -12, dayChangePercent: -2.81,
+    },
+    {
+      id: 'h5', stockId: 'SBIN', symbol: 'SBIN', name: 'State Bank of India',
+      quantity: 40, buyPrice: 820, currentPrice: 750,
+      totalInvested: 32800, currentValue: 30000,
+      pnl: -2800, pnlPercent: -8.54, dayChange: -18, dayChangePercent: -2.34,
+    },
+    {
+      id: 'h6', stockId: 'INFY', symbol: 'INFY', name: 'Infosys',
+      quantity: 12, buyPrice: 1800, currentPrice: 1650,
+      totalInvested: 21600, currentValue: 19800,
+      pnl: -1800, pnlPercent: -8.33, dayChange: -30, dayChangePercent: -1.79,
+    },
+    {
+      id: 'h7', stockId: 'BHARTIARTL', symbol: 'BHARTIARTL', name: 'Bharti Airtel',
+      quantity: 18, buyPrice: 1200, currentPrice: 1380,
+      totalInvested: 21600, currentValue: 24840,
+      pnl: 3240, pnlPercent: 15.0, dayChange: 25, dayChangePercent: 1.84,
+    },
+    {
+      id: 'h8', stockId: 'TATAMOTORS', symbol: 'TATAMOTORS', name: 'Tata Motors',
+      quantity: 30, buyPrice: 680, currentPrice: 580,
+      totalInvested: 20400, currentValue: 17400,
+      pnl: -3000, pnlPercent: -14.71, dayChange: -22, dayChangePercent: -3.65,
+    },
   ];
 }
 
-/**
- * Generate mock holdings for demo/empty state.
- */
-export function generateMockHoldings(): Holding[] {
-  const _now = Date.now();
-  const _DAY = 86400000;
+export function generateMockTrades(): Trade[] {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
 
   return [
-    { id: 'h1', stockId: 's1', symbol: 'RELIANCE', name: 'Reliance Industries', quantity: 30, buyPrice: 2850, currentPrice: 2690, totalInvested: 85500, currentValue: 80700, pnl: -4800, pnlPercent: -5.61, dayChange: -120, dayChangePercent: -0.15 },
-    { id: 'h2', stockId: 's2', symbol: 'TCS', name: 'Tata Consultancy Services', quantity: 15, buyPrice: 3850, currentPrice: 4050, totalInvested: 57750, currentValue: 60750, pnl: 3000, pnlPercent: 5.19, dayChange: 85, dayChangePercent: 0.14 },
-    { id: 'h3', stockId: 's3', symbol: 'HDFCBANK', name: 'HDFC Bank', quantity: 60, buyPrice: 1650, currentPrice: 1580, totalInvested: 99000, currentValue: 94800, pnl: -4200, pnlPercent: -4.24, dayChange: -95, dayChangePercent: -0.10 },
-    { id: 'h4', stockId: 's4', symbol: 'INFY', name: 'Infosys', quantity: 50, buyPrice: 1520, currentPrice: 1680, totalInvested: 76000, currentValue: 84000, pnl: 8000, pnlPercent: 10.53, dayChange: 120, dayChangePercent: 0.14 },
-    { id: 'h5', stockId: 's5', symbol: 'WIPRO', name: 'Wipro', quantity: 120, buyPrice: 520, currentPrice: 490, totalInvested: 62400, currentValue: 58800, pnl: -3600, pnlPercent: -5.77, dayChange: -45, dayChangePercent: -0.09 },
-    { id: 'h6', stockId: 's6', symbol: 'ITC', name: 'ITC', quantity: 100, buyPrice: 480, currentPrice: 445, totalInvested: 48000, currentValue: 44500, pnl: -3500, pnlPercent: -7.29, dayChange: -30, dayChangePercent: -0.07 },
-    { id: 'h7', stockId: 's7', symbol: 'BHARTIARTL', name: 'Bharti Airtel', quantity: 60, buyPrice: 890, currentPrice: 955, totalInvested: 53400, currentValue: 57300, pnl: 3900, pnlPercent: 7.30, dayChange: 55, dayChangePercent: 0.06 },
-    { id: 'h8', stockId: 's8', symbol: 'MARUTI', name: 'Maruti Suzuki', quantity: 15, buyPrice: 10400, currentPrice: 9850, totalInvested: 156000, currentValue: 147750, pnl: -8250, pnlPercent: -5.29, dayChange: -180, dayChangePercent: -0.18 },
+    // Realized losses (sell trades with buy matching)
+    {
+      id: 't1', stockId: 'WIPRO', symbol: 'WIPRO', name: 'Wipro',
+      type: 'sell', quantity: 25, price: 380, total: 9500,
+      timestamp: new Date(now - 30 * day).toISOString(),
+    },
+    {
+      id: 't1b', stockId: 'WIPRO', symbol: 'WIPRO', name: 'Wipro',
+      type: 'buy', quantity: 25, price: 420, total: 10500,
+      timestamp: new Date(now - 120 * day).toISOString(),
+    },
+    {
+      id: 't2', stockId: 'AXISBANK', symbol: 'AXISBANK', name: 'Axis Bank',
+      type: 'sell', quantity: 15, price: 950, total: 14250,
+      timestamp: new Date(now - 60 * day).toISOString(),
+    },
+    {
+      id: 't2b', stockId: 'AXISBANK', symbol: 'AXISBANK', name: 'Axis Bank',
+      type: 'buy', quantity: 15, price: 1050, total: 15750,
+      timestamp: new Date(now - 200 * day).toISOString(),
+    },
+    // A profitable sell (to show in realized gains)
+    {
+      id: 't3', stockId: 'BAJFINANCE', symbol: 'BAJFINANCE', name: 'Bajaj Finance',
+      type: 'sell', quantity: 5, price: 7200, total: 36000,
+      timestamp: new Date(now - 45 * day).toISOString(),
+    },
+    {
+      id: 't3b', stockId: 'BAJFINANCE', symbol: 'BAJFINANCE', name: 'Bajaj Finance',
+      type: 'buy', quantity: 5, price: 6500, total: 32500,
+      timestamp: new Date(now - 300 * day).toISOString(),
+    },
   ];
 }
