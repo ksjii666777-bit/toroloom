@@ -69,7 +69,7 @@ describe('TechnicalIndicators', () => {
       const { getByText } = render(<TechnicalIndicators data={generateData(30)} />);
       expect(getByText('RSI')).toBeTruthy();
       expect(getByText('MACD')).toBeTruthy();
-      expect(getByText('Bollinger')).toBeTruthy();
+      expect(getByText('BB')).toBeTruthy();
     });
 
     it('should render RSI panel header', () => {
@@ -84,7 +84,7 @@ describe('TechnicalIndicators', () => {
 
     it('should render Bollinger panel header', () => {
       const { getByText } = render(<TechnicalIndicators data={generateData(30)} />);
-      expect(getByText('Bollinger (20,2)')).toBeTruthy();
+      expect(getByText('BB (20,2)')).toBeTruthy();
     });
   });
 
@@ -93,7 +93,7 @@ describe('TechnicalIndicators', () => {
       const { queryByText } = render(<TechnicalIndicators data={generateData(30)} indicators={['rsi']} />);
       expect(queryByText('RSI (14)')).toBeTruthy();
       expect(queryByText('MACD (12,26,9)')).toBeNull();
-      expect(queryByText('Bollinger (20,2)')).toBeNull();
+      expect(queryByText('BB (20,2)')).toBeNull();
     });
   });
 

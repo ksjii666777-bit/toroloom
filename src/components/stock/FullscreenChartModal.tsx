@@ -75,6 +75,9 @@ interface FullscreenChartModalProps {
   onDrawToolChange: (tool: DrawingToolType) => void;
   showPatterns: boolean;
   patterns: DetectedPattern[];
+  // ── Indicator props ──
+  activeIndicators?: ('rsi' | 'macd' | 'bollinger' | 'stochastic' | 'obv')[];
+  onIndicatorToggle?: (type: 'rsi' | 'macd' | 'bollinger' | 'stochastic' | 'obv') => void;
   /** Render the live TradingView chart instead of the custom candlestick chart */
   useLiveChart?: boolean;
   /** TradingView symbol (e.g. "NSE:RELIANCE") used in live mode */
@@ -125,6 +128,8 @@ export default function FullscreenChartModal({
   onDrawToolChange,
   showPatterns,
   patterns,
+  activeIndicators,
+  onIndicatorToggle,
   useLiveChart,
   tvSymbol,
   onTvError,
@@ -273,6 +278,10 @@ export default function FullscreenChartModal({
             onDrawToolChange={onDrawToolChange}
             showPatterns={showPatterns}
             patterns={patterns}
+            showRSI={activeIndicators?.includes('rsi') ?? false}
+            showMACD={activeIndicators?.includes('macd') ?? false}
+            showBollinger={activeIndicators?.includes('bollinger') ?? false}
+            onIndicatorToggle={onIndicatorToggle}
           />
         )}
       </View>

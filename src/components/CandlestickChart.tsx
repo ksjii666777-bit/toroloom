@@ -56,6 +56,7 @@ interface CandlestickChartProps {
   showRSI?: boolean;
   showMACD?: boolean;
   showBollinger?: boolean;
+  activeIndicatorTypes?: IndicatorType[];
   onIndicatorToggle?: (type: IndicatorType) => void;
 
   // ── Drawing tools ──
@@ -137,6 +138,7 @@ export default function CandlestickChart({
   showRSI = false,
   showMACD = false,
   showBollinger = false,
+  activeIndicatorTypes,
   onIndicatorToggle,
   enableDrawing = false,
   drawings = [],
@@ -435,12 +437,15 @@ export default function CandlestickChart({
 
   // ── Active indicators ──
   const activeIndicators = useMemo(() => {
+    // If a direct array is provided, use it (supports all types including stochastic/obv)
+    if (activeIndicatorTypes && activeIndicatorTypes.length > 0) return activeIndicatorTypes;
+    // Fallback: derive from boolean props
     const inds: IndicatorType[] = [];
     if (showRSI) inds.push('rsi');
     if (showMACD) inds.push('macd');
     if (showBollinger) inds.push('bollinger');
     return inds;
-  }, [showRSI, showMACD, showBollinger]);
+  }, [showRSI, showMACD, showBollinger, activeIndicatorTypes]);
 
   const zoomPercent = Math.round(zoomLevel * 100);
 

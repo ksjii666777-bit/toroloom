@@ -217,22 +217,24 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
   }, []);
 
   // ── Pattern detection settings from store ──
-  const patternSettings = usePatternSettingsStore(s => ({
-    minConfidence: s.minConfidence,
-    enabledPatterns: s.enabledPatterns,
-    lookback: s.lookback,
-  }));
+  // NOTE: select each field individually — an object-literal selector
+  // returns a NEW reference every render, which zustand v5's
+  // useSyncExternalStore treats as a changed snapshot → infinite render
+  // loop → "Maximum update depth exceeded" crash.
+  const minConfidence = usePatternSettingsStore(s => s.minConfidence);
+  const enabledPatterns = usePatternSettingsStore(s => s.enabledPatterns);
+  const lookback = usePatternSettingsStore(s => s.lookback);
 
   // ── Detect patterns on candle history ──
   const detectedPatterns: DetectedPattern[] = useMemo(() => {
     if (!showPatterns || candleHistory.length < 20) return [];
     const result = detectPatterns(candleHistory, {
-      minConfidence: patternSettings.minConfidence,
-      enabledPatterns: patternSettings.enabledPatterns,
-      lookback: patternSettings.lookback,
+      minConfidence,
+      enabledPatterns,
+      lookback,
     });
     return result.patterns;
-  }, [candleHistory, showPatterns, patternSettings]);
+  }, [candleHistory, showPatterns, minConfidence, enabledPatterns, lookback]);
 
   const handleWatchlistToggle = useCallback(() => {
     const firstWatchlist = watchlists[0];
@@ -636,6 +638,8 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
           tvSymbol={tvSymbol}
           onTvError={handleTvError}
           tvOptions={chartOptions}
+          activeIndicators={activeIndicators}
+          onIndicatorToggle={handleIndicatorToggle}
         />
       </AppScreen>
   );

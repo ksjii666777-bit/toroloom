@@ -55,6 +55,8 @@ export default function ChartControls({
     { label: 'RSI', active: activeIndicators.includes('rsi'), onPress: () => onToggleIndicator('rsi') },
     { label: 'MACD', active: activeIndicators.includes('macd'), onPress: () => onToggleIndicator('macd') },
     { label: 'BB', active: activeIndicators.includes('bollinger'), onPress: () => onToggleIndicator('bollinger') },
+    { label: 'STOCH', active: activeIndicators.includes('stochastic'), onPress: () => onToggleIndicator('stochastic') },
+    { label: 'OBV', active: activeIndicators.includes('obv'), onPress: () => onToggleIndicator('obv') },
     { label: '✏️', active: enableDrawing, onPress: onToggleDrawing },
     { label: '🔍', active: showPatterns, onPress: onTogglePatterns },
     { label: chartTypeEmojis[chartType], active: false, onPress: onChangeChartType },
