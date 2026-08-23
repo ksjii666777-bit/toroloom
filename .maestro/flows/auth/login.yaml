@@ -10,6 +10,10 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # Wait for the login screen to load — target the app name text
 - assertVisible:
     id: "login-email-input"
@@ -18,6 +22,8 @@ appId: com.toroloom.app
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+# Dismiss the keyboard so the password field is visible
+- hideKeyboard
 
 # Fill in password field
 - tapOn:
@@ -34,6 +40,30 @@ appId: com.toroloom.app
 # Wait for navigation + home screen loading skeleton (600ms) + render
 - waitForAnimationToEnd:
     timeout: 30000
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 # Navigate to the Home tab
 - tapOn:

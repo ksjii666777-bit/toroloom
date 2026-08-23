@@ -8,14 +8,42 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 1. Empty fields validation ────────────────────────────────────────────
 - assertVisible:
-    text: "Welcome Back"
+    id: "login-welcome-back"
 
 # Tap Log In without entering any credentials
 - tapOn:
     text: "Log In"
 - waitForAnimationToEnd
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 # Verify the validation error message appears
 - assertVisible:
@@ -26,6 +54,7 @@ appId: com.toroloom.app
 - tapOn:
     text: "Enter your email"
 - inputText: "wrong@email.com"
+- hideKeyboard
 
 - tapOn:
     text: "Enter your password"
@@ -38,6 +67,30 @@ appId: com.toroloom.app
     text: "Log In"
 - waitForAnimationToEnd
 
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
 # Verify the invalid credentials error message appears
 - assertVisible:
     text: "Invalid credentials. Try again."
@@ -48,6 +101,7 @@ appId: com.toroloom.app
     text: "Enter your email"
 - eraseText
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 
 - tapOn:
     text: "Enter your password"
@@ -67,6 +121,30 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 5000
 
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
 # Verify successful login — we should see the home screen
 - assertVisible:
-    text: "Good Morning,"
+    id: "home-greeting"

@@ -26,6 +26,10 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ═══════════════════════════════════════════════════════════════════════════
 # 1. Login
 # ═══════════════════════════════════════════════════════════════════════════
@@ -34,6 +38,7 @@ appId: com.toroloom.app
 - tapOn:
     text: "Enter your email"
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 - tapOn:
     text: "Enter your password"
 - inputText: ${TEST_PASSWORD}
@@ -43,12 +48,36 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 30000
 
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
 # Navigate to Home tab (More is default after login)
 - tapOn: "Home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
-    text: "Good Morning,"
+    id: "home-greeting"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 2. Navigate: More → Connect Broker
@@ -59,6 +88,8 @@ appId: com.toroloom.app
     element:
       text: "Connect Broker"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - tapOn:
     text: "Connect Broker"
 - waitForAnimationToEnd

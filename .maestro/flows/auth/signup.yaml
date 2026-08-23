@@ -9,6 +9,10 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # Start from the Login screen and navigate to Signup
 - tapOn:
     text: "Sign Up"
@@ -52,6 +56,31 @@ appId: com.toroloom.app
 # Wait for signup to process
 - waitForAnimationToEnd:
     timeout: 5000
+
+# Fresh installs show the onboarding walkthrough after signup — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
 
 # After successful signup, user should see the Home screen
 - assertVisible:

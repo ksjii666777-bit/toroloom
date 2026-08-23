@@ -14,6 +14,10 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 1. Open the deep link ──────────────────────────────────────────────────
 # This triggers toroloom://signup?ref=test123 which React Navigation resolves
 # to the Signup screen with route.params.ref = 'test123'
@@ -31,7 +35,7 @@ appId: com.toroloom.app
 
 # Verify we did NOT land on the Login screen (deep link worked correctly)
 - assertNotVisible:
-    text: "Welcome Back!"
+    id: "login-welcome-back"
 
 # ── 3. Verify the referral badge is visible ────────────────────────────────
 # The badge reads "🎉 Referred by test123" — confirms route.params.ref was
@@ -48,6 +52,7 @@ appId: com.toroloom.app
 - tapOn:
     text: "Enter your email"
 - inputText: "rahul+deeplink@toroloom.com"
+- hideKeyboard
 
 # ── 5. Fill in Phone ──────────────────────────────────────────────────────
 - tapOn:
@@ -75,8 +80,33 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 15000
 
+# Fresh installs show the onboarding walkthrough after signup — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+
 # ── 11. Verify navigation to Home screen ───────────────────────────────────
 - assertVisible:
-    text: "Good Morning,"
+    id: "home-greeting"
 - assertVisible:
     text: "Portfolio"

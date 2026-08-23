@@ -12,8 +12,11 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-- stopApp
 
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
@@ -21,6 +24,7 @@ appId: com.toroloom.app
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 - tapOn:
     id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
@@ -29,6 +33,30 @@ appId: com.toroloom.app
     id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - tapOn:
     id: "tab-home"
 - waitForAnimationToEnd:
@@ -42,6 +70,8 @@ appId: com.toroloom.app
     element:
       id: "menu-AIInsights"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - tapOn:
     id: "menu-AIInsights"
 - waitForAnimationToEnd

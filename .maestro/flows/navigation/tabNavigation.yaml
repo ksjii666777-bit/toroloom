@@ -8,8 +8,11 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-- stopApp
 
 # ── Step 1: Login ──────────────────────────────────────────────────────────
 - assertVisible:
@@ -17,6 +20,7 @@ appId: com.toroloom.app
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 - tapOn:
     id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
@@ -25,6 +29,30 @@ appId: com.toroloom.app
     id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 5000
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 # ── Step 2: Home Tab ───────────────────────────────────────────────────────
 - assertVisible:
@@ -63,6 +91,14 @@ appId: com.toroloom.app
 - waitForAnimationToEnd
 - assertVisible:
     id: "more-title"
+# Menu sections sit below the fold — scroll the target item into view
+# (slow scroll: this emulator scrolls slowly on the More screen).
+- scrollUntilVisible:
+    element:
+      id: "menu-MutualFunds"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     id: "menu-MutualFunds"
 

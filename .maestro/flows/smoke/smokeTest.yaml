@@ -14,8 +14,10 @@
 # Change to host.exp.exponent when running via Expo Go.
 appId: com.toroloom.app
 ---
-# ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-- stopApp
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
@@ -23,6 +25,7 @@ appId: com.toroloom.app
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 - tapOn:
     id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
@@ -31,6 +34,30 @@ appId: com.toroloom.app
     id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 # Navigate to Home tab
 - tapOn:
@@ -55,9 +82,8 @@ appId: com.toroloom.app
 - assertVisible:
     id: "learn-title"
 
-# Go back to Home via tab
-- tapOn:
-    id: "tab-home"
+# Learn is a stack screen (no tab bar) — use Android back to return
+- back
 - waitForAnimationToEnd
 - assertVisible:
     id: "home-greeting"
@@ -69,11 +95,11 @@ appId: com.toroloom.app
 - assertVisible:
     id: "markets-title"
 
-# Verify market indices are visible
+# Verify market indices are visible (screens render shortNames NIFTY / SENSEX)
 - assertVisible:
-    text: "NIFTY 50"
+    text: "NIFTY"
 - assertVisible:
-    text: "BSE Sensex"
+    text: "SENSEX"
 
 # ── 4. More Screen — Quick Actions ────────────────────────────────────────
 - tapOn:
@@ -82,17 +108,42 @@ appId: com.toroloom.app
 - assertVisible:
     id: "more-title"
 
-# Verify key menu items are present (via testIDs — i18n-safe)
+# Verify key menu items are present (via testIDs — i18n-safe). The menu
+# scrolls, so scroll each into view before asserting.
+# NOTE: scrolling on this emulator is slow (~350px/s regardless of speed
+# setting), and off-screen sections are unmounted (removeClippedSubviews)
+# with entering animations replaying on re-mount — use a slow speed and a
+# generous timeout so each section can mount/settle before the next scroll.
+- scrollUntilVisible:
+    element:
+      id: "menu-FundsDashboard"
+    direction: DOWN
+    speed: 20
+    timeout: 60000
 - assertVisible:
     id: "menu-FundsDashboard"
+- scrollUntilVisible:
+    element:
+      id: "menu-MutualFunds"
+    direction: DOWN
+    speed: 20
+    timeout: 60000
 - assertVisible:
     id: "menu-MutualFunds"
+- scrollUntilVisible:
+    element:
+      id: "menu-TradeHistory"
+    direction: DOWN
+    speed: 20
+    timeout: 60000
 - assertVisible:
     id: "menu-TradeHistory"
 - scrollUntilVisible:
     element:
       id: "menu-Help"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - assertVisible:
     id: "menu-Help"
 
@@ -117,6 +168,8 @@ appId: com.toroloom.app
     element:
       id: "more-logout-btn"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - assertVisible:
     id: "more-logout-btn"
 - tapOn:
@@ -124,8 +177,17 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 3000
 
-# Verify we're back on the login screen
+# Verify we're back on the login screen (signup row is below the fold on
+# smaller screens — let the logout transition settle, then scroll it in)
 - assertVisible:
     id: "login-welcome-back"
+- waitForAnimationToEnd:
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "login-no-account"
+    direction: DOWN
+    speed: 20
+    timeout: 15000
 - assertVisible:
     id: "login-no-account"

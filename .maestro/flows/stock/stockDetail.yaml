@@ -14,8 +14,11 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-- stopApp
 
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
@@ -23,6 +26,7 @@ appId: com.toroloom.app
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 - tapOn:
     id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
@@ -31,6 +35,30 @@ appId: com.toroloom.app
     id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - tapOn:
     id: "tab-home"
 - waitForAnimationToEnd:
@@ -43,27 +71,25 @@ appId: com.toroloom.app
 - assertVisible:
     id: "markets-title"
 
-# ── 3. Tap the first visible stock card ─────────────────────────────────────
-# Stock cards show symbol (e.g. "RELIANCE", "TCS") as the primary text
+# ── 3. Open a stock detail (RELIANCE is below the fold — scroll it in) ─────
+- scrollUntilVisible:
+    element:
+      text: "RELIANCE"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - tapOn:
     text: "RELIANCE"
-    index: 0
-    optional: true
 - waitForAnimationToEnd:
     timeout: 5000
 
-# If RELIANCE not found, try the first stock listed
-- runFlow:
-    when:
-      notVisible: "RELIANCE"
-    commands:
-      - tapOn:
-          index: 0
-          text: ".+"
-      - waitForAnimationToEnd:
-          timeout: 5000
-
-# ── 4. Verify Stock Detail Screen Elements ─────────────────────────────────
+# ── 4. Verify Stock Detail Screen Elements (About is below the fold) ───────
+- scrollUntilVisible:
+    element:
+      text: "About Company"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     text: "About Company"
 - assertVisible:
@@ -108,14 +134,17 @@ appId: com.toroloom.app
     text: "AI Analysis"
     optional: true
 
-# ── 7. Scroll back to top and go back ──────────────────────────────────────
-- swipe:
+# ── 7. Go back to Markets (Android back — the header back button is
+# scrolled off-screen and its label is "Close", not "Go back") ──────────────
+- back
+- waitForAnimationToEnd
+
+# Markets restores its previous scroll position — scroll back up to the title
+- scrollUntilVisible:
+    element:
+      id: "markets-title"
     direction: UP
-- waitForAnimationToEnd
-
-- tapOn:
-    text: "Go back"
-- waitForAnimationToEnd
-
+    speed: 20
+    timeout: 15000
 - assertVisible:
     id: "markets-title"

@@ -12,8 +12,11 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-- stopApp
 
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
@@ -21,6 +24,7 @@ appId: com.toroloom.app
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 - tapOn:
     id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
@@ -29,6 +33,30 @@ appId: com.toroloom.app
     id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - tapOn:
     id: "tab-home"
 - waitForAnimationToEnd:
@@ -41,6 +69,23 @@ appId: com.toroloom.app
 - tapOn:
     id: "more-profile-card"
 - waitForAnimationToEnd
+# Profile screen has a Profile/KYC toggle — switch to the KYC tab first
+- scrollUntilVisible:
+    element:
+      text: "KYC & Banks"
+    direction: UP
+    speed: 20
+    timeout: 30000
+- tapOn:
+    text: "KYC & Banks"
+- waitForAnimationToEnd
+# KYC card sits below the fold on the Profile screen — scroll it in
+- scrollUntilVisible:
+    element:
+      id: "kyc-status-card"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     id: "kyc-status-card"
 
@@ -65,9 +110,16 @@ appId: com.toroloom.app
 - tapOn:
     text: "HDFC0001234"
 - inputText: "HDFC0001234"
+- hideKeyboard
 - waitForAnimationToEnd
 
-# Verify button via testID — i18n-safe
+# Verify button via testID — i18n-safe (may sit below the fold)
+- scrollUntilVisible:
+    element:
+      id: "bank-verify-ifsc-btn"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - tapOn:
     id: "bank-verify-ifsc-btn"
 - waitForAnimationToEnd:
@@ -114,12 +166,24 @@ appId: com.toroloom.app
 
 # ── 10. Step 3: Select Account Type + Primary + Link ──────────────────────
 # Savings is already selected by default, just proceed
-# Toggle set as primary via testID — i18n-safe
+# Toggle set as primary via testID — i18n-safe (may sit below the fold)
+- scrollUntilVisible:
+    element:
+      id: "bank-set-primary-toggle"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - tapOn:
     id: "bank-set-primary-toggle"
 - waitForAnimationToEnd
 
 # Tap link bank via testID — i18n-safe
+- scrollUntilVisible:
+    element:
+      id: "bank-link-btn"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - tapOn:
     id: "bank-link-btn"
 - waitForAnimationToEnd:
@@ -138,5 +202,11 @@ appId: com.toroloom.app
     id: "bank-done-btn"
 - waitForAnimationToEnd
 
+- scrollUntilVisible:
+    element:
+      id: "kyc-status-card"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     id: "kyc-status-card"

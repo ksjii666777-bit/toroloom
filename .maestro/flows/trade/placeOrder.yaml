@@ -21,8 +21,11 @@
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-- stopApp
 
 # ── 1. Login ──────────────────────────────────────────────────────────────
 - assertVisible:
@@ -30,6 +33,7 @@ appId: com.toroloom.app
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+- hideKeyboard
 - tapOn:
     id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
@@ -38,6 +42,30 @@ appId: com.toroloom.app
     id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 5000
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 2. Navigate: Markets → Stock Detail → Buy
@@ -48,7 +76,13 @@ appId: com.toroloom.app
 - assertVisible:
     id: "markets-title"
 
-# Tap first visible stock (RELIANCE is always listed)
+# Tap RELIANCE (always listed, but may be below the fold — scroll it in)
+- scrollUntilVisible:
+    element:
+      text: "RELIANCE"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - tapOn:
     text: "RELIANCE"
 - waitForAnimationToEnd
@@ -153,9 +187,10 @@ appId: com.toroloom.app
     id: "productType_MIS"
 - waitForAnimationToEnd
 
-# Verify the description changed to mention intraday
+# Verify the description changed to mention intraday (actual label is
+# "Intraday — square off by EOD" — use a regex prefix match)
 - assertVisible:
-    text: "Intraday"
+    text: "Intraday.*"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 7. Set Quantity Using Quick Preset
@@ -172,13 +207,28 @@ appId: com.toroloom.app
     element:
       text: "Order Summary"
     direction: DOWN
-# Verify Order Summary section via testIDs — i18n-safe
+    speed: 20
+    timeout: 30000
+# Let the summary settle after the qty change (values recompute → re-render)
+- waitForAnimationToEnd:
+    timeout: 5000
+# Verify Order Summary section via testIDs — i18n-safe. The card is tall —
+# scroll the BOTTOM row (Estimated Total) into view so the clipped rows
+# (inverted/negative bounds when below the fold) are fully visible.
+- scrollUntilVisible:
+    element:
+      text: "Estimated Total"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     id: "order-summary-title"
 - assertVisible:
     id: "order-summary-qty"
-- assertVisible:
-    id: "order-summary-price-per-share"
+- extendedWaitUntil:
+    visible:
+      id: "order-summary-price-per-share"
+    timeout: 10000
 - assertVisible:
     id: "order-summary-est-total"
 

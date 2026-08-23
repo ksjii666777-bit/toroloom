@@ -9,37 +9,82 @@
 #   5. Filter by type chip (RIA / RA)
 #   6. Open an advisor profile → verify SEBI badge + Book a Session
 #   7. Navigate back to the list, then back to More
+#
+# Uses testID-based targeting for i18n/time-independent robustness
+# (login + tab + greeting assertions), with text fallbacks for content.
 # =============================================================================
 
 appId: com.toroloom.app
 ---
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 15000
 # ── 1. Login ───────────────────────────────────────────────────────────────
+# Wait for the login screen to load (testID — app text includes an emoji:
+# "Welcome Back! 👋", so text matchers are unreliable here)
 - assertVisible:
-    text: "Welcome Back!"
+    id: "login-email-input"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
+# Dismiss the keyboard so the password field is visible again (the
+# keyboard pushes it off-screen on smaller emulator viewports)
+- hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
-- tapOn: "Home"
+
+# Fresh installs show the onboarding walkthrough after login — skip it
+# (idempotent: skipped when already completed)
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# Navigate to the Home tab (greeting is time-dependent — "Good Morning/"
+# "Good Afternoon/"Good Evening" — so assert the testID, not the text)
+- tapOn:
+    text: "Home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
-    text: "Good Morning,"
+    id: "home-greeting"
 
 # ── 2. Navigate: More → Advisors ──────────────────────────────────────────
-- tapOn: "More"
+- tapOn:
+    text: "More"
 - waitForAnimationToEnd
+- assertVisible:
+    id: "more-title"
 - scrollUntilVisible:
     element:
       id: "menu-AdvisorList"
     direction: DOWN
+    speed: 80
+    timeout: 30000
 - tapOn:
     id: "menu-AdvisorList"
 - waitForAnimationToEnd
@@ -48,25 +93,28 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Advisors"
 
-# SEBI compliance note (i18n-safe partial match)
+# SEBI compliance note (partial regex — the note is a full sentence)
 - assertVisible:
-    text: "SEBI-registered"
+    text: ".*SEBI-registered.*"
 
-# An approved advisor card renders with a fee
+# An approved advisor card renders with name and fee (fee is "₹1500")
 - assertVisible:
     text: "Dr. Rajesh Khanna"
 - assertVisible:
-    text: "1500"
+    text: ".*₹1500.*"
 
 # ── 4. Search filter ──────────────────────────────────────────────────────
 - tapOn:
     id: "advisory-search"
 - inputText: "khanna"
+- hideKeyboard
 - waitForAnimationToEnd
 
-# Only the matching advisor remains
-- assertVisible:
-    text: "Dr. Rajesh Khanna"
+# Only the matching advisor remains (list reloads async — wait for it)
+- extendedWaitUntil:
+    visible:
+      text: "Dr. Rajesh Khanna"
+    timeout: 20000
 - assertNotVisible:
     text: "Priya Sharma"
 
@@ -76,7 +124,7 @@ appId: com.toroloom.app
 
 # ── 5. Filter by type chip (RA) ───────────────────────────────────────────
 - tapOn:
-    text: "RA"
+    id: "chip-RA"
 - waitForAnimationToEnd
 
 # RA advisors (Amit Verma) visible, RIA (Dr. Rajesh Khanna) hidden
@@ -87,7 +135,7 @@ appId: com.toroloom.app
 
 # Reset back to All
 - tapOn:
-    text: "All"
+    id: "chip-all"
 - waitForAnimationToEnd
 - assertVisible:
     text: "Dr. Rajesh Khanna"
@@ -97,15 +145,30 @@ appId: com.toroloom.app
     text: "Dr. Rajesh Khanna"
 - waitForAnimationToEnd
 
-# Verify detail screen
+# Verify detail screen (SEBI badge text is "SEBI RIA Reg. · INA000001234")
 - assertVisible:
     text: "Advisor Profile"
 - assertVisible:
-    text: "SEBI RIA Reg."
+    text: ".*SEBI RIA Reg.*"
+
+# The Book a Session card is below the fold — scroll to it
+- scrollUntilVisible:
+    element:
+      text: "Book a Session"
+    direction: DOWN
+    speed: 60
+    timeout: 15000
 - assertVisible:
     text: "Book a Session"
 
 # ── 7. Navigate back to the list, then back to More ───────────────────────
+# The header (with the back button) scrolled off-screen — scroll back up
+- scrollUntilVisible:
+    element:
+      text: "Go back"
+    direction: UP
+    speed: 60
+    timeout: 15000
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd
