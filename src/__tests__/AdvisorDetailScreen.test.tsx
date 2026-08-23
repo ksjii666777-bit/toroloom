@@ -104,6 +104,19 @@ vi.mock('../hooks/useT', () => ({
   }),
 }));
 
+// ── Payments API mock ──
+vi.mock('../services/api/payments', () => ({
+  paymentsApi: {
+    createConsultationOrder: vi.fn().mockResolvedValue({
+      orderId: 'order_mock_123',
+      keyId: 'rzp_test_placeholder',
+      amount: 150000,
+      currency: 'INR',
+    }),
+    verifyPayment: vi.fn().mockResolvedValue({ success: true, message: 'Verified' }),
+  },
+}));
+
 // ── Advisory API mock — reads reject (mock fallback), writes overridden per test ──
 vi.mock('../services/api/advisory', () => ({
   advisoryApi: {
@@ -178,15 +191,15 @@ describe('AdvisorDetailScreen', () => {
     expect(getByText(/market risks/)).toBeTruthy();
   });
 
-  it('selecting a slot reveals the fee summary and Confirm & Book', async () => {
+  it('selecting a slot reveals the fee summary and Pay & Book button', async () => {
     const { getByTestId, getByText, queryByText } = renderScreen();
     await flushPromises();
 
-    expect(queryByText('Confirm & Book')).toBeNull();
+    expect(queryByText('Pay ₹1500 & Book')).toBeNull();
 
     fireEvent.press(getByTestId(`slot-${FIRST_SLOT_ID}`));
 
-    expect(getByText('Confirm & Book')).toBeTruthy();
+    expect(getByText('Pay ₹1500 & Book')).toBeTruthy();
     expect(getByText('Fee: ₹1500')).toBeTruthy();
   });
 
@@ -194,18 +207,21 @@ describe('AdvisorDetailScreen', () => {
     vi.mocked(advisoryApi.bookConsultation).mockResolvedValue({
       consultation: { id: 'consult_x', status: 'pending' } as any,
     });
+    vi.mocked(advisoryApi.confirmConsultation).mockResolvedValue({
+      consultation: { id: 'consult_x', status: 'confirmed' } as any,
+    });
     const alertSpy = vi.spyOn(Alert, 'alert');
 
     const { getByTestId, getByText } = renderScreen();
     await flushPromises();
 
     fireEvent.press(getByTestId(`slot-${FIRST_SLOT_ID}`));
-    fireEvent.press(getByText('Confirm & Book'));
+    fireEvent.press(getByText('Pay ₹1500 & Book'));
     await flushPromises();
 
     expect(advisoryApi.bookConsultation).toHaveBeenCalledWith('advisor_1', FIRST_SLOT_ID);
     expect(alertSpy).toHaveBeenCalledWith(
-      'Booking Confirmed 🎉',
+      expect.stringContaining('Booking Confirmed'),
       expect.stringContaining('Dr. Rajesh Khanna'),
       expect.any(Array),
     );
@@ -218,7 +234,7 @@ describe('AdvisorDetailScreen', () => {
     await flushPromises();
 
     fireEvent.press(getByTestId(`slot-${FIRST_SLOT_ID}`));
-    fireEvent.press(getByText('Confirm & Book'));
+    fireEvent.press(getByText('Pay ₹1500 & Book'));
     await flushPromises();
 
     expect(alertSpy).toHaveBeenCalledWith('Booking Failed', 'We could not book this slot. Please try another time slot.');

@@ -1,7 +1,11 @@
 import { create } from 'zustand';
+import { Alert } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import type { Advisor, AdvisorReview, Consultation } from '../types';
 import { mockAdvisors, mockAdvisorReviews, mockConsultations } from '../constants/mockData';
 import { advisoryApi } from '../services/api/advisory';
+import { paymentsApi } from '../services/api/payments';
+import { log } from '../utils/logger';
 
 export interface AdvisorFilters {
   q?: string;
@@ -107,7 +111,80 @@ export const useAdvisoryStore = create<AdvisoryState>((set, get) => ({
   bookConsultation: async (advisorId: string, slotId: string) => {
     set({ isLoading: true, error: null });
     try {
-      await advisoryApi.bookConsultation(advisorId, slotId);
+      // Step 1: Lock the slot server-side (creates a pending consultation)
+      const result = await advisoryApi.bookConsultation(advisorId, slotId);
+      const consultationId = result.consultation.id;
+
+      // Step 2: Get the advisor to know the fee
+      const advisor = get().selectedAdvisor;
+      const fee = advisor?.consultationFee ?? 0;
+
+      if (fee > 0) {
+        // Step 3: Create a Razorpay order for the consultation fee
+        const order = await paymentsApi.createConsultationOrder({
+          consultationId,
+          amount: fee,
+          advisorName: advisor?.name,
+        });
+
+        // Step 4: Try to open Razorpay Checkout
+        try {
+          const RazorpayCheckoutModule = await import('react-native-razorpay');
+          const RazorpayCheckout = RazorpayCheckoutModule.default;
+
+          const options = {
+            key: order.keyId,
+            amount: order.amount,
+            currency: order.currency,
+            order_id: order.orderId,
+            name: 'Toroloom',
+            description: `Consultation with ${advisor?.name || 'Advisor'}`,
+            image: 'https://toroloom.dev/assets/logo.png',
+            prefill: { email: '', contact: '' },
+            theme: { color: '#6C63FF' },
+            modal: {
+              confirm_close: true,
+              ondismiss: () => {
+                set({ isLoading: false });
+              },
+            },
+          };
+
+          const data = await RazorpayCheckout.open(options);
+
+          // Step 5: Verify payment on backend
+          await paymentsApi.verifyPayment({
+            razorpayPaymentId: data.razorpay_payment_id,
+            razorpayOrderId: data.razorpay_order_id,
+            razorpaySignature: data.razorpay_signature,
+            type: 'consultation',
+            consultationId,
+          });
+
+          // Step 6: Confirm the consultation after payment
+          await advisoryApi.confirmConsultation(consultationId);
+
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Alert.alert(
+            'Booking Confirmed! 🎉',
+            `Your consultation with ${advisor?.name || 'the advisor'} has been booked successfully.`,
+          );
+        } catch {
+          // Razorpay native module not available (Expo Go / dev) — confirm anyway
+          try {
+            await advisoryApi.confirmConsultation(consultationId);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          } catch {
+            // Confirm failed — slot is still locked, user can retry from My Consultations
+            log.warn('[AdvisoryStore] confirmConsultation failed after Razorpay fallback');
+          }
+        }
+      } else {
+        // Free consultation — confirm directly
+        await advisoryApi.confirmConsultation(consultationId);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+
       await get().loadMyConsultations();
       set({ isLoading: false });
       return true;

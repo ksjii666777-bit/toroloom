@@ -196,11 +196,11 @@ export default function AdvisorDetailScreen({ route, navigation }: NativeStackSc
                     <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.bookBtn}>
                       <Ionicons name="checkmark-circle" size={20} color="#fff" />
                       <Text style={styles.bookBtnText}>
-                        {booking ? t('advisory.booking') : t('advisory.confirmBook')}
+                        {booking ? t('advisory.booking') : advisor.consultationFee > 0 ? `Pay ₹${advisor.consultationFee} & Book` : t('advisory.confirmBook')}
                       </Text>
                     </LinearGradient>
                   </AnimatedPressable>
-                  <Text style={styles.paymentNote}>{t('advisory.paymentNote')}</Text>
+                  <Text style={styles.paymentNote}>💳 Payment via Razorpay — UPI, Cards, Netbanking accepted</Text>
                 </Animated.View>
               )}
             </Card>
