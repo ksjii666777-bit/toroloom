@@ -291,10 +291,18 @@ function parseRssItems(xml: string, max: number): AggregatedArticle[] {
     const srcTag = block.match(/<source[^>]*name="([^"]*)"[^>]*>/i);
     const publisher = srcTag && srcTag[1] ? decodeEntities(srcTag[1]) : (pick('source') || 'Google News');
 
+    // Google News descriptions contain anchor/font tags linking back to the
+    // article — strip them so the app's plain <Text> renders cleanly.
+    const cleanDescription = pick('description')
+      .replace(/\s*<font color="#6f6f6f">.*?<\/font>\s*/gis, '')
+      .replace(/\s+&gt;\s*/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
     items.push({
       title,
-      summary: pick('description').slice(0, 400),
-      content: pick('description'),
+      summary: cleanDescription.slice(0, 400),
+      content: cleanDescription,
       url: link,
       imageUrl: null, // RSS rarely includes images; app shows a placeholder.
       source: publisher,
