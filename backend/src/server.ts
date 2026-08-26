@@ -79,6 +79,7 @@ import twoFactorRoutes from './routes/twoFactor';
 import analyticsRoutes from './routes/analytics';
 import syncRoutes from './services/syncService';
 import globalStocksRoutes from './routes/globalStocks';
+import globalMarketsRoutes from './routes/globalMarkets';
 import forexRoutes from './routes/forex';
 import commoditiesRoutes from './routes/commodities';
 import bondsRoutes from './routes/bonds';
@@ -307,6 +308,12 @@ app.use('/api/sync', writeLimiter, authMiddleware, syncRoutes);
 
 // ── Global Stocks (Europe + Asia-Pacific) — 200 req / min ──────────
 app.use('/api/global-stocks', readLimiter, globalStocksRoutes);
+
+// ── Global Markets (US stocks via MarketStack + crypto via CoinGecko) ──
+// FIX: this router existed but was never mounted — the app's US Markets,
+// Global Stock Detail, Crypto Trading and Crypto Detail screens all call
+// /api/global-markets/* and were silently falling back to mock data.
+app.use('/api/global-markets', readLimiter, globalMarketsRoutes);
 
 // ── Advanced Markets (Forex, Commodities, Bonds) — 200 req / min ──
 app.use('/api/forex', readLimiter, forexRoutes);
