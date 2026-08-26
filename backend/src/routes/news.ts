@@ -3,96 +3,78 @@
  * Toroloom — News Routes
  * ============================================================================
  *
- * Provides endpoints for fetching financial news from NewsAPI.org.
- * Falls back gracefully when NewsAPI is not configured.
+ * Serves financial news via the multi-provider aggregator
+ * (`newsAggregatorService`). Providers are tried in order:
+ *
+ *     GNews → NewsData.io → Google News RSS (no key) → NewsAPI.org
+ *
+ * The response's `source` field reports the provider that ACTUALLY served
+ * the articles ('none' when every provider failed — the app then shows its
+ * own offline content instead of us fabricating data).
  *
  * Endpoints:
- *   GET /api/news          — Fetch financial news articles
- *   GET /api/news/top      — Fetch top financial headlines
+ *   GET /api/news                — Fetch financial news articles
+ *   GET /api/news/top            — Fetch top financial headlines
  *   GET /api/news/symbol/:symbol — Fetch news for a specific stock symbol
  *
  * ============================================================================
  */
 
 import { Router, Request, Response } from 'express';
-import { newsApi, isNewsApiConfigured, configureNewsApi } from '../services/newsApiService';
-import { mockNews } from '../data/mockNews';
+import {
+  aggregateFinancialNews,
+  aggregateSymbolNews,
+  getPreferredProvider,
+  type NewsCategory,
+} from '../services/newsAggregatorService';
 
 const router = Router();
 
-// Re-configure from env when this module loads
-configureNewsApi({ newsApiKey: process.env.NEWSAPI_KEY });
+const VALID_CATEGORIES = ['markets', 'economy', 'corporate', 'ipo', 'global', 'policy'];
+
+function parseCategory(raw: unknown): NewsCategory | undefined {
+  if (typeof raw === 'string' && VALID_CATEGORIES.includes(raw)) {
+    return raw as NewsCategory;
+  }
+  return undefined;
+}
 
 // ─── GET /api/news — Fetch financial news ──────────────────────────────
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const q = req.query.q as string | undefined;
-    const category = req.query.category as string | undefined;
-    const pageSize = parseInt(req.query.pageSize as string || '20', 10);
-    const page = parseInt(req.query.page as string || '1', 10);
-    const sortBy = (req.query.sortBy as string) || 'publishedAt';
+    const q = typeof req.query.q === 'string' ? req.query.q : undefined;
+    const category = parseCategory(req.query.category);
+    const pageSize = Math.min(parseInt(String(req.query.pageSize || '20'), 10) || 20, 100);
+    const page = Math.max(parseInt(String(req.query.page || '1'), 10) || 1, 1);
 
-    // Validate category
-    const validCategories = ['markets', 'economy', 'corporate', 'ipo', 'global', 'policy'];
-    const activeCategory = category && validCategories.includes(category)
-      ? category as 'markets' | 'economy' | 'corporate' | 'ipo' | 'global' | 'policy'
-      : undefined;
+    const result = await aggregateFinancialNews({ q, category, pageSize, page });
 
-    if (!isNewsApiConfigured()) {
-      // Return mock news when API key is not configured
-      const filtered = activeCategory
-        ? mockNews.filter(a => a.category === activeCategory)
-        : mockNews;
-
-      // Sort by publishedAt descending
-      const sorted = [...filtered].sort(
-        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-      );
-
-      // Paginate
-      const start = (page - 1) * pageSize;
-      const paginated = sorted.slice(start, start + pageSize);
-
-      res.json({
-        articles: paginated,
-        totalResults: sorted.length,
-        source: 'mock',
-      });
-      return;
-    }
-
-    // Fetch from NewsAPI
-    const result = await newsApi.getFinancialNews({
-      q,
-      category: activeCategory,
-      pageSize: Math.min(pageSize, 100),
-      page,
-      sortBy,
-    });
-
-    // Map to our format
-    const articles = result.articles.map(a => {
-      return newsApi.toMarketNewsItem(a, activeCategory || 'markets');
-    });
+    const articles = result.articles.map((a) => ({
+      id: `news_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      title: a.title,
+      summary: a.summary,
+      content: a.content,
+      source: a.source,
+      category: category || 'markets',
+      sentiment: scoreSentiment(`${a.title} ${a.summary}`),
+      imageUrl: a.imageUrl,
+      url: a.url,
+      publishedAt: a.publishedAt,
+      read: false,
+      bookmarked: false,
+    }));
 
     res.json({
       articles,
       totalResults: result.totalResults,
-      source: 'newsapi',
+      source: result.provider,
+      preferredProvider: getPreferredProvider(),
     });
-  } catch (_error: unknown) {
-    // Fallback to mock data on error
-    const fallbackArticles = mockNews.slice(0, 10).map(a => ({
-      ...a,
-      read: false,
-      bookmarked: false,
-    }));
-    res.json({
-      articles: fallbackArticles,
-      totalResults: fallbackArticles.length,
-      source: 'mock_fallback',
-    });
+  } catch (error: unknown) {
+    // Aggregator never throws in practice; keep a hard guard anyway.
+    console.error('[News] /news handler error:', (error as Error).message);
+    res.json({ articles: [], totalResults: 0, source: 'none' });
   }
 });
 
@@ -100,22 +82,32 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/top', async (_req: Request, res: Response) => {
   try {
-    if (!isNewsApiConfigured()) {
-      const top = [...mockNews]
-        .filter(a => !a.read)
-        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-        .slice(0, 5);
-      res.json({ articles: top, source: 'mock' });
-      return;
-    }
+    const result = await aggregateFinancialNews({ pageSize: 10 });
 
-    const topArticles = await newsApi.getTopHeadlines(10);
-    const articles = topArticles.map(a => newsApi.toMarketNewsItem(a, 'markets'));
+    const articles = result.articles.slice(0, 5).map((a) => ({
+      id: `news_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      title: a.title,
+      summary: a.summary,
+      content: a.content,
+      source: a.source,
+      category: 'markets',
+      sentiment: scoreSentiment(`${a.title} ${a.summary}`),
+      imageUrl: a.imageUrl,
+      url: a.url,
+      publishedAt: a.publishedAt,
+      read: false,
+      bookmarked: false,
+    }));
 
-    res.json({ articles, source: 'newsapi' });
-  } catch {
-    const fallback = mockNews.slice(0, 5).map(a => ({ ...a, read: false, bookmarked: false }));
-    res.json({ articles: fallback, source: 'mock_fallback' });
+    res.json({
+      articles,
+      totalResults: articles.length,
+      source: result.provider,
+      preferredProvider: getPreferredProvider(),
+    });
+  } catch (error: unknown) {
+    console.error('[News] /news/top handler error:', (error as Error).message);
+    res.json({ articles: [], totalResults: 0, source: 'none' });
   }
 });
 
@@ -123,27 +115,54 @@ router.get('/top', async (_req: Request, res: Response) => {
 
 router.get('/symbol/:symbol', async (req: Request, res: Response) => {
   try {
-    const symbol = req.params.symbol as string;
-
-    if (!isNewsApiConfigured()) {
-      const symbolNews = mockNews.filter(a =>
-        a.symbol?.toLowerCase() === symbol.toLowerCase(),
-      );
-      res.json({
-        articles: symbolNews,
-        totalResults: symbolNews.length,
-        source: 'mock',
-      });
+    const symbol = String(req.params.symbol || '').trim().toUpperCase();
+    if (!symbol) {
+      res.status(400).json({ error: 'symbol path parameter is required' });
       return;
     }
 
-    const articles = await newsApi.getNewsForSymbol(symbol);
-    const mapped = articles.map(a => newsApi.toMarketNewsItem(a, 'markets'));
+    const result = await aggregateSymbolNews(symbol, 10);
 
-    res.json({ articles: mapped, totalResults: mapped.length, source: 'newsapi' });
+    const articles = result.articles.map((a) => ({
+      id: `news_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      title: a.title,
+      summary: a.summary,
+      content: a.content,
+      source: a.source,
+      category: 'markets',
+      symbol,
+      sentiment: scoreSentiment(`${a.title} ${a.summary}`),
+      imageUrl: a.imageUrl,
+      url: a.url,
+      publishedAt: a.publishedAt,
+      read: false,
+      bookmarked: false,
+    }));
+
+    res.json({
+      articles,
+      totalResults: result.totalResults,
+      source: result.provider,
+      preferredProvider: getPreferredProvider(),
+    });
   } catch (error: unknown) {
-    res.status(500).json({ error: (error as Error).message || 'Failed to fetch news for symbol' });
+    console.error('[News] /news/symbol handler error:', (error as Error).message);
+    res.json({ articles: [], totalResults: 0, source: 'none' });
   }
 });
 
 export default router;
+
+// ─── Shared sentiment heuristic ───────────────────────────────────────
+
+function scoreSentiment(text: string): 'positive' | 'negative' | 'neutral' {
+  const lower = text.toLowerCase();
+  const positiveWords = ['surge', 'rally', 'gain', 'profit', 'growth', 'bullish', 'record', 'beat', 'strong'];
+  const negativeWords = ['fall', 'drop', 'loss', 'decline', 'bearish', 'crash', 'slowdown', 'fear', 'risk'];
+
+  let score = 0;
+  for (const w of positiveWords) if (lower.includes(w)) score++;
+  for (const w of negativeWords) if (lower.includes(w)) score--;
+
+  return score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral';
+}

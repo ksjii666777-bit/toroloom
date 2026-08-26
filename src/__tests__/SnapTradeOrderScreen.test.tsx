@@ -64,6 +64,11 @@ vi.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
+// Mock navigation focus effect (screen now re-checks broker status on focus)
+vi.mock('@react-navigation/native', () => ({
+  useFocusEffect: (cb: any) => cb(),
+}));
+
 // Mock AnimatedPressable — forwards onPress so fireEvent.press works
 vi.mock('../components/ui/AnimatedPressable', () => ({
   default: ({ onPress, children }: any) =>

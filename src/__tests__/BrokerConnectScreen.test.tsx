@@ -27,6 +27,10 @@ const mockGoBack = vi.fn();
 const mockApiGet = vi.fn();
 const mockApiPost = vi.fn();
 const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false })));
+const mockSnapTradeRegister = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true })));
+const mockSnapTradeGetConnectLink = vi.hoisted(() =>
+  vi.fn(() => Promise.resolve({ oauthUrl: 'https://app.snaptrade.com/connect?token=x', redirectUri: 'toroloom://snaptrade/callback' })),
+);
 
 vi.mock('../services/api', () => ({
   api: {
@@ -35,8 +39,9 @@ vi.mock('../services/api', () => ({
   },
   snapTradeApi: {
     status: mockSnapTradeStatus,
-    register: vi.fn(() => Promise.resolve({ success: true })),
-    getConnectLink: vi.fn(() => Promise.resolve({ oauthUrl: '' })),
+    register: mockSnapTradeRegister,
+    getConnectLink: mockSnapTradeGetConnectLink,
+    handleCallback: vi.fn(() => Promise.resolve({ success: true })),
     disconnect: vi.fn(() => Promise.resolve()),
   },
 }));
@@ -357,6 +362,8 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     mockGoBack.mockClear();
     mockApiGet.mockReset();
     mockApiPost.mockReset();
+    mockSnapTradeRegister.mockClear();
+    mockSnapTradeGetConnectLink.mockClear();
     mockApiGet.mockResolvedValue({
       connected: false,
       brokerType: null,
@@ -370,7 +377,7 @@ describe('BrokerConnectScreen — Connect Flow', () => {
   });
 
   it('shows connecting overlay when tapping Angel One', async () => {
-    const { getByText } = render(
+    const { getByText, queryByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
@@ -379,11 +386,15 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     act(() => { fireEvent.press(getByText('Angel One')); });
     await advanceAndFlush();
 
-    // Connecting overlay should appear (SnapTrade connect)
-    expect(getByText('Connecting...')).toBeDefined();
+    // FIX: real OAuth flow — register + connect-link are called, then the
+    // SnapTrade portal opens in the WebView. The fake "Connected ✓" overlay
+    // must NOT appear (that was the old broken behaviour).
+    expect(mockSnapTradeRegister).toHaveBeenCalled();
+    expect(mockSnapTradeGetConnectLink).toHaveBeenCalled();
+    expect(queryByText("You're Connected!")).toBeNull();
   });
 
-  it('shows connecting overlay when Angel is selected (SnapTrade connect)', async () => {
+  it('opens the SnapTrade portal in the WebView when Angel is selected', async () => {
     const { getByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
@@ -392,7 +403,10 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     act(() => { fireEvent.press(getByText('Angel One')); });
     await advanceAndFlush();
 
-    expect(getByText('Connecting...')).toBeDefined();
+    // The flow must reach the point where the SnapTrade portal URL was
+    // requested and received — i.e. register + getConnectLink both completed.
+    expect(mockSnapTradeRegister).toHaveBeenCalledTimes(1);
+    expect(mockSnapTradeGetConnectLink).toHaveBeenCalledTimes(1);
   });
 
   it('does not show old credentials modal for SnapTrade brokers', async () => {
@@ -419,8 +433,9 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     act(() => { fireEvent.press(getByText('Zerodha')); });
     await advanceAndFlush();
 
-    // Should show connecting overlay
-    expect(getByText('Connecting...')).toBeDefined();
+    // Should call register + getConnectLink (the real OAuth handshake)
+    expect(mockSnapTradeRegister).toHaveBeenCalled();
+    expect(mockSnapTradeGetConnectLink).toHaveBeenCalled();
   });
 });
 

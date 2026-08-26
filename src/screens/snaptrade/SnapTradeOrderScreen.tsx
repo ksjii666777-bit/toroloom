@@ -38,6 +38,7 @@ import TradingViewChart from '../../components/TradingViewChart';
 import PositionLevelsOverlay from '../../components/PositionLevelsOverlay';
 import { tickerProvider, useTicker, useExecutionPrice } from '../../services/tickerProvider';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import type { RootStackParamList } from '../../types';
 
 
@@ -139,13 +140,27 @@ export default function SnapTradeOrderScreen({ route, navigation }: NativeStackS
   }, [symbol]);
 
   // ── Broker connection status → read-only mode flag ───────────────────
+  // FIX: re-checks when the screen regains focus so a broker connected from
+  // another screen (or the OAuth WebView) flips this screen out of read-only
+  // without a manual remount. Previously the status was fetched exactly once
+  // on mount and the banner could never clear.
   useEffect(() => {
     let mounted = true;
     snapTradeApi.status()
-      .then((s) => { if (mounted) setIsBrokerConnected(s.connected); })
+      .then((s) => { if (mounted) setIsBrokerConnected(!!s.connected); })
       .catch(() => { /* broker API down — stays read-only */ });
     return () => { mounted = false; };
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      snapTradeApi.status()
+        .then((s) => { if (mounted) setIsBrokerConnected(!!s.connected); })
+        .catch(() => {});
+      return () => { mounted = false; };
+    }, []),
+  );
 
   // ── Single execution-price feed (WS primary, simulated fallback) ─────
   useEffect(() => {
@@ -374,10 +389,18 @@ export default function SnapTradeOrderScreen({ route, navigation }: NativeStackS
         {/* ── Live TradingView chart + position levels (hybrid) ── */}
         <Animated.View entering={FadeInUp.duration(250)} style={styles.chartSection}>
           {!isBrokerConnected && (
-            <View style={[styles.readOnlyBanner, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Ionicons name="eye-outline" size={13} color={colors.textMuted} />
-              <Text style={[styles.readOnlyText, { color: colors.textMuted }]}>{t('trading.chartReadOnly')}</Text>
-            </View>
+            <Pressable
+              onPress={() => navigation.navigate('BrokerConnect' as never)}
+              accessibilityRole="button"
+              accessibilityLabel={t('trading.chartReadOnly')}
+              testID="readOnlyBanner"
+            >
+              <View style={[styles.readOnlyBanner, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="eye-outline" size={13} color={colors.textMuted} />
+                <Text style={[styles.readOnlyText, { color: colors.textMuted, flex: 1 }]}>{t('trading.chartReadOnly')}</Text>
+                <Ionicons name="chevron-forward" size={13} color={colors.primary} />
+              </View>
+            </Pressable>
           )}
 
           {!symbol.trim() ? (

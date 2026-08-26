@@ -218,6 +218,9 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
         const result = await newsApi.getNews({ pageSize: 4 });
         if (mounted && result.articles?.length > 0) {
           setLiveNews(result.articles);
+        } else if (mounted) {
+          // FIX: zero articles from backend → use bundled mock content
+          setLiveNews(mockNews.slice(0, 4));
         }
       } catch {
         // Use mock data as fallback

@@ -541,8 +541,12 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
       setIsLoadingNews(true);
       try {
         const result = await newsApi.getNews({ pageSize: 30 });
-        if (mounted && result.articles) {
+        if (mounted && result.articles && result.articles.length > 0) {
           setNews(result.articles);
+        } else if (mounted) {
+          // FIX: Backend reachable but zero articles (all news providers
+          // down/blocked). Show bundled content instead of an empty feed.
+          setNews(mockNews);
         }
       } catch {
         // API failed — fall back to mock data

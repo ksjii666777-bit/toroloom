@@ -256,9 +256,12 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
   // SnapTrade specific state
   const [isConnectingSnapTrade, setIsConnectingSnapTrade] = useState(false);
-  const [_snapTradeOauthUrl, setSnapTradeOauthUrl] = useState<string | null>(null);
 
   // ── Open SnapTrade Connect ────────────────────────────────
+  // FIX: The OAuth URL is now ACTUALLY opened in the in-app WebView.
+  // Previously it was stored in an unused variable and a fake "Connected ✓"
+  // overlay fired after 500ms without any OAuth flow ever starting — which
+  // is why broker connect never worked from this screen.
   const openSnapTradeConnect = useCallback(async (broker: BrokerMeta) => {
     setSelectedBroker(broker);
     setIsConnectingSnapTrade(true);
@@ -267,25 +270,25 @@ export default function BrokerConnectScreen({ navigation }: any) {
     try {
       await snapTradeApi.register();
       const linkResult = await snapTradeApi.getConnectLink();
-      if (linkResult.oauthUrl) {
-        setSnapTradeOauthUrl(linkResult.oauthUrl);
-        setTimeout(() => {
-          setIsConnectingSnapTrade(false);
-          setConnectionState({
-            connected: true,
-            brokerType: broker.type,
-            label: broker.label,
-            connectedAt: new Date().toISOString(),
-            isLoading: false,
-          });
-          showConnectedSuccess();
-        }, 500);
+
+      if (!linkResult?.oauthUrl) {
+        setIsConnectingSnapTrade(false);
+        Alert.alert(
+          t('brokerConnect.connectionFailed'),
+          t('brokerConnect.noOauthUrl'),
+        );
+        return;
       }
+
+      // Launch the real SnapTrade connection portal inside the WebView.
+      setWebViewUrl(linkResult.oauthUrl);
+      setShowWebView(true);
+      setIsConnectingSnapTrade(false); // WebView is now visible — hide overlay
     } catch (err: any) {
       setIsConnectingSnapTrade(false);
       Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedSnapTrade'));
     }
-  }, [showConnectedSuccess, t]);
+  }, [t]);
 
   // ── Open OAuth WebView (Zerodha — legacy fallback) ────────
   const _openOAuthWebView = useCallback(async (broker: BrokerMeta) => {
@@ -352,15 +355,52 @@ export default function BrokerConnectScreen({ navigation }: any) {
     );
   }, [connectionState, t]);
 
-  // ── WebView navigation handler (extract request_token) ─────
+  // ── WebView navigation handler (SnapTrade OAuth + Zerodha legacy) ──────
   const handleWebViewNav = useCallback((navState: any) => {
     const { url } = navState;
+    if (!url) return;
 
-    // Zerodha redirects to a URL with request_token after login.
-    // Only act when we see the token — ignore intermediate navigation events.
+    // ── 1. SnapTrade flow: portal redirects back to our deep link with the
+    //      authorizationId once the broker connection completes.
+    if (url.includes('snaptrade/callback') || url.includes('authorizationId=')) {
+      try {
+        // Custom-scheme URLs (toroloom://...) are not parseable by `new URL`
+        // in RN without a base, so extract params manually.
+        const qIndex = url.indexOf('?');
+        const params = new URLSearchParams(qIndex >= 0 ? url.slice(qIndex + 1) : '');
+        const authorizationId = params.get('authorizationId');
+
+        if (authorizationId) {
+          setShowWebView(false);
+          setIsConnectingSnapTrade(true);
+          snapTradeApi.handleCallback(authorizationId)
+            .then(() => {
+              setIsConnectingSnapTrade(false);
+              showConnectedSuccess();
+            })
+            .catch((err: any) => {
+              setIsConnectingSnapTrade(false);
+              Alert.alert(
+                t('brokerConnect.connectionFailed'),
+                err.message || t('brokerConnect.failedSnapTrade'),
+              );
+              loadStatus();
+            });
+        } else {
+          // Redirect reached without an id — user may have cancelled.
+          setShowWebView(false);
+          loadStatus();
+        }
+      } catch {
+        setShowWebView(false);
+        loadStatus();
+      }
+      return;
+    }
+
+    // ── 2. Zerodha legacy flow: request_token extraction ──
     if (!url.includes('request_token=') && !url.includes('status=success')) return;
 
-    // Extract the request_token from the URL and connect directly
     try {
       const parsed = new URL(url);
       const token = parsed.searchParams.get('request_token');
@@ -372,7 +412,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
       setShowWebView(false);
       loadStatus();
     }
-  }, [handleOAuthConnect, loadStatus]);
+  }, [handleOAuthConnect, loadStatus, showConnectedSuccess, t]);
 
   // ── WebView error handler ──────────────────────────────────
   const handleWebViewError = useCallback(() => {
@@ -581,6 +621,18 @@ export default function BrokerConnectScreen({ navigation }: any) {
               source={{ uri: webViewUrl }}
               style={styles.webView}
               onNavigationStateChange={handleWebViewNav}
+              onShouldStartLoadWithRequest={(request) => {
+                // Intercept our deep-link callback (toroloom://snaptrade/callback)
+                // BEFORE Android tries to load an unknown custom scheme.
+                if (
+                  request.url.includes('snaptrade/callback') ||
+                  request.url.includes('authorizationId=')
+                ) {
+                  handleWebViewNav({ url: request.url });
+                  return false;
+                }
+                return true;
+              }}
               onError={handleWebViewError}
               javaScriptEnabled
               domStorageEnabled

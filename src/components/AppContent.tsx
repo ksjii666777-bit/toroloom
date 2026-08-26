@@ -47,6 +47,30 @@ function AppContent() {
     }
   }, [isLoggedIn, loadOnboarding, loadStoredAuth, loadSubscription]);
 
+  // ── FIX: Fresh market data on launch + periodic refresh ────────────────
+  // Previously the app ONLY loaded AsyncStorage cache at startup and never
+  // fetched fresh prices until the user manually pulled-to-refresh on the
+  // Markets tab — so prices looked frozen/stale. Now:
+  //   1. One fresh fetch shortly after launch (cache still shows instantly)
+  //   2. A 60s polling interval keeps lists in sync with the live backend
+  //      (the per-stock WebSocket tick feed is unaffected by this)
+  useEffect(() => {
+    // Initial fresh fetch — small delay lets the first render use cache first
+    const initialTimer = setTimeout(() => {
+      useMarketStore.getState().refreshMarket();
+    }, 1500);
+
+    // Periodic refresh every 60s
+    const interval = setInterval(() => {
+      useMarketStore.getState().refreshMarket();
+    }, 60_000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, []);
+
   // Wire up the risk store to the WebSocket risk bridge
   useEffect(() => {
     if (isLoggedIn) {
