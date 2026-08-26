@@ -185,7 +185,13 @@ function decodeEntities(text: string): string {
 }
 
 function stripTags(html: string): string {
-  return decodeEntities(html.replace(/<[^>]*>/g, '')).trim();
+  // IMPORTANT: decode entities BEFORE stripping tags. Google News escapes its
+  // description markup (&lt;a href=...&gt;), so stripping first would miss
+  // them and decoding after would resurrect literal "<a href..." text.
+  return decodeEntities(html)
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 function categoryToQuery(category?: NewsCategory, fallbackQ?: string): string {
