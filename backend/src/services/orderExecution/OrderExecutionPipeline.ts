@@ -174,8 +174,26 @@ export class OrderExecutionPipeline {
       productType,
       isFNO: exchange === 'NFO' || Boolean(metadata?.fno),
       currentPosition: params.currentPosition,
-      portfolioValue: 0, // Will be fetched from profile
+      portfolioValue: 0, // Seeded below from live holdings
     };
+
+    // ── Seed the risk engine with real portfolio value ────────────────
+    // FIX: this used to hardcode 0. The RiskEngine only seeds
+    // portfolioValueAtOpen when context.portfolioValue > 0, so for users who
+    // never had a market-open sync the max-position-size gate compared every
+    // BUY against ₹0 and blocked ALL orders ("exceeds max position size of
+    // ₹0"). Compute the value from live holdings and let evaluate() seed it.
+    try {
+      const broker = await getBroker();
+      const holdings = await broker.getHoldings();
+      const liveValue = holdings.reduce(
+        (sum, h) => sum + (Number(h.quantity) || 0) * (Number(h.currentPrice) || 0),
+        0,
+      );
+      if (liveValue > 0) orderContext.portfolioValue = liveValue;
+    } catch {
+      // Holdings unavailable — leave 0; evaluate() falls back to its profile.
+    }
 
     // ──────────────────────────────────────────────────────────
     // STEP 1: Audit — Order Started
