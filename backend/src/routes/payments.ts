@@ -209,6 +209,8 @@ router.post('/verify', async (req: Request, res: Response) => {
     const { keySecret } = resolveRazorpayKeys(tenantId);
     const razorpay = getRazorpayClient(tenantId);
 
+    let fetchedPayment: { amount?: number; status?: string } | null = null;
+
     if (razorpay && keySecret) {
       // Verify signature using HMAC-SHA256
       const body = `${razorpayOrderId}|${razorpayPaymentId}`;
@@ -224,6 +226,7 @@ router.post('/verify', async (req: Request, res: Response) => {
 
       // Fetch payment details to confirm status
       const payment = await razorpay.payments.fetch(razorpayPaymentId);
+      fetchedPayment = payment as { amount?: number; status?: string };
       if (payment.status !== 'captured') {
         res.status(400).json({ error: `Payment not captured (status: ${payment.status})` });
         return;
@@ -260,8 +263,8 @@ router.post('/verify', async (req: Request, res: Response) => {
         }
 
         // Cross-check: Razorpay order amount vs consultation fee
-        if (razorpay && payment && (payment as any).amount !== undefined) {
-          const razorpayAmount = (payment as any).amount; // in paise from Razorpay
+        if (razorpay && fetchedPayment && fetchedPayment.amount !== undefined) {
+          const razorpayAmount = fetchedPayment.amount; // in paise from Razorpay
           const expectedPaise = Math.round(consultation.amount * 100);
           if (Math.abs(razorpayAmount - expectedPaise) > Math.max(expectedPaise * 0.01, 1)) {
             console.error(`[Payments] Amount mismatch! Razorpay order: ${razorpayAmount}p, consultation fee: ${expectedPaise}p`);

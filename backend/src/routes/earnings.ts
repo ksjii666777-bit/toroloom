@@ -61,7 +61,8 @@ router.get('/upcoming', async (_req: Request, res: Response) => {
 
 router.get('/:symbol', async (req: Request, res: Response) => {
   try {
-    const symbol = req.params.symbol?.toUpperCase().trim();
+    const rawSymbol = req.params.symbol;
+    const symbol = (Array.isArray(rawSymbol) ? rawSymbol[0] : rawSymbol)?.toUpperCase().trim();
     if (!symbol) {
       res.status(400).json({ success: false, error: 'Symbol is required' });
       return;
