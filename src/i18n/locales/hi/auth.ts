@@ -16,6 +16,7 @@ export default {
     confirmPassword: 'पासवर्ड की पुष्टि करें',
     confirmPasswordPlaceholder: 'पासवर्ड दोबारा दर्ज करें',
     forgotPassword: 'पासवर्ड भूल गए?',
+    forgotPasswordMessage: 'पासवर्ड रीसेट करने के लिए कृपया सहायता से संपर्क करें। हम आपके खाते तक पहुँचने में आपकी सहायता करेंगे।',
     noAccount: 'खाता नहीं है? ',
     hasAccount: 'पहले से खाता है? ',
     fullName: 'पूरा नाम',

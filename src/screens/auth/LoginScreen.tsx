@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, Pressable, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -103,7 +103,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             testID="login-password-input"
           />
 
-          <Pressable style={styles.forgotPassword}>
+          <Pressable style={styles.forgotPassword} onPress={() => Alert.alert(t('auth.forgotPassword'), t('auth.forgotPasswordMessage'), [{ text: 'OK' }])}>
             <Text style={styles.forgotText}>{t('auth.forgotPassword')}</Text>
           </Pressable>
 

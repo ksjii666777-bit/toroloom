@@ -16,6 +16,7 @@ export default {
     confirmPassword: 'Confirm Password',
     confirmPasswordPlaceholder: 'Re-enter your password',
     forgotPassword: 'Forgot Password?',
+    forgotPasswordMessage: 'Please contact support to reset your password. We\'ll help you regain access to your account.',
     noAccount: "Don't have an account? ",
     hasAccount: 'Already have an account? ',
     fullName: 'Full Name',
