@@ -115,24 +115,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             testID="login-btn"
           />
 
-          {/* Social Login */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>{t('auth.orContinueWith')}</Text>
-            <View style={styles.dividerLine} />
-          </View>
 
-          <View style={styles.socialRow}>
-            <Pressable style={styles.socialBtn}>
-              <Ionicons name="logo-google" size={24} color={colors.text} />
-            </Pressable>
-            <Pressable style={styles.socialBtn}>
-              <Ionicons name="logo-apple" size={24} color={colors.text} />
-            </Pressable>
-            <Pressable style={styles.socialBtn}>
-              <Ionicons name="logo-facebook" size={24} color={colors.text} />
-            </Pressable>
-          </View>
         </View>
 
         {/* Sign Up Link */}
@@ -217,37 +200,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.sm,
     color: colors.primary,
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.xxl,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.divider,
-  },
-  dividerText: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: colors.textMuted,
-    marginHorizontal: SPACING.lg,
-  },
-  socialRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.lg,
-  },
-  socialBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: colors.bgCard,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+
   signupSection: {
     flexDirection: 'row',
     justifyContent: 'center',
