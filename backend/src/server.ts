@@ -86,6 +86,10 @@ import bondsRoutes from './routes/bonds';
 import apiDocsRoutes from './routes/apiDocs';
 import apiKeyRoutes from './routes/apiKeys';
 import publicApiRoutes from './routes/publicApi';
+import gdprRoutes from './routes/gdpr';
+import ogPreviewRoutes from './routes/ogPreview';
+import appLinksRoutes from './routes/appLinks';
+import shareAnalyticsRoutes from './routes/shareAnalytics';
 import { advisorsRoutes, consultationsRoutes } from './routes/advisors';
 import { setWSS, getFailureCount, SEND_FAILURE_THRESHOLD } from './services/syncInvalidationBridge';
 
@@ -167,6 +171,14 @@ app.get('/terms', (_req, res) => {
 app.get('/legal', (_req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
+
+// ============ Open Graph Preview (social media share cards) ============
+// Serves HTML with OG meta tags for crawlers, redirects real users to app
+app.use('/og', ogPreviewRoutes);
+
+// ============ App Links Verification ============
+// Verify iOS Universal Links and Android App Links setup
+app.use('/api/app-links', appLinksRoutes);
 
 // ============ Prometheus Metrics ============
 
@@ -325,6 +337,12 @@ app.use('/api/v1', readLimiter, publicApiRoutes);
 
 // ── Analytics — 200 req / min — Redis-cached endpoints ─────────────────────
 app.use('/api/analytics', readLimiter, authMiddleware, requireSubscription('pro'), analyticsRoutes);
+
+// ── Share Analytics — track share events ──────────────────────────────
+app.use('/api/analytics/share', shareAnalyticsRoutes);
+
+// ── GDPR Compliance — data export/delete ──────────────────────────────
+app.use('/api/gdpr', writeLimiter, authMiddleware, gdprRoutes);
 
 // ── Advisory Marketplace — public reads + auth bookings ───────────────────
 app.use('/api/advisors', readLimiter, advisorsRoutes);

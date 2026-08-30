@@ -54,7 +54,8 @@ describe('Auth — password validation (mock store)', () => {
       .send({ name: 'Test User', email: 'new-user@toroloom.com', phone: '+91 99999 00000' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('password');
+    expect(res.body.error).toBe('Validation failed');
+    expect(res.body.details).toBeDefined();
   });
 
   it('signup creates a login-able account, duplicate email is 409', async () => {

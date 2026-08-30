@@ -3,11 +3,48 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAM_ID.com.anonymous.Toroloom",
+        "appID": "TEAM_ID.com.toroloom.app",
         "paths": [
+          "/og/stock/*",
+          "/og/post/*",
+          "/og/course/*",
+          "/og/advisor/*",
+          "/og/share/*",
+          "/stock/*",
+          "/post/*",
+          "/course/*",
+          "/advisor/*",
+          "/signup*",
+          "/privacy",
+          "/terms"
+        ]
+      },
+      {
+        "appID": "TEAM_ID.com.toroloom.app.debug",
+        "paths": [
+          "/og/stock/*",
+          "/og/post/*",
+          "/og/course/*",
+          "/og/advisor/*",
+          "/og/share/*",
+          "/stock/*",
+          "/post/*",
+          "/course/*",
+          "/advisor/*",
           "/signup*"
         ]
       }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAM_ID.com.toroloom.app",
+      "TEAM_ID.com.toroloom.app.debug"
+    ]
+  },
+  "appclips": {
+    "apps": [
+      "TEAM_ID.com.toroloom.app.Clip"
     ]
   }
 }

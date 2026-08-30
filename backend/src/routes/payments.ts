@@ -20,6 +20,16 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { env } from '../config/env';
 import { authMiddleware } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import {
+  createOrderSchema,
+  verifyPaymentSchema,
+  createMandateSchema,
+  createSubscriptionSchema,
+  createFundOrderSchema,
+  createPaidOrderSchema,
+  createConsultationOrderSchema,
+} from '../schemas/payments';
 
 const router = Router();
 router.use(authMiddleware);
@@ -80,9 +90,9 @@ function getRazorpayClient(tenantId?: string): Razorpay | null {
 // ============ POST /api/payments/create-order ============
 // Creates a Razorpay order for a subscription plan
 
-router.post('/create-order', async (req: Request, res: Response) => {
+router.post('/create-order', validate(createOrderSchema), async (req: Request, res: Response) => {
   try {
-    const { planId, billingPeriod = 'monthly', tenantId } = req.body;
+    const { planId, billingPeriod, tenantId } = req.body;
 
     const planAmounts = PLAN_AMOUNTS[planId];
     if (!planAmounts) {
@@ -133,19 +143,9 @@ router.post('/create-order', async (req: Request, res: Response) => {
 // ============ POST /api/payments/create-fund-order ============
 // Creates a Razorpay order for adding funds to the user's wallet
 
-router.post('/create-fund-order', async (req: Request, res: Response) => {
+router.post('/create-fund-order', validate(createFundOrderSchema), async (req: Request, res: Response) => {
   try {
-    const { amount, currency = 'INR' } = req.body;
-
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
-      res.status(400).json({ error: 'A valid positive amount is required' });
-      return;
-    }
-
-    if (amount < 500) {
-      res.status(400).json({ error: 'Minimum add amount is ₹500' });
-      return;
-    }
+    const { amount, currency } = req.body;
 
     if (amount > 500000) {
       res.status(400).json({ error: 'Maximum add amount is ₹5,00,000 per transaction' });
@@ -192,19 +192,9 @@ router.post('/create-fund-order', async (req: Request, res: Response) => {
 // ============ POST /api/payments/verify ============
 // Verifies a completed Razorpay payment (supports both subscription & fund-add)
 
-router.post('/verify', async (req: Request, res: Response) => {
+router.post('/verify', validate(verifyPaymentSchema), async (req: Request, res: Response) => {
   try {
     const { razorpayPaymentId, razorpayOrderId, razorpaySignature, planId, tenantId, type } = req.body;
-
-    if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
-      res.status(400).json({ error: 'Missing required payment fields' });
-      return;
-    }
-
-    if (!planId && type !== 'fund_add' && type !== 'consultation') {
-      res.status(400).json({ error: 'Missing planId for subscription payment' });
-      return;
-    }
 
     const { keySecret } = resolveRazorpayKeys(tenantId);
     const razorpay = getRazorpayClient(tenantId);
@@ -342,9 +332,9 @@ router.post('/verify', async (req: Request, res: Response) => {
 // ============ POST /api/payments/create-subscription ============
 // Creates a Razorpay subscription (recurring payment) for UPI AutoPay
 
-router.post('/create-subscription', async (req: Request, res: Response) => {
+router.post('/create-subscription', validate(createSubscriptionSchema), async (req: Request, res: Response) => {
   try {
-    const { planId, billingPeriod = 'monthly', totalCount, tenantId } = req.body;
+    const { planId, billingPeriod, totalCount, tenantId } = req.body;
 
     const planAmounts = PLAN_AMOUNTS[planId];
     if (!planAmounts) {
@@ -425,9 +415,9 @@ router.post('/create-subscription', async (req: Request, res: Response) => {
 // ============ POST /api/payments/create-mandate ============
 // Creates a Razorpay UPI mandate for UPI AutoPay recurring payments
 
-router.post('/create-mandate', async (req: Request, res: Response) => {
+router.post('/create-mandate', validate(createMandateSchema), async (req: Request, res: Response) => {
   try {
-    const { planId, billingPeriod = 'monthly', _customerName, _customerEmail, _customerContact, tenantId } = req.body;
+    const { planId, billingPeriod, customerName, customerEmail, customerContact, tenantId } = req.body;
 
     const planAmounts = PLAN_AMOUNTS[planId];
     if (!planAmounts) {
@@ -482,14 +472,9 @@ router.post('/create-mandate', async (req: Request, res: Response) => {
 // ============ POST /api/payments/create-paid-order ============
 // Creates a direct order for one-time payment (used for UPI app redirect)
 
-router.post('/create-paid-order', async (req: Request, res: Response) => {
+router.post('/create-paid-order', validate(createPaidOrderSchema), async (req: Request, res: Response) => {
   try {
-    const { amount, currency = 'INR', receipt } = req.body;
-
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
-      res.status(400).json({ error: 'A valid positive amount is required' });
-      return;
-    }
+    const { amount, currency, receipt } = req.body;
 
     const razorpay = getRazorpayClient();
     const { keyId } = resolveRazorpayKeys();
@@ -530,14 +515,9 @@ router.post('/create-paid-order', async (req: Request, res: Response) => {
 // ============ POST /api/payments/create-consultation-order ============
 // Creates a Razorpay order for an advisory consultation booking
 
-router.post('/create-consultation-order', async (req: Request, res: Response) => {
+router.post('/create-consultation-order', validate(createConsultationOrderSchema), async (req: Request, res: Response) => {
   try {
     const { consultationId, amount, advisorName, advisorId } = req.body;
-
-    if (!consultationId || typeof amount !== 'number' || amount <= 0) {
-      res.status(400).json({ error: 'consultationId and a valid positive amount are required' });
-      return;
-    }
 
     // ── Validate amount against the advisor's consultationFee in the DB ──
     if (advisorId) {

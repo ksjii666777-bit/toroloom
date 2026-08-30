@@ -39,6 +39,8 @@
 
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { executeOrderSchema, validateOrderSchema, modifyOrderSchema, cancelOrderSchema } from '../schemas/orders';
 import { getBroker } from '../services/broker';
 import {
   orderPipeline,
@@ -66,7 +68,7 @@ router.use(authMiddleware);
  *   orderType    — "LIMIT" | "MARKET" | "SL" | "SLM" (default: "MARKET")
  *   metadata     — Arbitrary object for custom hooks (optional)
  */
-router.post('/execute', async (req: Request, res: Response) => {
+router.post('/execute', validate(executeOrderSchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
     const {
@@ -82,88 +84,13 @@ router.post('/execute', async (req: Request, res: Response) => {
       idempotencyKey,
     } = req.body;
 
-    // ──────────────────────────────────────────────────────────────
-    // INPUT VALIDATION
-    // ──────────────────────────────────────────────────────────────
-
     // Backward compatibility: accept transactionType (old) as alias for actionType
-    const resolvedAction = (actionType || transactionType) as string | undefined;
-
-    if (!resolvedAction) {
-      res.status(400).json({ error: 'actionType is required (BUY | SELL | SQUARE_OFF | MODIFY | CANCEL)' });
-      return;
-    }
-
+    const resolvedAction = (actionType || transactionType) as string;
     const normalizedAction = resolvedAction.toUpperCase() as OrderActionType;
-    if (!Object.values(OrderActionType).includes(normalizedAction)) {
-      res.status(400).json({
-        error: `Invalid actionType. Must be one of: ${Object.values(OrderActionType).join(', ')}`,
-      });
-      return;
-    }
-
-    if (!symbol || typeof symbol !== 'string') {
-      res.status(400).json({ error: 'symbol is required (e.g., "RELIANCE")' });
-      return;
-    }
-
-    if (quantity === undefined || typeof quantity !== 'number' || quantity <= 0 || !Number.isInteger(quantity)) {
-      res.status(400).json({ error: 'quantity is required and must be a positive integer' });
-      return;
-    }
-
-    if (price === undefined || typeof price !== 'number' || price <= 0) {
-      res.status(400).json({ error: 'price is required and must be a positive number' });
-      return;
-    }
-
-    // ──────────────────────────────────────────────────────────────
-    // IDEMPOTENCY KEY (optional for backward compatibility)
-    // ──────────────────────────────────────────────────────────────
-    // Client retries after a lost response reuse the same key; the server
-    // returns the ORIGINAL result instead of executing a duplicate order.
-    let normalizedIdempotencyKey: string | undefined;
-    if (idempotencyKey !== undefined && idempotencyKey !== null) {
-      normalizedIdempotencyKey = String(idempotencyKey);
-      if (normalizedIdempotencyKey.length < 8 || normalizedIdempotencyKey.length > 128) {
-        res.status(400).json({
-          error: 'idempotencyKey must be a string between 8 and 128 characters',
-        });
-        return;
-      }
-    }
-
-    // ──────────────────────────────────────────────────────────────
-    // VALIDATE OPTIONAL FIELDS
-    // ──────────────────────────────────────────────────────────────
-
-    const VALID_EXCHANGES = ['NSE', 'BSE', 'NFO', 'BFO', 'CDS', 'MCX'] as const;
-    const VALID_ORDER_TYPES = ['LIMIT', 'MARKET', 'SL', 'SLM'] as const;
-    const VALID_PRODUCT_TYPES = ['CNC', 'MIS', 'NRML'] as const;
-
-    const normalizedExchange = exchange ? (exchange as string).toUpperCase() : 'NSE';
-    if (exchange !== undefined && !VALID_EXCHANGES.includes(normalizedExchange as any)) {
-      res.status(400).json({
-        error: `Invalid exchange. Must be one of: ${VALID_EXCHANGES.join(', ')}`,
-      });
-      return;
-    }
-
-    const normalizedProductType = productType ? (productType as string).toUpperCase() : 'CNC';
-    if (productType !== undefined && !VALID_PRODUCT_TYPES.includes(normalizedProductType as any)) {
-      res.status(400).json({
-        error: `Invalid productType. Must be one of: ${VALID_PRODUCT_TYPES.join(', ')}`,
-      });
-      return;
-    }
-
-    const normalizedOrderType = orderType ? (orderType as string).toUpperCase() : 'MARKET';
-    if (orderType !== undefined && !VALID_ORDER_TYPES.includes(normalizedOrderType as any)) {
-      res.status(400).json({
-        error: `Invalid orderType. Must be one of: ${VALID_ORDER_TYPES.join(', ')}`,
-      });
-      return;
-    }
+    const normalizedExchange = (exchange || 'NSE').toUpperCase();
+    const normalizedProductType = (productType || 'CNC').toUpperCase();
+    const normalizedOrderType = (orderType || 'MARKET').toUpperCase();
+    const normalizedIdempotencyKey = idempotencyKey ? String(idempotencyKey) : undefined;
 
     // ──────────────────────────────────────────────────────────────
     // SERVER-SIDE POSITION LOOKUP (Exit-Exception Support)
@@ -235,23 +162,12 @@ router.post('/execute', async (req: Request, res: Response) => {
  *
  * Body schema matches POST /execute (same validation rules).
  */
-router.post('/validate', async (req: Request, res: Response) => {
+router.post('/validate', validate(validateOrderSchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
     const { actionType, symbol, quantity, price, exchange } = req.body;
 
-    if (!actionType) {
-      res.status(400).json({ error: 'actionType is required' });
-      return;
-    }
-
     const normalizedAction = (actionType as string).toUpperCase() as OrderActionType;
-    if (!Object.values(OrderActionType).includes(normalizedAction)) {
-      res.status(400).json({
-        error: `Invalid actionType. Must be one of: ${Object.values(OrderActionType).join(', ')}`,
-      });
-      return;
-    }
 
     // ──────────────────────────────────────────────────────────────
     // SERVER-SIDE POSITION LOOKUP (mirrors /execute logic)
@@ -277,9 +193,9 @@ router.post('/validate', async (req: Request, res: Response) => {
 
     const evaluation = riskEngine.evaluate(userId, {
       actionType: normalizedAction,
-      symbol: (symbol as string || '').trim().toUpperCase(),
-      quantity: quantity ? parseInt(quantity as string, 10) : undefined,
-      price: price ? parseFloat(price as string) : undefined,
+      symbol: ((symbol as string) || '').trim().toUpperCase(),
+      quantity: typeof quantity === 'number' ? quantity : (quantity ? parseInt(quantity as string, 10) : undefined),
+      price: typeof price === 'number' ? price : (price ? parseFloat(price as string) : undefined),
       portfolioValue,
       currentPosition,
       // Mirror /execute: F&O orders get the allowFNO gate in pre-checks too
@@ -329,39 +245,9 @@ router.get('/open', async (_req: Request, res: Response) => {
  *   symbol      — Trading symbol (optional, for token resolution)
  *   exchange    — Exchange: NSE | BSE (optional, default: NSE)
  */
-router.post('/modify', async (req: Request, res: Response) => {
+router.post('/modify', validate(modifyOrderSchema), async (req: Request, res: Response) => {
   try {
     const { orderId, symbol, exchange, quantity, price, productType, orderType, triggerPrice } = req.body;
-
-    if (!orderId || typeof orderId !== 'string') {
-      res.status(400).json({ error: 'orderId is required' });
-      return;
-    }
-
-    // Validate optional enum fields if provided
-    const VALID_ORDER_TYPES = ['LIMIT', 'MARKET', 'SL', 'SLM'] as const;
-    const VALID_PRODUCT_TYPES = ['CNC', 'MIS', 'NRML'] as const;
-
-    if (orderType && !VALID_ORDER_TYPES.includes(orderType as any)) {
-      res.status(400).json({ error: `Invalid orderType. Must be one of: ${VALID_ORDER_TYPES.join(', ')}` });
-      return;
-    }
-    if (productType && !VALID_PRODUCT_TYPES.includes(productType as any)) {
-      res.status(400).json({ error: `Invalid productType. Must be one of: ${VALID_PRODUCT_TYPES.join(', ')}` });
-      return;
-    }
-    if (quantity !== undefined && (typeof quantity !== 'number' || quantity <= 0 || !Number.isInteger(quantity))) {
-      res.status(400).json({ error: 'quantity must be a positive integer' });
-      return;
-    }
-    if (price !== undefined && (typeof price !== 'number' || price <= 0)) {
-      res.status(400).json({ error: 'price must be a positive number' });
-      return;
-    }
-    if (triggerPrice !== undefined && (typeof triggerPrice !== 'number' || triggerPrice <= 0)) {
-      res.status(400).json({ error: 'triggerPrice must be a positive number' });
-      return;
-    }
 
     const broker = await getBroker();
     const result = await broker.modifyOrder({
@@ -410,14 +296,9 @@ router.post('/modify', async (req: Request, res: Response) => {
  *   symbol   — Trading symbol (optional)
  *   exchange — Exchange (optional)
  */
-router.post('/cancel', async (req: Request, res: Response) => {
+router.post('/cancel', validate(cancelOrderSchema), async (req: Request, res: Response) => {
   try {
     const { orderId, symbol, exchange } = req.body;
-
-    if (!orderId || typeof orderId !== 'string') {
-      res.status(400).json({ error: 'orderId is required' });
-      return;
-    }
 
     const broker = await getBroker();
     const result = await broker.cancelOrder({ orderId, symbol, exchange });

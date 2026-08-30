@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { stockOGUrl } from '../../utils/deepLinks';
+import { showShareSheet, type ShareContent } from '../../utils/share';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useMarketStore } from '../../store/marketStore';
@@ -14,6 +16,7 @@ import CandlestickChart, { ChartType } from '../../components/CandlestickChart';
 import TechnicalIndicators from '../../components/TechnicalIndicators';
 import type { IndicatorType } from '../../components/TechnicalIndicators';
 import { DrawingToolbar, type DrawingAnnotation, type DrawingToolType } from '../../components/chart/DrawingTools';
+import DrawingTemplates from '../../components/chart/DrawingTemplates';
 import { detectPatterns , type DetectedPattern } from '../../components/chart/patternDetection';
 import { usePatternSettingsStore } from '../../store/patternSettingsStore';
 import PatternSettingsModal from '../../components/stock/PatternSettingsModal';
@@ -41,6 +44,7 @@ import { openExitOrder } from '../../utils/orderExit';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 import AppScreen from '../../components/ui/AppScreen';
+import SEBIComplianceBanner, { TradingRiskDisclosure } from '../../components/ui/SEBIComplianceBanner';
 
 
 const { width } = Dimensions.get('window');
@@ -103,6 +107,7 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
   const [activeDrawTool, setActiveDrawTool] = useState<DrawingToolType>('none');
   const [showPatterns, setShowPatterns] = useState(false);
   const [showPatternSettings, setShowPatternSettings] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // ── Sector Performance Data ──
@@ -200,6 +205,11 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
     setActiveTimeframe(tf);
     loadHistory(tf);
   }, [loadHistory]);
+
+  const handleApplyTemplate = useCallback((templateDrawings: DrawingAnnotation[]) => {
+    setDrawings(prev => [...prev, ...templateDrawings]);
+    setEnableDrawing(true);
+  }, []);
 
   const handleIndicatorToggle = useCallback((type: IndicatorType) => {
     setActiveIndicators(prev =>
@@ -307,6 +317,23 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
                   size={24}
                   color={inWatchlist ? colors.secondary : colors.text}
                 />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.watchlistBtn}
+                onPress={() => {
+                  const ogUrl = stockOGUrl(stock.symbol);
+                  const content: ShareContent = {
+                    title: `${stock.symbol} — ${stock.name}`,
+                    message: `${stock.name} (${stock.symbol}) is trading at ₹${displayPrice.toFixed(2)} (${displayChangePercent >= 0 ? '+' : ''}${displayChangePercent.toFixed(2)}%)`,
+                    url: ogUrl,
+                    contentType: 'stock',
+                    contentId: stock.id,
+                    contentSymbol: stock.symbol,
+                  };
+                  showShareSheet(content);
+                }}
+              >
+                <Ionicons name="share-outline" size={22} color={colors.text} />
               </TouchableOpacity>
             </View>
           </View>
@@ -453,13 +480,21 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
                 {/* Drawing Toolbar */}
                 {enableDrawing && (
                   <View style={{ marginBottom: SPACING.sm }}>
-                    <DrawingToolbar
-                      activeTool={activeDrawTool}
-                      onToolChange={setActiveDrawTool}
-                      colors={colors}
-                      drawingCount={drawings.length}
-                      onClearAll={() => setDrawings([])}
-                    />
+                    <View style={{ flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.sm }}>
+                      <DrawingToolbar
+                        activeTool={activeDrawTool}
+                        onToolChange={setActiveDrawTool}
+                        colors={colors}
+                        drawingCount={drawings.length}
+                        onClearAll={() => setDrawings([])}
+                      />
+                      <TouchableOpacity
+                        style={[styles.templatesBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                        onPress={() => setShowTemplates(true)}
+                      >
+                        <Ionicons name="bookmarks-outline" size={18} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
 
@@ -557,6 +592,9 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
             </View>
           </AnimatedPressable>
 
+          {/* SEBI Compliance Banner */}
+          <SEBIComplianceBanner variant="compact" dismissible={false} />
+
           {/* About Company */}
           <View testID="stock-about-company">
           <Card title={t('stockDetail.aboutCompany')} style={styles.aboutCard}>
@@ -640,6 +678,15 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
           tvOptions={chartOptions}
           activeIndicators={activeIndicators}
           onIndicatorToggle={handleIndicatorToggle}
+        />
+
+        {/* ── Drawing Templates Modal ── */}
+        <DrawingTemplates
+          visible={showTemplates}
+          onClose={() => setShowTemplates(false)}
+          spotPrice={displayPrice}
+          onApplyTemplate={handleApplyTemplate}
+          currentDrawings={drawings}
         />
       </AppScreen>
   );
@@ -865,5 +912,13 @@ const createStyles = (colors: any) =>
     },
     chartWrap: {
       position: 'relative',
+    },
+    templatesBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      borderWidth: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });

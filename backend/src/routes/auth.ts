@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { generateToken, authMiddleware } from '../middleware/auth';
 import { inputSanitizer, InputValidationError, sanitizeInput } from '../middleware/inputSanitizer';
+import { validate } from '../middleware/validate';
+import { loginSchema, signupSchema } from '../schemas/auth';
 import {
   authenticateUser,
   registerUser,
@@ -34,23 +36,9 @@ function isValidEmail(email: string): boolean {
 }
 
 // POST /api/auth/login
-router.post('/login', (req: Request, res: Response) => {
+router.post('/login', validate(loginSchema), (req: Request, res: Response) => {
   let { email, password } = req.body;
   const { role } = req.body;
-
-  // --- Check required fields first ---
-  if (!email && !password) {
-    res.status(400).json({ error: 'Email and password are required' });
-    return;
-  }
-  if (!email) {
-    res.status(400).json({ error: 'Email is required' });
-    return;
-  }
-  if (!password) {
-    res.status(400).json({ error: 'Password is required' });
-    return;
-  }
 
   try {
     email = sanitizeInput(String(email), 'email');
@@ -61,12 +49,6 @@ router.post('/login', (req: Request, res: Response) => {
       return;
     }
     res.status(400).json({ error: 'Invalid input' });
-    return;
-  }
-
-  // Validate email format
-  if (!isValidEmail(email)) {
-    res.status(400).json({ error: 'Invalid email format' });
     return;
   }
 
@@ -89,13 +71,8 @@ router.post('/login', (req: Request, res: Response) => {
 });
 
 // POST /api/auth/signup
-router.post('/signup', (req: Request, res: Response) => {
+router.post('/signup', validate(signupSchema), (req: Request, res: Response) => {
   let { name, email, phone, password } = req.body;
-
-  if (!name || !email || !phone || !password) {
-    res.status(400).json({ error: 'Name, email, phone, and password are required' });
-    return;
-  }
 
   try {
     name = sanitizeInput(String(name), 'name');
@@ -108,25 +85,6 @@ router.post('/signup', (req: Request, res: Response) => {
       return;
     }
     res.status(400).json({ error: 'Invalid input' });
-    return;
-  }
-
-  // Validate email format
-  if (!isValidEmail(email)) {
-    res.status(400).json({ error: 'Invalid email format' });
-    return;
-  }
-
-  // Validate phone format (basic: digits only, 10-15 chars)
-  const cleanPhone = phone.replace(/[\s\-()]/g, '');
-  if (!/^\+?\d{7,15}$/.test(cleanPhone)) {
-    res.status(400).json({ error: 'Invalid phone number format' });
-    return;
-  }
-
-  // Validate password strength (minimum 8 chars)
-  if (password.length < 8) {
-    res.status(400).json({ error: 'Password must be at least 8 characters' });
     return;
   }
 

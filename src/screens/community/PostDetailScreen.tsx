@@ -34,6 +34,7 @@ import Badge from '../../components/ui/Badge';
 import { triggerHaptic } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { showShareSheet, ShareContent } from '../../utils/share';
+import { postOGUrl } from '../../utils/deepLinks';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -203,10 +204,14 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
   const handleShare = useCallback(() => {
     if (!post) return;
     notificationAsync(NotificationFeedbackType.Success);
+    const ogUrl = postOGUrl(post.id);
     const shareContent: ShareContent = {
       title: 'Toroloom Community Post',
-      message: post.content,
+      message: post.content.substring(0, 200) + (post.content.length > 200 ? '...' : ''),
+      url: ogUrl,
       authorName: post.userName,
+      contentType: 'post',
+      contentId: post.id,
     };
     showShareSheet(shareContent);
   }, [post]);

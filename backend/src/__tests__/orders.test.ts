@@ -217,7 +217,8 @@ describe('Orders Route', () => {
         method: 'POST', path: '/api/orders/execute', body: {},
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('actionType');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toBeDefined();
     });
 
     it('should accept legacy transactionType as alias for actionType', async () => {
@@ -235,7 +236,7 @@ describe('Orders Route', () => {
         body: { actionType: 'INVALID', symbol: 'RELIANCE', quantity: 10, price: 2500 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('Invalid');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject without symbol', async () => {
@@ -244,7 +245,8 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('symbol');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toBeDefined();
     });
 
     it('should reject symbol that is not a string', async () => {
@@ -253,7 +255,7 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 123, quantity: 10, price: 2500 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('symbol');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject without quantity', async () => {
@@ -262,7 +264,8 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('quantity');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toBeDefined();
     });
 
     it('should reject non-positive quantity', async () => {
@@ -271,7 +274,7 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE', quantity: 0, price: 2500 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('quantity');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject non-integer quantity', async () => {
@@ -280,7 +283,7 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE', quantity: 10.5, price: 2500 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('quantity');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject without price', async () => {
@@ -289,7 +292,8 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE', quantity: 10 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('price');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toBeDefined();
     });
 
     it('should reject non-positive price', async () => {
@@ -298,7 +302,7 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE', quantity: 10, price: -100 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('price');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject invalid exchange', async () => {
@@ -307,7 +311,7 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE', quantity: 10, price: 2500, exchange: 'INVALID' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('Invalid exchange');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject invalid productType', async () => {
@@ -316,7 +320,7 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE', quantity: 10, price: 2500, productType: 'INVALID' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('Invalid productType');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject invalid orderType', async () => {
@@ -325,7 +329,7 @@ describe('Orders Route', () => {
         body: { actionType: 'BUY', symbol: 'RELIANCE', quantity: 10, price: 2500, orderType: 'INVALID' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('Invalid orderType');
+      expect(body.error).toBe('Validation failed');
     });
   });
 
@@ -458,7 +462,8 @@ describe('Orders Route', () => {
         method: 'POST', path: '/api/orders/validate', body: {},
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('actionType');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toBeDefined();
     });
 
     it('should reject invalid actionType', async () => {
@@ -467,7 +472,7 @@ describe('Orders Route', () => {
         body: { actionType: 'INVALID' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('Invalid');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should gracefully handle position fetch failure during validate', async () => {
@@ -549,7 +554,8 @@ describe('Orders Route', () => {
         method: 'POST', path: '/api/orders/modify', body: {},
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('orderId');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toBeDefined();
     });
 
     it('should reject non-string orderId', async () => {
@@ -558,7 +564,7 @@ describe('Orders Route', () => {
         body: { orderId: 123 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('orderId');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject invalid orderType', async () => {
@@ -567,7 +573,7 @@ describe('Orders Route', () => {
         body: { orderId: 'ord-001', orderType: 'INVALID' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('Invalid orderType');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject invalid productType', async () => {
@@ -576,7 +582,7 @@ describe('Orders Route', () => {
         body: { orderId: 'ord-001', productType: 'INVALID' },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('Invalid productType');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject non-positive quantity', async () => {
@@ -585,7 +591,7 @@ describe('Orders Route', () => {
         body: { orderId: 'ord-001', quantity: -5 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('quantity');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject non-integer quantity', async () => {
@@ -594,7 +600,7 @@ describe('Orders Route', () => {
         body: { orderId: 'ord-001', quantity: 10.5 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('quantity');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject non-positive price', async () => {
@@ -603,7 +609,7 @@ describe('Orders Route', () => {
         body: { orderId: 'ord-001', price: 0 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('price');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should reject non-positive triggerPrice', async () => {
@@ -612,7 +618,7 @@ describe('Orders Route', () => {
         body: { orderId: 'ord-001', triggerPrice: -10 },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('triggerPrice');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should fall back to NSE exchange when not provided', async () => {
@@ -678,7 +684,8 @@ describe('Orders Route', () => {
         method: 'POST', path: '/api/orders/cancel', body: {},
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('orderId');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toBeDefined();
     });
 
     it('should reject non-string orderId', async () => {
@@ -687,7 +694,7 @@ describe('Orders Route', () => {
         body: { orderId: true },
       });
       expect(status).toBe(400);
-      expect(body.error).toContain('orderId');
+      expect(body.error).toBe('Validation failed');
     });
 
     it('should write audit trail on successful cancel', async () => {

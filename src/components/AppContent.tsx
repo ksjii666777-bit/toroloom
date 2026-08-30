@@ -13,6 +13,7 @@ import { useWatchlistStore } from '../store/watchlistStore';
 import { useMarketStore } from '../store/marketStore';
 import { useEducationStore } from '../store/educationStore';
 import { useFnoStore } from '../store/fnoStore';
+import { log } from '../utils/logger';
 import { useCommunityStore } from '../store/communityStore';
 import { useAIStore } from '../store/aiStore';
 import { seedAllBrokerSessions, seedE2EBrokerSession } from '../services/gateway/seedE2ESession';
@@ -97,9 +98,9 @@ function AppContent() {
             : [await seedE2EBrokerSession(broker as any)];
           const allOk = results.every(Boolean);
           if (allOk) {
-            console.log('[E2E] Broker session(s) seeded successfully.');
+            log.info('[E2E] Broker session(s) seeded successfully.');
           } else {
-            console.warn('[E2E] One or more broker sessions failed to seed.');
+            log.warn('[E2E] One or more broker sessions failed to seed.');
           }
         }
       } catch {

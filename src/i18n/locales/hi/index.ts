@@ -22,6 +22,7 @@ import capitalGains from './capitalGains';
 import charts from './charts';
 import cdnOptimization from './cdnOptimization';
 import commodityMarkets from './commodityMarkets';
+import compliance from './compliance';
 import components from './components';
 import copyAnalytics from './copyAnalytics';
 import createPoll from './createPoll';
@@ -47,6 +48,7 @@ import funds from './funds';
 import fundamentals from './fundamentals';
 import futuresCurve from './futuresCurve';
 import gamification from './gamification';
+import gdpr from './gdpr';
 import quizResult from './quizResult';
 import stepUpSip from './stepUpSip';
 import help from './help';
@@ -133,6 +135,7 @@ const hi = {
   charts,
   cdnOptimization,
   commodityMarkets,
+  compliance,
   components,
   copyAnalytics,
   createPoll,
@@ -158,6 +161,7 @@ const hi = {
   fundamentals,
   futuresCurve,
   gamification,
+  gdpr,
   quizResult,
   stepUpSip,
   help,

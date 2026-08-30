@@ -26,6 +26,8 @@ import Card from '../../components/ui/Card';
 import * as _Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AppScreen from '../../components/ui/AppScreen';
+import { useAuthStore } from '../../store/authStore';
+import { generateAndShareInvoice } from '../../utils/invoiceGenerator';
 
 
 // ─── Mock Payment History (fallback if store is empty) ───────────────────────
@@ -95,6 +97,8 @@ function formatTransactionDate(iso: string): { date: string; time: string } {
 function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayment; colors: any; styles: any }) {
   const { t } = useT();
   const [expanded, setExpanded] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const user = useAuthStore(st => st.user);
   const statusCfg = STATUS_CONFIG[payment.status] || STATUS_CONFIG.pending;
   const { date, time } = formatTransactionDate(payment.timestamp);
 
@@ -213,10 +217,34 @@ function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayme
               </AnimatedPressable>
             )}
 
-            {payment.invoiceId && (                <AnimatedPressable onPress={() => Alert.alert(t('paymentHistory.downloadInvoice'), `${t('paymentHistory.downloadInvoiceDesc')} ${payment.invoiceId}`)} haptic="light" scaleTo={0.95}>
-                <View style={s.detailActionBtn}>
-                  <Ionicons name="download-outline" size={14} color={colors.primary} />
-                  <Text style={s.detailActionText}>{t('paymentHistory.downloadInvoice')}</Text>
+            {payment.invoiceId && (
+              <AnimatedPressable
+                onPress={async () => {
+                  if (isGeneratingPdf) return;
+                  setIsGeneratingPdf(true);
+                  try {
+                    const success = await generateAndShareInvoice(
+                      payment,
+                      user?.name || 'Valued Customer',
+                      user?.email || 'customer@toroloom.app',
+                    );
+                    if (!success) {
+                      Alert.alert(t('paymentHistory.downloadFailed'), t('paymentHistory.downloadFailedDesc'));
+                    }
+                  } catch {
+                    Alert.alert(t('paymentHistory.downloadFailed'), t('paymentHistory.downloadFailedDesc'));
+                  } finally {
+                    setIsGeneratingPdf(false);
+                  }
+                }}
+                haptic="light"
+                scaleTo={0.95}
+              >
+                <View style={[s.detailActionBtn, isGeneratingPdf && { opacity: 0.6 }]}>
+                  <Ionicons name={isGeneratingPdf ? 'hourglass-outline' : 'download-outline'} size={14} color={colors.primary} />
+                  <Text style={s.detailActionText}>
+                    {isGeneratingPdf ? t('paymentHistory.generating') : t('paymentHistory.downloadInvoice')}
+                  </Text>
                 </View>
               </AnimatedPressable>
             )}

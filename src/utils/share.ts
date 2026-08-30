@@ -7,6 +7,7 @@ import { Share, Alert} from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { Linking } from 'react-native';
+import { useShareAnalyticsStore, type SharePlatform, type ShareContentType } from '../store/shareAnalyticsStore';
 
 export interface ShareContent {
   /** Post or item title */
@@ -17,6 +18,12 @@ export interface ShareContent {
   url?: string;
   /** Username of the author */
   authorName?: string;
+  /** Content type for analytics tracking */
+  contentType?: ShareContentType;
+  /** Content ID for analytics tracking */
+  contentId?: string;
+  /** Stock symbol for analytics tracking */
+  contentSymbol?: string;
 }
 
 /**
@@ -35,6 +42,7 @@ export async function shareNative(content: ShareContent): Promise<boolean> {
 
     if (result.action === Share.sharedAction) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      trackShareEvent('native', content);
       return true;
     }
     return false;
@@ -55,6 +63,7 @@ export async function shareCopyLink(content: ShareContent): Promise<boolean> {
     await Clipboard.setStringAsync(text);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert('Copied!', 'Link copied to clipboard.');
+    trackShareEvent('copy', content);
     return true;
   } catch {
     return false;
@@ -111,6 +120,7 @@ export async function shareTwitter(content: ShareContent): Promise<boolean> {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
         await Linking.openURL(url);
+        trackShareEvent('twitter', content);
         return true;
       }
     }
@@ -138,6 +148,7 @@ export async function shareTelegram(content: ShareContent): Promise<boolean> {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
         await Linking.openURL(url);
+        trackShareEvent('telegram', content);
         return true;
       }
     }
@@ -210,6 +221,25 @@ export function showShareSheet(content: ShareContent): void {
     [...buttons, { text: 'Cancel', style: 'cancel' as const }],
     { cancelable: true }
   );
+}
+
+// ─── Analytics Tracking ────────────────────────────────────────────────────
+
+/**
+ * Internal helper to track share events
+ */
+function trackShareEvent(platform: SharePlatform, content: ShareContent): void {
+  try {
+    const contentType = content.contentType || 'general';
+    useShareAnalyticsStore.getState().trackShare({
+      platform,
+      contentType,
+      contentId: content.contentId,
+      contentSymbol: content.contentSymbol,
+    });
+  } catch {
+    // Silently ignore analytics errors
+  }
 }
 
 

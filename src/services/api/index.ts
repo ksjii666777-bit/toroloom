@@ -10,6 +10,7 @@ export { mutualFundApi } from './mutualFunds';
 export { aiApi } from './ai';
 export { supportApi } from './support';
 export { paymentsApi } from './payments';
+export { subscriptionsApi } from './subscriptions';
 export { fnoApi } from './fno';
 export { newsApi } from './news';
 export { telegramApi } from './telegram';

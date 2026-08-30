@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, TextInput, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withSequence } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withSequence, runOnJS } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -15,6 +15,7 @@ import Badge from '../../components/ui/Badge';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AppScreen from '../../components/ui/AppScreen';
+import ConfettiCelebration from '../../components/ui/ConfettiCelebration';
 
 const { width } = Dimensions.get('window');
 const CARD_GAP = SPACING.md;
@@ -27,7 +28,7 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
   const { subscription, isLoading, initiateUpgrade, cancelSubscription, isInTrial,
     trialDaysRemaining, hasTrialAvailable, couponInput: _couponInput, couponResult, isApplyingCoupon,
     setCouponInput, applyCoupon, removeCoupon, getDiscountedPrice,
-    setUpAutopay, cancelAutopay, startTrial, refreshTrialStatus } = useSubscriptionStore();
+    setUpAutopay, cancelAutopay, startTrial, refreshTrialStatus, paymentSuccessPlan, clearPaymentSuccess } = useSubscriptionStore();
   const getPlanPrice = useSubscriptionStore(s => s.getPlanPrice);
   const getFeaturesForTier = useSubscriptionStore(s => s.getFeaturesForTier);
   const getEffectiveFeatureMatrix = useSubscriptionStore(s => s.getEffectiveFeatureMatrix);
@@ -38,6 +39,9 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
   const [couponCode, setCouponCode] = useState('');
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showAutopayModal, setShowAutopayModal] = useState(false);
+  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+  const payConfirmBackdrop = useSharedValue(0);
+  const payConfirmSheetY = useSharedValue(400);
 
   // Refresh trial status on mount
   useEffect(() => {
@@ -130,33 +134,53 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
     await startTrial(plan.tier);
   }, [selectedPlanId, hasTrialAvailable, startTrial]);
 
+  const animatePayConfirmIn = useCallback(() => {
+    'worklet';
+    payConfirmBackdrop.value = withSpring(1, { damping: 20, stiffness: 300 });
+    payConfirmSheetY.value = withSpring(0, { damping: 18, stiffness: 200 });
+  }, [payConfirmBackdrop, payConfirmSheetY]);
+
+  const animatePayConfirmOut = useCallback((onComplete: () => void) => {
+    'worklet';
+    payConfirmBackdrop.value = withSpring(0, { damping: 20, stiffness: 300 });
+    payConfirmSheetY.value = withSpring(400, { damping: 20, stiffness: 300 }, (finished) => {
+      if (finished) runOnJS(onComplete)();
+    });
+  }, [payConfirmBackdrop, payConfirmSheetY]);
+
+  const payConfirmBackdropStyle = useAnimatedStyle(() => ({
+    opacity: payConfirmBackdrop.value,
+  }));
+
+  const payConfirmSheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: payConfirmSheetY.value }],
+  }));
+
   const handleUpgrade = useCallback(async () => {
     const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
     if (!plan || plan.tier === 'free') return;
     if (plan.tier === subscription.tier) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setShowPaymentConfirm(true);
+    payConfirmBackdrop.value = 0;
+    payConfirmSheetY.value = 400;
+    requestAnimationFrame(() => {
+      payConfirmBackdrop.value = withSpring(1, { damping: 20, stiffness: 300 });
+      payConfirmSheetY.value = withSpring(0, { damping: 18, stiffness: 200 });
+    });
+  }, [selectedPlanId, subscription.tier, payConfirmBackdrop, payConfirmSheetY]);
 
-    const discounted = getDiscountedPrice(plan.id, isYearly ? 'yearly' : 'monthly');
-    const displayPrice = discounted.final;
+  const closePayConfirm = useCallback(() => {
+    animatePayConfirmOut(() => setShowPaymentConfirm(false));
+  }, [animatePayConfirmOut]);
 
-    Alert.alert(
-      `${t('subscription.upgradeTo')} ${plan.name}`,
-      (couponResult?.valid
-        ? `${t('subscription.original')}: ₹${discounted.original.toLocaleString('en-IN')}/mo\n${t('subscription.discount')}: -₹${discounted.discount.toLocaleString('en-IN')}/mo\n`
-        : '') +
-      `${t('subscription.willBeCharged')} ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}. ${t('subscription.cancelAnytime')}.`,
-      [
-        { text: t('app.cancel'), style: 'cancel' },
-        {
-          text: `${t('subscription.upgrade')} — ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}`,
-          onPress: async () => {
-            await initiateUpgrade(plan, isYearly ? 'yearly' : 'monthly');
-          },
-        },
-      ]
-    );
-  }, [selectedPlanId, subscription.tier, isYearly, initiateUpgrade, getDiscountedPrice, couponResult, t]);
+  const handleConfirmPayment = useCallback(async () => {
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
+    if (!plan || plan.tier === 'free') return;
+    closePayConfirm();
+    await initiateUpgrade(plan, isYearly ? 'yearly' : 'monthly');
+  }, [selectedPlanId, isYearly, initiateUpgrade, closePayConfirm]);
 
   const handleCancel = useCallback(() => {
     Alert.alert(
@@ -672,6 +696,79 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
             </Card>
           </AnimatedPressable>
 
+          {/* Payment Confirmation Bottom Sheet */}
+          {showPaymentConfirm && (
+            <Pressable style={[styles.autopayModalOverlay]} onPress={closePayConfirm}>
+              <Animated.View style={[payConfirmBackdropStyle, StyleSheet.absoluteFill]}
+                pointerEvents="none"
+              />
+              <Pressable onPress={() => {}}>
+              <Animated.View style={[styles.autopayModal, { backgroundColor: colors.bgSecondary, borderColor: colors.border }, payConfirmSheetStyle]}>
+                {/* Header */}
+                <View style={{ alignItems: 'center', marginBottom: SPACING.lg }}>
+                  <View style={[styles.payConfirmIcon, { backgroundColor: colors.primary + '20' }]}>
+                    <Ionicons name="lock-closed" size={28} color={colors.primary} />
+                  </View>
+                  <Text style={styles.autopayModalTitle}>{t('subscription.confirmPayment')}</Text>
+                  <Text style={styles.autopayModalDesc}>{t('subscription.securePaymentDesc')}</Text>
+                </View>
+
+                {/* Plan Summary */}
+                {(() => {
+                  const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
+                  if (!plan) return null;
+                  const discounted = getDiscountedPrice(plan.id, isYearly ? 'yearly' : 'monthly');
+                  return (
+                    <View style={styles.payConfirmSummary}>
+                      <View style={styles.payConfirmRow}>
+                        <Text style={styles.payConfirmLabel}>{t('subscription.plan')}</Text>
+                        <Text style={styles.payConfirmValue}>{plan.name} ({isYearly ? t('subscription.yearly') : t('subscription.monthly')})</Text>
+                      </View>
+                      {couponResult?.valid && (
+                        <>
+                          <View style={styles.payConfirmRow}>
+                            <Text style={styles.payConfirmLabel}>{t('subscription.original')}</Text>
+                            <Text style={[styles.payConfirmValue, { textDecorationLine: 'line-through', color: colors.textMuted }]}>₹{discounted.original.toLocaleString('en-IN')}</Text>
+                          </View>
+                          <View style={styles.payConfirmRow}>
+                            <Text style={styles.payConfirmLabel}>{t('subscription.discount')}</Text>
+                            <Text style={[styles.payConfirmValue, { color: colors.marketUp }]}>-₹{discounted.discount.toLocaleString('en-IN')}</Text>
+                          </View>
+                        </>
+                      )}
+                      <View style={[styles.payConfirmRow, styles.payConfirmTotal]}>
+                        <Text style={[styles.payConfirmLabel, { ...FONTS.bold, color: colors.text }]}>{t('subscription.total')}</Text>
+                        <Text style={[styles.payConfirmValue, { ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }]}>₹{discounted.final.toLocaleString('en-IN')}{isYearly ? '/yr' : '/mo'}</Text>
+                      </View>
+                    </View>
+                  );
+                })()}
+
+                {/* Actions */}
+                <View style={{ gap: SPACING.sm }}>
+                  <AnimatedPressable onPress={handleConfirmPayment} haptic="medium" scaleTo={0.97} disabled={isLoading}>
+                    <LinearGradient
+                      colors={selectedPlanId === 'plan_elite' ? GRADIENTS.success : GRADIENTS.primary}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={[styles.payConfirmBtn, isLoading && { opacity: 0.7 }]}
+                    >
+                      {isLoading ? (
+                        <Text style={styles.payConfirmBtnText}>{t('subscription.processing')}</Text>
+                      ) : (
+                        <Text style={styles.payConfirmBtnText}>{t('subscription.payNow')}</Text>
+                      )}
+                    </LinearGradient>
+                  </AnimatedPressable>
+                  <AnimatedPressable onPress={closePayConfirm} haptic="light" scaleTo={0.97}>
+                    <Text style={styles.autopayModalCancel}>{t('app.cancel')}</Text>
+                  </AnimatedPressable>
+                </View>
+              </Animated.View>
+              </Pressable>
+            </Pressable>
+          )}
+
           {/* UPI AutoPay Setup Modal */}
           {showAutopayModal && (
             <View style={styles.autopayModalOverlay}>
@@ -746,6 +843,13 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
 
           <View style={{ height: 100 }} />
         </ScrollView>
+
+      {/* Confetti Celebration on Payment Success */}
+      <ConfettiCelebration
+        visible={paymentSuccessPlan !== null}
+        planName={paymentSuccessPlan || ''}
+        onComplete={clearPaymentSuccess}
+      />
       </AppScreen>
   );
 }
@@ -1436,6 +1540,54 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.xs,
     color: colors.textMuted,
     marginTop: 1,
+  },
+
+  // ── Payment Confirmation ──
+  payConfirmIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  payConfirmSummary: {
+    backgroundColor: colors.bgInput,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  payConfirmRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  payConfirmTotal: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: SPACING.md,
+    marginTop: SPACING.xs,
+  },
+  payConfirmLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textSecondary,
+  },
+  payConfirmValue: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.text,
+  },
+  payConfirmBtn: {
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    alignItems: 'center',
+  },
+  payConfirmBtnText: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.lg,
+    color: colors.white,
   },
 
   // ── Payment Info ──

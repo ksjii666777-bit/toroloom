@@ -9,6 +9,7 @@ import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import StockItem from '../../components/StockItem';
 import MarketCard from '../../components/MarketCard';
 import AppScreen from '../../components/ui/AppScreen';
+import SEBIComplianceBanner from '../../components/ui/SEBIComplianceBanner';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
@@ -185,6 +186,11 @@ export default function MarketsScreen({ navigation }: CompositeScreenProps<Botto
           <View style={{ flexDirection: 'row', marginTop: SPACING.sm }}>
             <SyncStatusIndicator variant="inline" />
           </View>
+        </View>
+
+        {/* SEBI Compliance Banner */}
+        <View style={{ paddingHorizontal: SPACING.xl }}>
+          <SEBIComplianceBanner variant="compact" dismissible={false} />
         </View>
 
         {/* Search Bar — elevated when focused */}

@@ -21,6 +21,15 @@ import * as Haptics from 'expo-haptics';
 import { renderIllustration } from '../../components/onboarding/onboardingUtils';
 import AppScreen from '../../components/ui/AppScreen';
 import OnboardingLottie from '../../components/onboarding/OnboardingLottie';
+import {
+  MiniPieChart,
+  MiniCandlestickChart,
+  MockTradePanel,
+  MiniBrokerConnect,
+  InteractiveBadges,
+  RocketAnimation,
+  AnimatedStepCard,
+} from '../../components/onboarding/demos';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -29,705 +38,7 @@ const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - SPACING.xl * 2;
 const CARD_GAP = SPACING.md;
 
-// ────────────────────────────────────────────────────────
-// Interactive Demo Data
-// ────────────────────────────────────────────────────────
-
-const MOCK_BROKERS = [
-  { id: 'zerodha', label: 'Zerodha', tagline: "India's biggest stock broker", icon: 'Z', color: '#2874F0', gradient: ['#2874F0', '#1A5FCC'] as const },
-  { id: 'angel', label: 'Angel One', tagline: "India's largest retail broking house", icon: 'A', color: '#FF6B00', gradient: ['#FF6B00', '#CC5500'] as const },
-  { id: 'groww', label: 'Groww', tagline: 'Simple, modern investing platform', icon: 'G', color: '#00A86B', gradient: ['#00A86B', '#008050'] as const },
-];
-
-const MOCK_SECTORS = [
-  { name: 'Tech', value: 45, color: '#3B82F6', icon: 'hardware-chip' },
-  { name: 'Finance', value: 25, color: '#00E676', icon: 'wallet' },
-  { name: 'Energy', value: 18, color: '#FFAB40', icon: 'flame' },
-  { name: 'Health', value: 12, color: '#FF5252', icon: 'medkit' },
-];
-
-const MOCK_CANDLE_DATA = [
-  { date: 'Mon', open: 100, high: 108, low: 98, close: 106, volume: 1200 },
-  { date: 'Tue', open: 106, high: 112, low: 104, close: 110, volume: 1500 },
-  { date: 'Wed', open: 110, high: 115, low: 107, close: 108, volume: 1000 },
-  { date: 'Thu', open: 108, high: 118, low: 106, close: 116, volume: 1800 },
-  { date: 'Fri', open: 116, high: 122, low: 114, close: 120, volume: 2200 },
-  { date: 'Sat', open: 120, high: 125, low: 118, close: 124, volume: 1600 },
-  { date: 'Sun', open: 124, high: 130, low: 122, close: 128, volume: 2000 },
-];
-
-const MOCK_BADGES = [
-  { id: 'first-trade', icon: '🎯', label: 'First Trade', color: '#3B82F6' },
-  { id: 'streak-3', icon: '🔥', label: '3-Day Streak', color: '#FFAB40' },
-  { id: 'course-beginner', icon: '📘', label: 'Learner', color: '#10B981' },
-  { id: 'market-pro', icon: '📊', label: 'Market Pro', color: '#8B5CF6' },
-];
-
-// ────────────────────────────────────────────────────────
-// Mini Interactive Components
-// ────────────────────────────────────────────────────────
-
-function MiniPieChart({
-  onInteract,
-  onDemoComplete,
-}: {
-  onInteract: () => void;
-  onDemoComplete?: () => void;
-}) {
-  const { t } = useT();
-  const [selectedSector, setSelectedSector] = useState<number | null>(null);
-  const [exploredSectors, setExploredSectors] = useState<Set<number>>(new Set());
-  const total = MOCK_SECTORS.reduce((sum, s) => sum + s.value, 0);
-  const demoCompletedRef = useRef(false);
-
-  // Build segments using simple stacked bar (simulating pie segments)
-  let currentAngle = 0;
-  const segments = MOCK_SECTORS.map((sector) => {
-    const angle = (sector.value / total) * 360;
-    const seg = { ...sector, startAngle: currentAngle, endAngle: currentAngle + angle };
-    currentAngle += angle;
-    return seg;
-  });
-
-  return (
-    <View style={demoStyles.pieContainer}>
-      <Text style={demoStyles.pieTitle}>{t('onboarding.portfolioAllocation')}</Text>
-      <View style={demoStyles.pieRow}>
-        {/* Segmented bar visualization (horizontal stacked bar as pie alternative) */}
-        <View style={demoStyles.pieBar}>
-          {segments.map((seg, i) => {
-            const isSelected = selectedSector === i;
-            const widthPct = (seg.value / total) * 100;
-            return (
-              <Pressable
-                key={seg.name}
-                
-                onPress={() => {
-                  onInteract();
-                  const next = new Set(exploredSectors).add(i);
-                  setExploredSectors(next);
-                  if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
-                    demoCompletedRef.current = true;
-                    setTimeout(() => onDemoComplete?.(), 300);
-                  }
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setSelectedSector(isSelected ? null : i);
-                }}
-                style={[
-                  demoStyles.pieSegment,
-                  {
-                    backgroundColor: seg.color,
-                    width: `${widthPct}%`,
-                    opacity: selectedSector === null || isSelected ? 1 : 0.4,
-                    transform: isSelected ? [{ scaleY: 1.15 }] : [],
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
-      </View>
-
-      {/* Legend */}
-      <View style={demoStyles.pieLegend}>
-        {MOCK_SECTORS.map((sector, i) => {
-          const isSelected = selectedSector === i;
-          return (
-            <Pressable
-              key={sector.name}
-              style={[demoStyles.legendItem, isSelected && demoStyles.legendItemActive]}
-              onPress={() => {
-                onInteract();
-                const next = new Set(exploredSectors).add(i);
-                setExploredSectors(next);
-                if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
-                  demoCompletedRef.current = true;
-                  setTimeout(() => onDemoComplete?.(), 300);
-                }
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setSelectedSector(isSelected ? null : i);
-              }}
-            >
-              <View style={[demoStyles.legendDot, { backgroundColor: sector.color }]} />
-              <Text style={[demoStyles.legendLabel, isSelected && demoStyles.legendLabelActive]}>
-                {sector.name}
-              </Text>
-              <Text style={[demoStyles.legendValue, isSelected && demoStyles.legendValueActive]}>
-                {sector.value}%
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {/* Selected sector detail */}
-      {selectedSector !== null && (
-        <Animated.View entering={BounceIn.duration(300)} style={demoStyles.sectorDetail}>
-          <Ionicons name={MOCK_SECTORS[selectedSector].icon as keyof typeof Ionicons.glyphMap} size={18} color={MOCK_SECTORS[selectedSector].color} />
-          <Text style={demoStyles.sectorDetailText}>
-            {MOCK_SECTORS[selectedSector].name}: ₹{(Math.random() * 5 + 1).toFixed(1)}L invested
-          </Text>
-        </Animated.View>
-      )}
-
-      {selectedSector === null && (
-        <Text style={demoStyles.pieHint}>👆 Tap a sector to explore</Text>
-      )}
-    </View>
-  );
-}
-
-function MiniCandlestickChart({
-  onInteract,
-  onDemoComplete,
-}: {
-  onInteract: () => void;
-  onDemoComplete?: () => void;
-}) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const demoCompletedRef = useRef(false);
-  const chartHeight = 100;
-  const chartWidth = CARD_WIDTH - SPACING.xl * 2 - 20;
-  const candleWidth = Math.floor(chartWidth / MOCK_CANDLE_DATA.length) - 4;
-  const prices = MOCK_CANDLE_DATA.map(d => d.high);
-  const maxPrice = Math.max(...prices);
-  const minPrice = Math.min(...MOCK_CANDLE_DATA.map(d => d.low));
-  const range = maxPrice - minPrice || 1;
-
-  return (
-    <View style={demoStyles.candleContainer}>
-      <Text style={demoStyles.pieTitle}>RELIANCE — This Week</Text>
-
-      {/* Mini chart */}
-      <View style={[demoStyles.candleChart, { height: chartHeight + 30 }]}>
-        {/* Price labels */}
-        <Text style={[demoStyles.priceLabel, { top: 0 }]}>₹{maxPrice}</Text>
-        <Text style={[demoStyles.priceLabel, { bottom: 20 }]}>₹{minPrice}</Text>
-
-        {/* Candles */}
-        <View style={demoStyles.candlesRow}>
-          {MOCK_CANDLE_DATA.map((candle, i) => {
-            const isUp = candle.close >= candle.open;
-            const candleTop = ((maxPrice - Math.max(candle.open, candle.close)) / range) * chartHeight;
-            const candleBottom = ((maxPrice - Math.min(candle.open, candle.close)) / range) * chartHeight;
-            const wickTop = ((maxPrice - candle.high) / range) * chartHeight;
-            const wickBottom = ((maxPrice - candle.low) / range) * chartHeight;
-            const isSelected = selectedIndex === i;
-
-            return (
-              <Pressable
-                key={candle.date}
-                
-                onPress={() => {
-                  onInteract();
-                  if (!demoCompletedRef.current) {
-                    demoCompletedRef.current = true;
-                    onDemoComplete?.();
-                  }
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setSelectedIndex(isSelected ? null : i);
-                }}
-                style={[demoStyles.candleWrapper, { width: candleWidth + 4 }]}
-              >
-                {/* Wick */}
-                <View
-                  style={[
-                    demoStyles.wick,
-                    {
-                      top: wickTop,
-                      height: wickBottom - wickTop,
-                      left: (candleWidth + 4) / 2 - 1,
-                      backgroundColor: isUp ? '#00E676' : '#FF5252',
-                    },
-                  ]}
-                />
-                {/* Body */}
-                <View
-                  style={[
-                    demoStyles.candleBody,
-                    {
-                      top: candleTop,
-                      height: Math.max(candleBottom - candleTop, 3),
-                      width: candleWidth,
-                      left: 2,
-                      backgroundColor: isUp ? '#00E676' : '#FF5252',
-                      opacity: isSelected ? 1 : 0.8,
-                      borderWidth: isSelected ? 2 : 0,
-                      borderColor: isSelected ? '#FFFFFF' : 'transparent',
-                    },
-                  ]}
-                />
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Day labels */}
-        <View style={demoStyles.dayLabels}>
-          {MOCK_CANDLE_DATA.map((candle) => (
-            <Text key={candle.date} style={[demoStyles.dayLabel, { width: candleWidth + 4 }]}>
-              {candle.date.substring(0, 3)}
-            </Text>
-          ))}
-        </View>
-      </View>
-
-      {/* Selected candle detail */}
-      {selectedIndex !== null && (
-        <Animated.View entering={FadeInDown.duration(200)} style={demoStyles.candleDetail}>
-          <Text style={demoStyles.candleDetailText}>
-            O: {MOCK_CANDLE_DATA[selectedIndex].open} · H: {MOCK_CANDLE_DATA[selectedIndex].high} · L: {MOCK_CANDLE_DATA[selectedIndex].low} · C: {MOCK_CANDLE_DATA[selectedIndex].close}
-          </Text>
-          <Text style={demoStyles.candleDetailVol}>
-            Vol: {(MOCK_CANDLE_DATA[selectedIndex].volume / 1000).toFixed(1)}K
-          </Text>
-        </Animated.View>
-      )}
-
-      {selectedIndex === null && (
-        <Text style={demoStyles.pieHint}>👆 Tap a candle for details</Text>
-      )}
-    </View>
-  );
-}
-
-function MockTradePanel({
-  onInteract,
-  onDemoComplete,
-}: {
-  onInteract: () => void;
-  onDemoComplete?: () => void;
-}) {
-  const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
-  const [quantity, setQuantity] = useState(10);
-  const [confirmed, setConfirmed] = useState(false);
-  const { t } = useT();
-  const mockPrice = 2450.50;
-  const pulseAnim = useSharedValue(1);
-
-  useEffect(() => {
-    if (!confirmed) {
-      pulseAnim.value = withRepeat(
-        withSequence(withTiming(1.05, { duration: 800 }), withTiming(1, { duration: 800 })),
-        -1,
-        true,
-      );
-    }
-  }, [confirmed, pulseAnim]);
-
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseAnim.value }],
-  }));
-
-  const handleConfirm = () => {
-    onInteract();
-    onDemoComplete?.();
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setConfirmed(true);
-    pulseAnim.value = withTiming(1, { duration: 200 });
-  };
-
-  const handleQtyChange = (delta: number) => {
-    onInteract();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setQuantity(Math.max(1, Math.min(100, quantity + delta)));
-  };
-
-  return (
-    <View style={demoStyles.tradeContainer}>
-      <Text style={demoStyles.pieTitle}>Mock Trade — RELIANCE</Text>
-
-      {/* Price display */}
-      <View style={demoStyles.tradePriceRow}>
-        <Text style={demoStyles.tradePrice}>₹{mockPrice.toFixed(2)}</Text>
-        <Text style={demoStyles.tradeChange}>+2.3%</Text>
-      </View>
-
-      {/* Buy/Sell Toggle */}
-      <View style={demoStyles.tradeToggle}>
-        <Pressable
-          style={[demoStyles.tradeToggleBtn, tradeType === 'buy' && demoStyles.tradeToggleBuy]}
-          onPress={() => {
-            onInteract();
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setTradeType('buy');
-            setConfirmed(false);
-          }}
-        >
-          <Ionicons name="trending-up" size={16} color={tradeType === 'buy' ? '#fff' : '#00E676'} />
-          <Text style={[demoStyles.tradeToggleText, tradeType === 'buy' && demoStyles.tradeToggleTextActive]}>Buy</Text>
-        </Pressable>
-        <Pressable
-          style={[demoStyles.tradeToggleBtn, tradeType === 'sell' && demoStyles.tradeToggleSell]}
-          onPress={() => {
-            onInteract();
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setTradeType('sell');
-            setConfirmed(false);
-          }}
-        >
-          <Ionicons name="trending-down" size={16} color={tradeType === 'sell' ? '#fff' : '#FF5252'} />
-          <Text style={[demoStyles.tradeToggleText, tradeType === 'sell' && demoStyles.tradeToggleTextActive]}>{t('onboarding.sell')}</Text>
-        </Pressable>
-      </View>
-
-      {/* Quantity Selector */}
-      <View style={demoStyles.qtyRow}>
-        <Pressable
-          style={demoStyles.qtyBtn}
-          onPress={() => handleQtyChange(-5)}
-        >
-          <Ionicons name="remove" size={20} color="#9CA3AF" />
-        </Pressable>
-        <View style={demoStyles.qtyValue}>
-          <Text style={demoStyles.qtyText}>{quantity}</Text>
-          <Text style={demoStyles.qtyLabel}>Qty</Text>
-        </View>
-        <Pressable
-          style={demoStyles.qtyBtn}
-          onPress={() => handleQtyChange(5)}
-        >
-          <Ionicons name="add" size={20} color="#9CA3AF" />
-        </Pressable>
-      </View>
-
-      {/* Order Total */}
-      <View style={demoStyles.orderTotal}>
-        <Text style={demoStyles.orderTotalLabel}>{t('onboarding.total')}</Text>
-        <Text style={demoStyles.orderTotalValue}>
-          ₹{(mockPrice * quantity).toLocaleString()}
-        </Text>
-      </View>
-
-      {/* Confirm Button */}
-      {!confirmed ? (
-        <Animated.View style={pulseStyle}>
-          <Pressable
-            style={[
-              demoStyles.confirmBtn,
-              { backgroundColor: tradeType === 'buy' ? '#00E676' : '#FF5252' },
-            ]}
-            onPress={handleConfirm}
-          >
-            <Text style={demoStyles.confirmBtnText}>
-              {tradeType === 'buy' ? '📈 Place Buy Order' : '📉 Place Sell Order'}
-            </Text>
-          </Pressable>
-        </Animated.View>
-      ) : (
-        <Animated.View entering={BounceIn.duration(400)} style={demoStyles.confirmedBox}>
-          <Ionicons name="checkmark-circle" size={28} color="#00E676" />
-          <Text style={demoStyles.confirmedText}>
-            {t('onboarding.orderPlaced', { count: quantity, action: tradeType === 'buy' ? t('onboarding.bought') : t('onboarding.sold') })}
-          </Text>
-        </Animated.View>
-      )}
-
-      {!confirmed && (
-        <Text style={demoStyles.pieHint}>👆 Try placing a mock order</Text>
-      )}
-    </View>
-  );
-}
-
-function MiniBrokerConnect({
-  onInteract,
-  onDemoComplete,
-  interacted,
-}: {
-  onInteract: () => void;
-  onDemoComplete?: () => void;
-  interacted: boolean;
-}) {
-  const { t } = useT();
-  const [connectedBroker, setConnectedBroker] = useState<string | null>(null);
-  const [connectingBroker, setConnectingBroker] = useState<string | null>(null);
-
-  const handleConnect = async (brokerId: string) => {
-    if (connectedBroker) return;
-    onInteract();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setConnectingBroker(brokerId);
-
-    // Simulate connection delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    onDemoComplete?.();
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setConnectedBroker(brokerId);
-    setConnectingBroker(null);
-  };
-
-  return (
-    <View style={demoStyles.brokerContainer}>
-      <Text style={demoStyles.pieTitle}>{t('onboarding.tapToConnectBroker')}</Text>
-
-      <View style={demoStyles.brokerRow}>
-        {MOCK_BROKERS.map((broker) => {
-          const isConnected = connectedBroker === broker.id;
-          const isConnecting = connectingBroker === broker.id;
-          return (
-            <Pressable
-              key={broker.id}
-              
-              disabled={isConnected || isConnecting}
-              onPress={() => handleConnect(broker.id)}
-              style={[demoStyles.brokerMiniCard, { width: (CARD_WIDTH - 48) / 3 - 4 }]}
-            >
-              <LinearGradient
-                colors={broker.gradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1.2 }}
-                style={demoStyles.brokerMiniGradient}
-              >
-                {/* Icon circle */}
-                <View style={[demoStyles.brokerMiniIcon, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-                  {isConnecting ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                  ) : isConnected ? (
-                    <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
-                  ) : (
-                    <Text style={demoStyles.brokerMiniIconText}>{broker.icon}</Text>
-                  )}
-                </View>
-                <Text style={demoStyles.brokerMiniLabel}>{broker.label}</Text>
-
-                {/* Connected badge */}
-                {isConnected && (
-                  <Animated.View entering={BounceIn.duration(300)} style={demoStyles.brokerMiniConnected}>
-                    <Ionicons name="checkmark-circle" size={14} color="#FFFFFF" />
-                    <Text style={demoStyles.brokerMiniConnectedText}>{t('onboarding.connected')}</Text>
-                  </Animated.View>
-                )}
-                {!isConnected && !isConnecting && (
-                  <View style={demoStyles.brokerMiniSyncBadge}>
-                    <Ionicons name="wifi" size={8} color="rgba(255,255,255,0.6)" />
-                    <Text style={demoStyles.brokerMiniSyncText}>{t('onboarding.sync')}</Text>
-                  </View>
-                )}
-              </LinearGradient>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {/* Status message */}
-      {!connectedBroker && !interacted && (
-        <Text style={demoStyles.pieHint}>👆 Tap any broker to connect</Text>
-      )}
-      {connectedBroker && (
-        <Animated.View entering={BounceIn.duration(400)} style={demoStyles.brokerSuccessRow}>
-          <Ionicons name="shield-checkmark" size={16} color="#00E676" />
-          <Text style={demoStyles.brokerSuccessText}>
-            {MOCK_BROKERS.find(b => b.id === connectedBroker)?.label} connected! Secure session established.
-          </Text>
-        </Animated.View>
-      )}
-    </View>
-  );
-}
-
-function InteractiveBadges({
-  onInteract,
-  onDemoComplete,
-}: {
-  onInteract: () => void;
-  onDemoComplete?: () => void;
-}) {
-  const { t } = useT();
-  const [unlocked, setUnlocked] = useState<Record<string, boolean>>({});
-
-  const handleBadgeTap = (id: string) => {
-    onInteract();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const next = { ...unlocked, [id]: !unlocked[id] };
-    setUnlocked(next);
-    if (Object.values(next).filter(Boolean).length >= MOCK_BADGES.length) {
-      setTimeout(() => onDemoComplete?.(), 400);
-    }
-  };
-
-  const unlockedCount = Object.values(unlocked).filter(Boolean).length;
-
-  return (
-    <View style={demoStyles.badgesContainer}>
-      <Text style={demoStyles.pieTitle}>{t('onboarding.tapBadgesToUnlock')}</Text>
-      <Text style={demoStyles.badgesProgress}>
-        {unlockedCount} / {MOCK_BADGES.length} unlocked
-      </Text>
-
-      <View style={demoStyles.badgesGrid}>
-        {MOCK_BADGES.map((badge) => {
-          const isUnlocked = unlocked[badge.id];
-          return (
-            <Pressable
-              key={badge.id}
-              
-              onPress={() => handleBadgeTap(badge.id)}
-              style={[
-                demoStyles.badgeCard,
-                isUnlocked && { borderColor: badge.color, backgroundColor: badge.color + '15' },
-              ]}
-            >
-              <Animated.View
-                entering={BounceIn.duration(300)}
-                style={[
-                  demoStyles.badgeIconCircle,
-                  isUnlocked && { backgroundColor: badge.color + '30' },
-                ]}
-              >
-                <Text style={demoStyles.badgeEmoji}>{badge.icon}</Text>
-              </Animated.View>
-              <Text style={[demoStyles.badgeLabel, isUnlocked && { color: badge.color }]}>
-                {badge.label}
-              </Text>
-              {isUnlocked && (
-                <View style={[demoStyles.badgeUnlockedTag, { backgroundColor: badge.color }]}>
-                  <Ionicons name="checkmark" size={10} color="#fff" />
-                </View>
-              )}
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {unlockedCount >= MOCK_BADGES.length && (
-        <Animated.View entering={BounceIn.duration(500)} style={demoStyles.allUnlocked}>
-          <Text style={demoStyles.allUnlockedText}>🎉 All badges unlocked! You're a pro!</Text>
-        </Animated.View>
-      )}
-
-      {unlockedCount === 0 && (
-        <Text style={demoStyles.pieHint}>👆 Tap badges to unlock them</Text>
-      )}
-    </View>
-  );
-}
-
-function RocketAnimation({
-  onInteract,
-  onDemoComplete,
-  interacted,
-}: {
-  onInteract: () => void;
-  onDemoComplete?: () => void;
-  interacted: boolean;
-}) {
-  const [launched, setLaunched] = useState(false);
-  const rocketY = useSharedValue(0);
-  const rocketRotate = useSharedValue(0);
-  const glowOpacity = useSharedValue(0.6);
-  const flameScale = useSharedValue(1);
-
-  useEffect(() => {
-    if (!launched) {
-      glowOpacity.value = withRepeat(
-        withSequence(withTiming(1, { duration: 1000 }), withTiming(0.4, { duration: 1000 })),
-        -1,
-        true,
-      );
-      flameScale.value = withRepeat(
-        withSequence(withTiming(1.3, { duration: 400 }), withTiming(1, { duration: 400 })),
-        -1,
-        true,
-      );
-    }
-  }, [launched, glowOpacity, flameScale]);
-
-  const handleLaunch = () => {
-    if (launched) return;
-    onInteract();
-    onDemoComplete?.();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    setLaunched(true);
-    rocketY.value = withTiming(-200, { duration: 1200 });
-    rocketRotate.value = withTiming(-15, { duration: 1200 });
-    glowOpacity.value = withTiming(0, { duration: 800 });
-  };
-
-  const rocketStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: rocketY.value },
-      { rotate: `${rocketRotate.value}deg` },
-    ],
-  }));
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: glowOpacity.value,
-  }));
-
-  const flameStyle = useAnimatedStyle(() => ({
-    transform: [{ scaleY: flameScale.value }],
-  }));
-
-  return (
-    <View style={demoStyles.rocketContainer}>
-      <Pressable onPress={handleLaunch}  disabled={launched}>
-        <Animated.View style={[demoStyles.rocketWrapper, rocketStyle]}>
-          {/* Glow */}
-          <Animated.View style={[demoStyles.rocketGlow, glowStyle]} />
-          {/* Rocket icon */}
-          <View style={demoStyles.rocketIcon}>
-            <Ionicons name="rocket" size={64} color="#FFFFFF" />
-          </View>
-          {/* Flame */}
-          <Animated.View style={[demoStyles.flame, flameStyle]}>
-            <LinearGradient
-              colors={['#FF6B35', '#FFAB40', 'transparent']}
-              style={demoStyles.flameGradient}
-            />
-          </Animated.View>
-        </Animated.View>
-      </Pressable>
-
-      {!launched && !interacted && (
-        <Text style={demoStyles.pieHint}>🚀 Tap to launch!</Text>
-      )}
-      {launched && (
-        <Animated.View entering={BounceIn.duration(500)} style={demoStyles.launchMsg}>
-          <Text style={demoStyles.launchMsgText}>✨ Blast off! Let's start your journey</Text>
-        </Animated.View>
-      )}
-    </View>
-  );
-}
-
-// ────────────────────────────────────────────────────────
-// Animated Step Card — manages its own entrance animation
-// (extracted to avoid calling hooks inside Array.from/map)
-// ────────────────────────────────────────────────────────
-
-function AnimatedStepCard({ index, style, children }: {
-  index: number;
-  style?: StyleProp<ViewStyle>;
-  children: React.ReactNode;
-}) {
-  const scale = useSharedValue(0.9);
-  const opacity = useSharedValue(0);
-
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-
-  useEffect(() => {
-    const delay = index * 150;
-    const id = setTimeout(() => {
-      scale.value = withSpring(1, { stiffness: 100, damping: 12 });
-      opacity.value = withTiming(1, { duration: 300 });
-    }, delay);
-    return () => clearTimeout(id);
-  }, [index, scale, opacity]);
-
-  return (
-    <Animated.View style={[style, animStyle]}>
-      {children}
-    </Animated.View>
-  );
-}
-
-// ────────────────────────────────────────────────────────
-// Main Component
+// (Demo components extracted to ../../components/onboarding/demos)
 // ────────────────────────────────────────────────────────
 
 export default function OnboardingScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'Onboarding'>) {
@@ -867,7 +178,7 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
     // When Lottie mode is on, render Lottie animations instead of SVG background + interactive component
     if (useLottie) {
       return (
-        <View style={demoStyles.illustrationWrapper}>
+        <View style={styles.illustrationWrapper}>
           <OnboardingLottie
             stepId={stepId}
             autoPlay
@@ -875,14 +186,14 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
             speed={0.8}
           />
           <Pressable
-            style={demoStyles.lottieInteractBtn}
+            style={styles.lottieInteractBtn}
             onPress={() => {
               markStepInteracted(stepId);
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
             
           >
-            <Text style={demoStyles.lottieInteractText}>
+            <Text style={styles.lottieInteractText}>
               {interactedSteps[stepId] ? '✓ Interacted' : '👆 Tap to explore'}
             </Text>
           </Pressable>
@@ -894,8 +205,8 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
     switch (stepId) {
       case 'welcome':
         return (
-          <View style={demoStyles.illustrationWrapper}>
-            <View style={demoStyles.illustrationBg} pointerEvents="none">
+          <View style={styles.illustrationWrapper}>
+            <View style={styles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
             <RocketAnimation
@@ -907,8 +218,8 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
         );
       case 'portfolio':
         return (
-          <View style={demoStyles.illustrationWrapper}>
-            <View style={demoStyles.illustrationBg} pointerEvents="none">
+          <View style={styles.illustrationWrapper}>
+            <View style={styles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
             <MiniPieChart
@@ -919,8 +230,8 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
         );
       case 'markets':
         return (
-          <View style={demoStyles.illustrationWrapper}>
-            <View style={demoStyles.illustrationBg} pointerEvents="none">
+          <View style={styles.illustrationWrapper}>
+            <View style={styles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
             <MiniCandlestickChart
@@ -931,8 +242,8 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
         );
       case 'trading':
         return (
-          <View style={demoStyles.illustrationWrapper}>
-            <View style={demoStyles.illustrationBg} pointerEvents="none">
+          <View style={styles.illustrationWrapper}>
+            <View style={styles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
             <MockTradePanel
@@ -943,8 +254,8 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
         );
       case 'broker':
         return (
-          <View style={demoStyles.illustrationWrapper}>
-            <View style={demoStyles.illustrationBg} pointerEvents="none">
+          <View style={styles.illustrationWrapper}>
+            <View style={styles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
             <MiniBrokerConnect
@@ -956,8 +267,8 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
         );
       case 'learn':
         return (
-          <View style={demoStyles.illustrationWrapper}>
-            <View style={demoStyles.illustrationBg} pointerEvents="none">
+          <View style={styles.illustrationWrapper}>
+            <View style={styles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
             <InteractiveBadges
@@ -1201,555 +512,6 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
 }
 
 // ────────────────────────────────────────────────────────
-// Demo Component Styles
-// ────────────────────────────────────────────────────────
-
-const demoStyles = StyleSheet.create({
-  // ── Rocket ──
-  rocketContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  rocketWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  rocketGlow: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  rocketIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
-  },
-  flame: {
-    position: 'absolute',
-    bottom: -30,
-    width: 40,
-    height: 50,
-    zIndex: 1,
-  },
-  flameGradient: {
-    width: '100%',
-    height: '100%',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  launchMsg: {
-    marginTop: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 20,
-  },
-  launchMsgText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontFamily: 'Inter-Medium',
-  },
-
-  // ── Pie Chart ──
-  pieContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  pieTitle: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontFamily: 'Inter-SemiBold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  pieRow: {
-    alignItems: 'center',
-  },
-  pieBar: {
-    flexDirection: 'row',
-    height: 32,
-    borderRadius: 16,
-    overflow: 'hidden',
-    width: '100%',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  pieSegment: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  pieLegend: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: 8,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-  legendItemActive: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 11,
-    fontFamily: 'Inter-Medium',
-  },
-  legendLabelActive: {
-    color: '#FFFFFF',
-  },
-  legendValue: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 10,
-    fontFamily: 'Inter-Bold',
-  },
-  legendValueActive: {
-    color: '#FFFFFF',
-  },
-  sectorDetail: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-  },
-  sectorDetailText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
-  },
-  pieHint: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 11,
-    fontFamily: 'Inter-Regular',
-    textAlign: 'center',
-    marginTop: 6,
-  },
-
-  // ── Candlestick ──
-  candleContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-  },
-  candleChart: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  priceLabel: {
-    position: 'absolute',
-    right: 0,
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 9,
-    fontFamily: 'Inter-Medium',
-  },
-  candlesRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    height: 100,
-    paddingLeft: 30,
-  },
-  candleWrapper: {
-    position: 'relative',
-    height: 100,
-  },
-  wick: {
-    position: 'absolute',
-    width: 2,
-    borderRadius: 1,
-  },
-  candleBody: {
-    position: 'absolute',
-    borderRadius: 2,
-  },
-  dayLabels: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingLeft: 30,
-    marginTop: 2,
-  },
-  dayLabel: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 8,
-    fontFamily: 'Inter-Regular',
-    textAlign: 'center',
-  },
-  candleDetail: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 10,
-  },
-  candleDetailText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontFamily: 'Inter-SemiBold',
-  },
-  candleDetailVol: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 10,
-    fontFamily: 'Inter-Regular',
-  },
-
-  // ── Trade Panel ──
-  tradeContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  tradePriceRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'baseline',
-    gap: 8,
-    marginBottom: 8,
-  },
-  tradePrice: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontFamily: 'Inter-Bold',
-  },
-  tradeChange: {
-    color: '#00E676',
-    fontSize: 13,
-    fontFamily: 'Inter-Medium',
-  },
-  tradeToggle: {
-    flexDirection: 'row',
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    marginBottom: 8,
-  },
-  tradeToggleBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-  },
-  tradeToggleBuy: {
-    backgroundColor: '#00E676',
-  },
-  tradeToggleSell: {
-    backgroundColor: '#FF5252',
-  },
-  tradeToggleText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-    fontFamily: 'Inter-SemiBold',
-  },
-  tradeToggleTextActive: {
-    color: '#FFFFFF',
-  },
-  qtyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    marginBottom: 8,
-  },
-  qtyBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-  },
-  qtyValue: {
-    alignItems: 'center',
-  },
-  qtyText: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontFamily: 'Inter-Bold',
-  },
-  qtyLabel: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 10,
-    fontFamily: 'Inter-Regular',
-  },
-  orderTotal: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  orderTotalLabel: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 12,
-    fontFamily: 'Inter-Regular',
-  },
-  orderTotalValue: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Inter-Bold',
-  },
-  confirmBtn: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  confirmBtnText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontFamily: 'Inter-Bold',
-  },
-  confirmedBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    backgroundColor: 'rgba(0,230,118,0.12)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(0,230,118,0.3)',
-  },
-  confirmedText: {
-    color: '#00E676',
-    fontSize: 13,
-    fontFamily: 'Inter-Medium',
-  },
-
-  // ── Badges ──
-  badgesContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  badgesProgress: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 11,
-    fontFamily: 'Inter-Regular',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  badgesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  badgeCard: {
-    width: 72,
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 6,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    position: 'relative',
-  },
-  badgeIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  badgeEmoji: {
-    fontSize: 18,
-  },
-  badgeLabel: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 9,
-    fontFamily: 'Inter-Medium',
-    textAlign: 'center',
-  },
-  badgeUnlockedTag: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(0,0,0,0.3)',
-  },
-  allUnlocked: {
-    marginTop: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
-  },
-  allUnlockedText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontFamily: 'Inter-SemiBold',
-    textAlign: 'center',
-  },
-
-  // ── Broker Connect ──
-  brokerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-  },
-  brokerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
-    marginBottom: 6,
-  },
-  brokerMiniCard: {
-    borderRadius: 14,
-    overflow: 'hidden',
-    aspectRatio: 0.8,
-  },
-  brokerMiniGradient: {
-    flex: 1,
-    padding: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-  },
-  brokerMiniIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  brokerMiniIconText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontFamily: 'Inter-Bold',
-  },
-  brokerMiniLabel: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontFamily: 'Inter-SemiBold',
-    textAlign: 'center',
-  },
-  brokerMiniConnected: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    backgroundColor: 'rgba(16,185,129,0.25)',
-    borderRadius: 8,
-  },
-  brokerMiniConnectedText: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    fontFamily: 'Inter-Medium',
-  },
-  brokerMiniSyncBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-  },
-  brokerMiniSyncText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 8,
-    fontFamily: 'Inter-Regular',
-  },
-  brokerSuccessRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(0,230,118,0.1)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(0,230,118,0.2)',
-  },
-  brokerSuccessText: {
-    color: '#00E676',
-    fontSize: 11,
-    fontFamily: 'Inter-Medium',
-  },
-
-  // ── Lottie interact button ──
-  lottieInteractBtn: {
-    position: 'absolute',
-    bottom: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-  },
-  lottieInteractText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontFamily: 'Inter-Medium',
-  },
-
-  // ── Illustration Layout ──
-  illustrationWrapper: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  illustrationBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    opacity: 0.35,
-  },
-});
-
-// ────────────────────────────────────────────────────────
 // Main Styles
 // ────────────────────────────────────────────────────────
 
@@ -1991,5 +753,39 @@ const styles = StyleSheet.create({
   },
   lottieToggleTextActive: {
     color: '#00E676',
+  },
+
+  // ── Illustration Layout (moved from demoStyles) ──
+  lottieInteractBtn: {
+    position: 'absolute',
+    bottom: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  lottieInteractText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontFamily: 'Inter-Medium',
+  },
+  illustrationWrapper: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  illustrationBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 0.35,
   },
 });

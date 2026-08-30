@@ -420,14 +420,17 @@ describe('POST /api/orders/modify', () => {
     const { status, body } = await post('/api/orders/modify', { price: 2500 }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('orderId');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
+    expect(body.details.some((d: any) => d.field === 'orderId')).toBe(true);
   });
 
   it('should reject with non-string orderId', async () => {
     const { status, body } = await post('/api/orders/modify', { orderId: 123 }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('orderId');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should reject invalid orderType', async () => {
@@ -437,7 +440,8 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Invalid orderType');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should reject invalid productType', async () => {
@@ -447,7 +451,8 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Invalid productType');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should reject non-integer quantity', async () => {
@@ -457,7 +462,8 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('quantity must be a positive integer');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should reject non-positive price', async () => {
@@ -467,7 +473,8 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('price must be a positive number');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should reject negative triggerPrice', async () => {
@@ -477,7 +484,8 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('triggerPrice must be a positive number');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should modify an existing order successfully', async () => {
@@ -514,7 +522,8 @@ describe('POST /api/orders/cancel', () => {
     const { status, body } = await post('/api/orders/cancel', {}, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('orderId');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should cancel an existing order', async () => {
@@ -549,7 +558,7 @@ describe('POST /api/payments/create-order', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Invalid plan');
+    expect(body.error).toBe('Validation failed');
   });
 
   it('should create a pro monthly order', async () => {
@@ -634,7 +643,8 @@ describe('POST /api/payments/verify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Missing required payment');
+    expect(body.error).toBe('Validation failed');
+    expect(body.details).toBeDefined();
   });
 
   it('should reject missing razorpayPaymentId', async () => {
@@ -645,7 +655,7 @@ describe('POST /api/payments/verify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Missing');
+    expect(body.error).toBe('Validation failed');
   });
 
   it('should reject missing razorpaySignature', async () => {
@@ -656,7 +666,7 @@ describe('POST /api/payments/verify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Missing');
+    expect(body.error).toBe('Validation failed');
   });
 
   it('should verify payment with all required fields (mock dev mode)', async () => {

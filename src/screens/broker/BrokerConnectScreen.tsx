@@ -142,6 +142,9 @@ export default function BrokerConnectScreen({ navigation }: any) {
     connectedAt: null,
     isLoading: true,
   });
+  // BUG 1 FIX: Show a friendly error message when the backend can't be
+  // reached instead of silently leaving the screen blank.
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Modal states
   const [selectedBroker, setSelectedBroker] = useState<BrokerMeta | null>(null);
@@ -187,6 +190,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
           connectedAt: st.connectedAt,
           isLoading: false,
         });
+        setLoadError(null);
         return;
       }
 
@@ -199,8 +203,19 @@ export default function BrokerConnectScreen({ navigation }: any) {
         connectedAt: data.connectedAt,
         isLoading: false,
       });
-    } catch {
+      setLoadError(null);
+    } catch (err: any) {
+      // BUG 1 FIX: Surface a friendly error message instead of silently
+      // leaving the user staring at a blank screen. The original catch
+      // block only flipped `isLoading` off, which is what was being
+      // reported as "broker connect error aata hai".
       setConnectionState(s => ({ ...s, isLoading: false }));
+      const message = (err && (err.message || err.toString())) || '';
+      setLoadError(
+        message.includes('Network') || message.includes('Failed to fetch')
+          ? 'Cannot reach Toroloom servers. Check your internet and try again.'
+          : 'Broker status unavailable right now. Pull down to refresh.',
+      );
     }
   }, []);
 
@@ -446,6 +461,26 @@ export default function BrokerConnectScreen({ navigation }: any) {
             <Text style={styles.headerSubtitle}>{t('brokerConnect.headerSubtitle')}</Text>
           </View>
         </View>
+
+        {/* BUG 1 FIX: Show a user-friendly error banner when the broker
+            status fetch fails. The previous version left the screen blank
+            with no feedback, which the user reported as "broker connect
+            error aata hai". */}
+        {loadError && !connectionState.connected && (
+          <View style={[styles.errorBanner, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '40' }]}>
+            <Ionicons name="cloud-offline-outline" size={20} color={colors.danger} />
+            <View style={styles.errorBannerText}>
+              <Text style={[styles.errorBannerTitle, { color: colors.danger }]}>Unable to reach broker service</Text>
+              <Text style={[styles.errorBannerSubtitle, { color: colors.textSecondary }]}>{loadError}</Text>
+            </View>
+            <AnimatedPressable onPress={loadStatus} haptic="light" scaleTo={0.92}>
+              <View style={[styles.retryButton, { backgroundColor: colors.danger }]}>
+                <Ionicons name="refresh" size={16} color="#fff" />
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </View>
+            </AnimatedPressable>
+          </View>
+        )}
 
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -907,7 +942,43 @@ const createStyles = (colors: any) => StyleSheet.create({
     lineHeight: 18,
   },
 
-  // (Removed legacy credentials modal styles)
+  // ── Error Banner ──────────────────────────────────────────
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.md,
+  },
+  errorBannerText: {
+    flex: 1,
+  },
+  errorBannerTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    marginBottom: 2,
+  },
+  errorBannerSubtitle: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    lineHeight: 16,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  retryButtonText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.xs,
+    color: '#fff',
+  },
 
   // ── OAuth WebView ─────────────────────────────────────────────
   webViewContainer: {

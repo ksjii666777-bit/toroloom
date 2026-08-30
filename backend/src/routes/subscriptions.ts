@@ -28,6 +28,8 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { upgradeSubscriptionSchema, checkFeatureSchema } from '../schemas/subscriptions';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getStorage } from '../services/storage';
 import type { UserSubscriptionData } from '../services/storage/types';
@@ -171,7 +173,7 @@ router.get('/current', async (req: Request, res: Response) => {
 
 // ──── POST /api/subscriptions/upgrade ─────────────────────────────────────
 
-router.post('/upgrade', async (req: Request, res: Response) => {
+router.post('/upgrade', validate(upgradeSubscriptionSchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
     const { planId, billingPeriod = 'monthly', razorpayOrderId, tenantId } = req.body;
@@ -448,15 +450,10 @@ async function handlePaymentCaptured(
 
 // ──── POST /api/subscriptions/check-feature ─────────────────────────────
 
-router.post('/check-feature', async (req: Request, res: Response) => {
+router.post('/check-feature', validate(checkFeatureSchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
     const { feature } = req.body;
-
-    if (!feature) {
-      res.status(400).json({ error: 'Feature name is required' });
-      return;
-    }
 
     const minTier = FEATURE_TIER_MAP[feature] || 'free';
 

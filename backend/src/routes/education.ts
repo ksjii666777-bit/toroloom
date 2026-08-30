@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { getCourseByIdSchema, getLessonByIdSchema } from '../schemas/education';
 import { mockCourses, mockLessons } from '../data/mockData';
 
 const router = Router();
@@ -11,7 +13,7 @@ router.get('/courses', (_req: Request, res: Response) => {
 });
 
 // GET /api/education/courses/:id
-router.get('/courses/:id', (req: Request, res: Response) => {
+router.get('/courses/:id', validate(getCourseByIdSchema), (req: Request, res: Response) => {
   const course = mockCourses.find(c => c.id === req.params.id);
   if (!course) {
     res.status(404).json({ error: 'Course not found' });
@@ -23,7 +25,7 @@ router.get('/courses/:id', (req: Request, res: Response) => {
 });
 
 // GET /api/education/lessons/:id
-router.get('/lessons/:id', (req: Request, res: Response) => {
+router.get('/lessons/:id', validate(getLessonByIdSchema), (req: Request, res: Response) => {
   const lesson = mockLessons.find(l => l.id === req.params.id);
   if (!lesson) {
     res.status(404).json({ error: 'Lesson not found' });
@@ -33,7 +35,7 @@ router.get('/lessons/:id', (req: Request, res: Response) => {
 });
 
 // PUT /api/education/lessons/:id/progress
-router.put('/lessons/:id/progress', (req: Request, res: Response) => {
+router.put('/lessons/:id/progress', validate(getLessonByIdSchema), (req: Request, res: Response) => {
   const lesson = mockLessons.find(l => l.id === req.params.id);
   if (!lesson) {
     res.status(404).json({ error: 'Lesson not found' });

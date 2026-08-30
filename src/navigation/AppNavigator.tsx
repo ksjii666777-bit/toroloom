@@ -97,6 +97,7 @@ import TwoFactorSetupScreen from '../screens/settings/TwoFactorSetupScreen';
 import TelegramConnectScreen from '../screens/settings/TelegramConnectScreen';
 import AISettingsScreen from '../screens/settings/AISettingsScreen';
 import DarkModeSettingsScreen from '../screens/settings/DarkModeSettingsScreen';
+import GDPRScreen from '../screens/settings/GDPRScreen';
 import AccessibilitySettingsScreen from '../screens/settings/AccessibilitySettingsScreen';
 import LandscapeSettingsScreen from '../screens/settings/LandscapeSettingsScreen';
 import CDNOptimizationScreen from '../screens/settings/CDNOptimizationScreen';
@@ -388,15 +389,14 @@ export default function AppNavigator() {
     function handleDeepLink(url: string | null) {
       if (!url) return;
 
-      // Parse referral ref from toroloom://signup?ref=XXX or https://toroloom.com/signup?ref=XXX
-      // For custom scheme URLs (toroloom://signup), 'signup' is the hostname.
-      // For HTTPS universal links (https://toroloom.com/signup), 'signup' is the pathname.
       try {
         const parsed = new URL(url);
-        const ref = parsed.searchParams.get('ref');
         const path = parsed.pathname.replace(/^\/+/, '') || parsed.hostname;
+        const params = Object.fromEntries(parsed.searchParams.entries());
+
+        // Referral link: toroloom://signup?ref=XXX
+        const ref = params.ref;
         if (ref && path === 'signup') {
-          // Record the referral on the user's account
           authApi.recordReferral(ref).then(() => {
             Alert.alert(
               '🎉 Referral Applied',
@@ -404,9 +404,47 @@ export default function AppNavigator() {
               [{ text: 'Awesome!' }]
             );
           }).catch(() => {
-            // Backend unavailable — store locally as fallback
             useOnboardingStore.getState().setReferralSource(ref);
           });
+          return;
+        }
+
+        // Stock detail: toroloom://stock/RELIANCE?id=123&symbol=RELIANCE
+        if (path.startsWith('stock/')) {
+          const symbol = decodeURIComponent(path.replace('stock/', ''));
+          const stockId = params.id || '';
+          if (symbol) {
+            // Navigation handled by React Navigation linking config
+            analytics.logScreenView('StockDetail');
+          }
+          return;
+        }
+
+        // Community post: toroloom://post/abc123
+        if (path.startsWith('post/')) {
+          const postId = path.replace('post/', '');
+          if (postId) {
+            analytics.logScreenView('CommunityPost');
+          }
+          return;
+        }
+
+        // Course: toroloom://course/abc123
+        if (path.startsWith('course/')) {
+          const courseId = path.replace('course/', '');
+          if (courseId) {
+            analytics.logScreenView('CourseDetail');
+          }
+          return;
+        }
+
+        // Advisor: toroloom://advisor/abc123
+        if (path.startsWith('advisor/')) {
+          const advisorId = path.replace('advisor/', '');
+          if (advisorId) {
+            analytics.logScreenView('AdvisorDetail');
+          }
+          return;
         }
       } catch {
         // Invalid URL — ignore
@@ -431,6 +469,31 @@ export default function AppNavigator() {
       screens: {
         Signup: 'signup',
         BrokerConnect: 'broker-connect',
+        StockDetail: {
+          path: 'stock/:symbol',
+          parse: {
+            symbol: (symbol: string) => decodeURIComponent(symbol),
+            id: (id: string) => id,
+          },
+        },
+        CommunityPost: {
+          path: 'post/:postId',
+          parse: {
+            postId: (postId: string) => postId,
+          },
+        },
+        CourseDetail: {
+          path: 'course/:courseId',
+          parse: {
+            courseId: (courseId: string) => courseId,
+          },
+        },
+        AdvisorDetail: {
+          path: 'advisor/:advisorId',
+          parse: {
+            advisorId: (advisorId: string) => advisorId,
+          },
+        },
       },
     },
   };
@@ -584,6 +647,7 @@ export default function AppNavigator() {
             <Stack.Screen name="TelegramConnect" component={TelegramConnectScreen} />
             <Stack.Screen name="AISettings" component={AISettingsScreen} />
             <Stack.Screen name="DarkMode" component={DarkModeSettingsScreen} />
+            <Stack.Screen name="GDPR" component={GDPRScreen} />
             <Stack.Screen name="Accessibility" component={AccessibilitySettingsScreen} />
             <Stack.Screen name="LandscapeMode" component={LandscapeSettingsScreen} />
             <Stack.Screen name="CDNOptimization" component={CDNOptimizationScreen} />

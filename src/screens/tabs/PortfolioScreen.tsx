@@ -12,6 +12,7 @@ import { formatCurrency, formatPercent } from '../../utils/formatters';
 import PortfolioHolding from '../../components/PortfolioHolding';
 import PnLChart from '../../components/PnLChart';
 import AppScreen from '../../components/ui/AppScreen';
+import SEBIComplianceBanner from '../../components/ui/SEBIComplianceBanner';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
@@ -125,6 +126,11 @@ export default function PortfolioScreen({ navigation }: CompositeScreenProps<Bot
           <View style={{ flexDirection: 'row', marginTop: SPACING.sm }}>
             <SyncStatusIndicator variant="inline" />
           </View>
+        </View>
+
+        {/* SEBI Compliance Banner */}
+        <View style={styles.paddingHorizontal}>
+          <SEBIComplianceBanner variant="compact" dismissible={false} />
         </View>
 
         {/* Portfolio Summary — Glassmorphic */}

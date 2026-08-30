@@ -40,7 +40,9 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Alert } from 'react-native';
 import { paymentsApi } from '../services/api/payments';
+import { subscriptionsApi } from '../services/api/subscriptions';
 import { couponApi } from '../services/api/coupons';
+import { log } from '../utils/logger';
 
 // ============ Storage Keys ============
 
@@ -268,6 +270,11 @@ interface SubscriptionState {
   upiMandates: UpiMandate[];
   isSettingUpAutopay: boolean;
 
+  // ──── Payment Success State ─────────────────────────────
+  /** Set to plan name on successful payment, consumer should clear it after showing confetti */
+  paymentSuccessPlan: string | null;
+  clearPaymentSuccess: () => void;
+
   // ──── Payment History State ──────────────────────────────
   paymentHistory: SubscriptionPayment[];
 
@@ -420,6 +427,10 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   upiMandates: [],
   isSettingUpAutopay: false,
 
+  // ──── Payment Success State ──────────────────────────────
+  paymentSuccessPlan: null,
+  clearPaymentSuccess: () => set({ paymentSuccessPlan: null }),
+
   // ──── Payment History State ───────────────────────────────
   paymentHistory: [],
 
@@ -538,7 +549,20 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
           tenantId,
         });
 
-        // 5. Update local subscription state
+        // 5. Record upgrade on backend subscription service
+        try {
+          await subscriptionsApi.upgrade(
+            plan.id,
+            billingPeriod,
+            data.razorpay_order_id,
+            tenantId,
+          );
+        } catch {
+          // Non-critical — webhook will also handle this, but log for awareness
+          log.warn('[SubscriptionStore] Backend upgrade record failed — webhook fallback active');
+        }
+
+        // 6. Update local subscription state
         const newSubscription: UserSubscription = {
           tier: plan.tier,
           planId: plan.id,
@@ -553,14 +577,9 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         };
 
         await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(newSubscription));
-        set({ subscription: newSubscription, isLoading: false });
+        set({ subscription: newSubscription, isLoading: false, paymentSuccessPlan: plan.name });
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert(
-          'Upgrade Successful! 🎉',
-          `You are now on the ${plan.name} plan. ${verification.message}`,
-          [{ text: 'Start Exploring' }]
-        );
 
       } catch {
         // Razorpay native module fallback (Expo Go / dev)
@@ -577,14 +596,9 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         };
 
         await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(newSubscription));
-        set({ subscription: newSubscription, isLoading: false });
+        set({ subscription: newSubscription, isLoading: false, paymentSuccessPlan: plan.name });
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert(
-          'Upgrade Successful! 🎉',
-          `You are now on the ${plan.name} plan. Welcome to Toroloom Premium!`,
-          [{ text: 'Start Exploring' }]
-        );
       }
     } catch (error: any) {
       set({ isLoading: false });
@@ -605,6 +619,13 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   cancelSubscription: async () => {
     set({ isLoading: true });
     try {
+      // Cancel on backend first
+      try {
+        await subscriptionsApi.cancel();
+      } catch {
+        log.warn('[SubscriptionStore] Backend cancel failed — proceeding with local cancel');
+      }
+
       const updated: UserSubscription = {
         ...get().subscription,
         autoRenew: false,
@@ -976,7 +997,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
           });
         } catch {
           // Subscription creation is non-critical for mandate setup
-          console.log('[Autopay] Subscription creation skipped — recurring will be handled by webhook');
+          log.info('[Autopay] Subscription creation skipped — recurring will be handled by webhook');
         }
 
         // 5. Build & persist mandate, show notification
@@ -985,11 +1006,11 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         return;
       } catch {
         // Razorpay Checkout or native module not available — fall through to mock
-        console.log('[Autopay] Razorpay Checkout unavailable — using fallback');
+        log.info('[Autopay] Razorpay Checkout unavailable — using fallback');
       }
     } catch {
       // Backend API unavailable — fall through to mock
-      console.log('[Autopay] Backend API unavailable — using fallback');
+      log.info('[Autopay] Backend API unavailable — using fallback');
     }
 
     // ── Fallback: Client-side mock ─────────────────────────────────

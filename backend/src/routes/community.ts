@@ -1,15 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware, optionalAuth } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { getPostsQuerySchema, getPostByIdSchema, createPostSchema, likePostSchema } from '../schemas/community';
 import { getPosts, getPost, createPost, likePost } from '../services/community';
 
 const router = Router();
 
 // GET /api/community/posts
 router.get('/posts', optionalAuth, async (req: Request, res: Response) => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const tag = req.query.tag as string;
-  const sort = (req.query.sort as string) || 'hot';
+  const { page = 1, limit = 10, tag, sort = 'hot' } = req.query;
 
   let posts = await getPosts();
 
@@ -49,7 +48,12 @@ router.get('/posts', optionalAuth, async (req: Request, res: Response) => {
 
 // GET /api/community/posts/:id
 router.get('/posts/:id', optionalAuth, async (req: Request, res: Response) => {
-  const post = await getPost(req.params.id as string);
+  const result = getPostByIdSchema.safeParse({ id: req.params.id });
+  if (!result.success) {
+    res.status(400).json({ error: 'Invalid post ID' });
+    return;
+  }
+  const post = await getPost(result.data.id);
   if (!post) {
     res.status(404).json({ error: 'Post not found' });
     return;
@@ -58,12 +62,8 @@ router.get('/posts/:id', optionalAuth, async (req: Request, res: Response) => {
 });
 
 // POST /api/community/posts
-router.post('/posts', authMiddleware, async (req: Request, res: Response) => {
+router.post('/posts', authMiddleware, validate(createPostSchema), async (req: Request, res: Response) => {
   const { content, tags } = req.body;
-  if (!content) {
-    res.status(400).json({ error: 'Content is required' });
-    return;
-  }
 
   const id = `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const userId = req.user!.userId;
@@ -76,7 +76,12 @@ router.post('/posts', authMiddleware, async (req: Request, res: Response) => {
 
 // POST /api/community/posts/:id/like
 router.post('/posts/:id/like', authMiddleware, async (req: Request, res: Response) => {
-  const likes = await likePost(req.params.id as string);
+  const result = likePostSchema.safeParse({ id: req.params.id });
+  if (!result.success) {
+    res.status(400).json({ error: 'Invalid post ID' });
+    return;
+  }
+  const likes = await likePost(result.data.id);
   res.json({ likes });
 });
 

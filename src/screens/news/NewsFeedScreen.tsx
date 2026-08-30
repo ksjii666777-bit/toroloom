@@ -534,6 +534,8 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
     </View>
   );
 
+  const [activeSymbol, setActiveSymbol] = useState<string | null>(null);
+
   // Fetch news from backend API on mount
   useEffect(() => {
     let mounted = true;
@@ -560,16 +562,55 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
     fetchNews();
     return () => { mounted = false; };
   }, []);
+  // BUG 3 FIX: Re-fetch news from the backend whenever a symbol filter is
+  // toggled. The previous version only filtered the articles already in
+  // memory, so stock-specific news (e.g. "NIFTY", "RELIANCE") never appeared
+  // because the initial feed only returns general market news.
+  useEffect(() => {
+    let mounted = true;
+    const fetchSymbolNews = async () => {
+      if (!activeSymbol) return; // No filter — keep what we already have.
+      setIsLoadingNews(true);
+      try {
+        const result = await newsApi.getNewsForSymbol(activeSymbol);
+        if (mounted && result.articles && result.articles.length > 0) {
+          // Merge the symbol-specific articles with the general feed so the
+          // user can still browse other news while a filter is active.
+          setNews(prev => {
+            const seen = new Set<string>();
+            const merged: MarketNewsItem[] = [];
+            for (const a of [...result.articles, ...prev]) {
+              if (!seen.has(a.id) && !seen.has(a.title)) {
+                seen.add(a.title);
+                merged.push(a);
+              }
+            }
+            return merged;
+          });
+        }
+      } catch {
+        // Network failed — silently keep the existing feed; the client-side
+        // filter on `activeSymbol` will still narrow the visible list.
+      } finally {
+        if (mounted) setIsLoadingNews(false);
+      }
+    };
+    fetchSymbolNews();
+    return () => { mounted = false; };
+  }, [activeSymbol]);
   const [selectedArticle, setSelectedArticle] = useState<MarketNewsItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [activeSymbol, setActiveSymbol] = useState<string | null>(null);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const searchRef = useRef<TextInput>(null);
 
-  // Extract trending symbols from current news
+  // BUG 3 FIX: Seed the trending-symbols strip with a curated list of
+  // popular Indian tickers. Before, the strip was derived ONLY from symbols
+  // present in the loaded news, so it was empty unless a backend article
+  // happened to mention that ticker.
+  const DEFAULT_TRENDING_SYMBOLS = ['NIFTY', 'SENSEX', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK'];
   const trendingSymbols = useMemo(() => {
-    const symbols = new Set<string>();
+    const symbols = new Set<string>(DEFAULT_TRENDING_SYMBOLS);
     news.forEach(a => {
       if (a.symbol) symbols.add(a.symbol);
     });

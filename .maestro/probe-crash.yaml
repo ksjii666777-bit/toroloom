@@ -1,0 +1,32 @@
+appId: com.toroloom.app
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "login-email-input"
+    timeout: 30000
+- tapOn:
+    id: "login-email-input"
+- inputText: "test@toroloom.com"
+- hideKeyboard
+- tapOn:
+    id: "login-password-input"
+- inputText: "password123"
+- hideKeyboard
+- tapOn:
+    id: "login-btn"
+- waitForAnimationToEnd:
+    timeout: 15000
+- tapOn:
+    id: "tab-markets"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "RELIANCE"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
+- tapOn:
+    text: "RELIANCE"
+- waitForAnimationToEnd:
+    timeout: 10000

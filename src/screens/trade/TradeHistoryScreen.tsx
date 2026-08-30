@@ -12,6 +12,7 @@ import { Trade } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 import AppScreen from '../../components/ui/AppScreen';
+import SEBIComplianceBanner from '../../components/ui/SEBIComplianceBanner';
 
 
 const { width } = Dimensions.get('window');
@@ -89,6 +90,9 @@ export default function TradeHistoryScreen({ navigation }: NativeStackScreenProp
             <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'sell').length} {t('trading.orders')}</Text>
           </LinearGradient>
         </View>
+
+        {/* SEBI Compliance Banner */}
+        <SEBIComplianceBanner variant="compact" dismissible={false} />
 
         {/* Search */}
         <View style={styles.searchContainer}>

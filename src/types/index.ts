@@ -3094,6 +3094,7 @@ export type RootStackParamList = {
   TelegramConnect: undefined;
   AISettings: undefined;
   DarkMode: undefined;
+  GDPR: undefined;
   Accessibility: undefined;
   LandscapeMode: undefined;
   CDNOptimization: undefined;

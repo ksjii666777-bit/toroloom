@@ -175,6 +175,32 @@ export function buildTradingViewWidgetHtml(config: TradingViewWidgetConfig): str
     save_image: config.saveImage ?? true,
     show_popup_button: config.showPopupButton ?? false,
     enable_publishing: false,
+    // ── BUG 2 FIX: hide TradingView's "Advanced Chart" disclosure overlay ──
+    // The widget renders a small disclosure banner at the bottom-right of the
+    // chart ("Advanced Chart by TradingView"). Hide it via the official
+    // `disabled_features` flag list so the chart looks native to Toroloom.
+    disabled_features: [
+      'left_toolbar',
+      'header_widget',
+      'timeframes_toolbar',
+      'edit_buttons_in_legend',
+      'context_menus',
+      'go_to_date',
+      'countdown',
+      'remove_library_container_top_padding',
+    ],
+    // Hide the "Advanced Chart" branding text rendered inside the widget iframe.
+    // TradingView respects `publisher_logo` and `custom_css_url` (paid plans).
+    // For the free embed we use CSS to hide the disclosure element.
+    custom_css_url: 'data:text/css;base64,' + btoa(
+      // Hide the "Advanced Chart" pill / disclaimer text rendered at the bottom
+      // of the embedded widget. The class names are stable across widget builds.
+      'iframe + div .tv-embed-widget__disclaimer,' +
+      '.tv-embed-widget__disclaimer,' +
+      '[class*="disclaimer"]{display:none!important;visibility:hidden!important;}' +
+      // Tighten the bottom padding so the chart uses the full height.
+      'html,body{padding:0!important;margin:0!important;}'
+    ),
     studies: [] as string[],
     container_id: containerId,
   };

@@ -21,6 +21,7 @@ import { formatCurrency, formatPercent } from '../../utils/formatters';
 import MarketCard from '../../components/MarketCard';
 import StockItem from '../../components/StockItem';
 import AppScreen from '../../components/ui/AppScreen';
+import SEBIComplianceBanner from '../../components/ui/SEBIComplianceBanner';
 import { FeatureGrid } from '../../components/patterns/FeatureGrid';
 import { PortfolioSummaryCard } from '../../components/ui/PortfolioSummaryCard';
 import { SectionHeader } from '../../components/ui/SectionHeader';
@@ -39,6 +40,15 @@ import type { LiveFeedEvent } from '../../services/ai/sentimentLiveFeed';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
+import {
+  MarketBreadth,
+  SectorHeatmap,
+  QuickCalculators,
+  AIMarketInsight,
+  TopHoldingsSection,
+  RecentTradesSection,
+  MarketNews,
+} from '../../components/home';
 
 export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTabScreenProps<TabParamList, 'Home'>, NativeStackScreenProps<RootStackParamList>>) {
   const { colors } = useTheme();
@@ -377,6 +387,11 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
           </View>
         </View>
 
+        {/* SEBI Compliance Banner */}
+        <View style={[styles.section, { paddingHorizontal: SPACING.xl }]}>
+          <SEBIComplianceBanner variant="compact" dismissible={false} />
+        </View>
+
         {/* Stock Search Bar */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[0]]}>
           <View style={[styles.searchContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -425,30 +440,7 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
 
         {/* Market Breadth */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
-          <View style={styles.marketBreadthRow}>
-            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
-              <Ionicons name="arrow-up-circle" size={18} color="#00C853" />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.adv')}</Text>
-              <Text style={[styles.breadthValue, { color: '#00C853' }]}>{advancing}</Text>
-            </View>
-            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
-              <Ionicons name="remove-circle" size={18} color={colors.textMuted} />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.flat')}</Text>
-              <Text style={[styles.breadthValue, { color: colors.textMuted }]}>{unchanged}</Text>
-            </View>
-            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
-              <Ionicons name="arrow-down-circle" size={18} color="#FF1744" />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.dec')}</Text>
-              <Text style={[styles.breadthValue, { color: '#FF1744' }]}>{declining}</Text>
-            </View>
-            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
-              <Ionicons name="stats-chart" size={18} color={advancing > declining ? '#00C853' : '#FF1744'} />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.ratio')}</Text>
-              <Text style={[styles.breadthValue, { color: advancing > declining ? '#00C853' : '#FF1744' }]}>
-                {declining > 0 ? (advancing / declining).toFixed(1) : '∞'}
-              </Text>
-            </View>
-          </View>
+          <MarketBreadth advancing={advancing} declining={declining} unchanged={unchanged} colors={colors} />
         </ReanimatedAnimated.View>
 
         {/* News Loading Skeleton */}
@@ -485,32 +477,7 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle} testID="home-section-sector-performance">{t('home.sectorPerformance')}</Text>
           </View>
-          <View style={[styles.heatmapContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            {sectorPerformance.slice(0, 6).map((sector, i) => {
-              const intensity = Math.min(Math.abs(sector.avgChange) / 5, 1);
-              const isGreen = sector.avgChange >= 0;
-              return (
-                <View key={sector.sector} style={[styles.heatmapItem, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                  <View style={styles.heatmapLeft}>
-                    <Text style={[styles.heatmapSector, { color: colors.text }]}>{sector.sector}</Text>
-                    <Text style={[styles.heatmapCount, { color: colors.textMuted }]}>{t('market.stocks', { count: sector.count })}</Text>
-                  </View>
-                  <View style={[styles.heatmapBar, {
-                    backgroundColor: isGreen
-                      ? `rgba(0, 230, 118, ${Math.max(0.1, intensity)})`
-                      : `rgba(255, 82, 82, ${Math.max(0.1, intensity)})`,
-                    width: `${Math.max(Math.abs(sector.avgChange) * 8, 8)}%`,
-                  }]}>
-                    <Text style={[styles.heatmapValue, {
-                      color: isGreen ? colors.marketUp : colors.marketDown,
-                    }]}>
-                      {isGreen ? '+' : ''}{sector.avgChange.toFixed(1)}%
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
+          <SectorHeatmap sectors={sectorPerformance} colors={colors} />
         </ReanimatedAnimated.View>
 
         {/* Quick Calculators */}
@@ -518,64 +485,13 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle} testID="home-section-calculators">{t('home.financialCalculators')}</Text>
           </View>
-          <FlashList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={calculatorsData}
-            keyExtractor={(calc) => calc.screen}
-            renderItem={({ item: calc }) => (
-              <TouchableOpacity
-                style={[styles.calcCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                onPress={() => (navigation.navigate as (screenName: string) => void)(calc.screen)}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.calcIcon, { backgroundColor: `${calc.color}20` }]}>
-                  <Ionicons name={calc.icon as keyof typeof Ionicons.glyphMap} size={24} color={calc.color} />
-                </View>
-                <Text style={[styles.calcLabel, { color: colors.text }]}>{calc.label}</Text>
-                <Text style={[styles.calcDesc, { color: colors.textMuted }]}>{calc.desc}</Text>
-              </TouchableOpacity>
-            )}
-          />
+          <QuickCalculators calculators={calculatorsData} navigation={navigation} colors={colors} />
         </ReanimatedAnimated.View>
 
         {/* AI Market Insight */}
         {topInsight && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[4]]}>
-            <Card animated animationDelay={500}>
-              <View style={styles.aiInsightHeader}>
-                <View style={styles.aiInsightLeft}>
-                  <View style={[styles.aiBadge, { backgroundColor: colors.primaryLight + '20' }]}>
-                    <Ionicons name="bulb" size={16} color={colors.primary} />
-                  </View>
-                  <View>
-                    <Text style={[styles.aiLabel, { color: colors.textSecondary }]}>{t('home.aiMarketInsight')}</Text>
-                    <Text style={[styles.aiSymbol, { color: colors.text }]}>{topInsight.symbol}</Text>
-                  </View>
-                </View>
-                <View style={[styles.confidenceChip, {
-                  backgroundColor: topInsight.type === 'bullish' ? '#00C85320' : topInsight.type === 'bearish' ? '#FF174420' : colors.bgCardLight,
-                }]}>
-                  <Ionicons name={
-                    topInsight.type === 'bullish' ? 'trending-up' :
-                    topInsight.type === 'bearish' ? 'trending-down' : 'remove'
-                  } size={14} color={
-                    topInsight.type === 'bullish' ? '#00C853' :
-                    topInsight.type === 'bearish' ? '#FF1744' : colors.textMuted
-                  } />
-                  <Text style={[styles.confidenceText, {
-                    color: topInsight.type === 'bullish' ? '#00C853' :
-                    topInsight.type === 'bearish' ? '#FF1744' : colors.textMuted,
-                  }]}>{topInsight.confidence}%</Text>
-                </View>
-              </View>
-              <Text style={[styles.aiSummary, { color: colors.textSecondary }]} numberOfLines={2}>
-                {topInsight.summary}
-              </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('AIInsights')} style={styles.aiCta}>
-                <Text style={[styles.aiCtaText, { color: colors.primary }]}>{t('home.viewFullAnalysis')}</Text>
-              </TouchableOpacity>
-            </Card>
+            <AIMarketInsight insight={topInsight} navigation={navigation} colors={colors} />
           </ReanimatedAnimated.View>
         )}
 
@@ -804,43 +720,7 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
         {/* Top Holdings */}
         {topHoldings.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[8]]}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle} testID="home-section-top-holdings">{t('home.topHoldings')}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Portfolio')}>
-                <Text style={styles.seeAll}>{t('home.allHoldings')}</Text>
-              </TouchableOpacity>
-            </View>
-            {topHoldings.map(holding => {
-              const isPositive = holding.pnl >= 0;
-              return (
-                <TouchableOpacity
-                  key={holding.id}
-                  style={[styles.holdingCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                  onPress={() => navigation.navigate('StockDetail', { stockId: holding.stockId, symbol: holding.symbol })}
-                >
-                  <View style={styles.holdingLeft}>
-                    <View style={[styles.holdingAvatar, { backgroundColor: isPositive ? '#00C85320' : '#FF174420' }]}>
-                      <Ionicons name={isPositive ? 'trending-up' : 'trending-down'} size={16} color={isPositive ? '#00C853' : '#FF1744'} />
-                    </View>
-                    <View>
-                      <Text style={[styles.holdingSymbol, { color: colors.text }]}>{holding.symbol}</Text>
-                      <Text style={[styles.holdingQty, { color: colors.textMuted }]}>{t('home.shares', { count: holding.quantity })}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.holdingRight}>
-                    <Text style={[styles.holdingValue, { color: colors.text }]}>
-                      {formatLargeCurrency(holding.currentValue)}
-                    </Text>
-                    <View style={[styles.holdingPnlChip, { backgroundColor: isPositive ? '#00C85320' : '#FF174420' }]}>
-                      <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={12} color={isPositive ? '#00C853' : '#FF1744'} />
-                      <Text style={[styles.holdingPnlText, { color: isPositive ? '#00C853' : '#FF1744' }]}>
-                        {formatPercent(holding.pnlPercent)}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+            <TopHoldingsSection holdings={topHoldings} formatLargeCurrency={formatLargeCurrency} navigation={navigation} colors={colors} />
           </ReanimatedAnimated.View>
         )}
 
@@ -887,28 +767,7 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
                 <Text style={styles.seeAll}>{t('home.allTrades')}</Text>
               </TouchableOpacity>
             </View>
-            {recentTrades.map(trade => (
-              <View key={trade.id} style={[styles.tradeItem, { borderColor: colors.border }]}>
-                <View style={styles.tradeLeft}>
-                  <View style={[styles.tradeTypeBadge, {
-                    backgroundColor: trade.type === 'buy' ? '#00C85320' : '#FF174420',
-                  }]}>
-                    <Ionicons name={trade.type === 'buy' ? 'cart' : 'arrow-up'} size={14} color={trade.type === 'buy' ? '#00C853' : '#FF1744'} />
-                  </View>
-                  <View>
-                    <Text style={[styles.tradeSymbol, { color: colors.text }]}>{trade.symbol}</Text>
-                    <Text style={[styles.tradeMeta, { color: colors.textMuted }]}>
-                      {trade.type === 'buy' ? t('home.bought') : t('home.sold')} {trade.quantity} @ ₹{trade.price.toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={[styles.tradeAmount, {
-                  color: trade.type === 'buy' ? colors.text : colors.marketUp,
-                }]}>
-                  {trade.type === 'buy' ? '-' : '+'}₹{trade.total.toLocaleString()}
-                </Text>
-              </View>
-            ))}
+            <RecentTradesSection trades={recentTrades} colors={colors} />
           </ReanimatedAnimated.View>
         )}
 
@@ -934,41 +793,7 @@ export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTa
         {/* Market News */}
         {latestNews.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[13]]}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle} testID="home-section-market-news">{t('home.marketNews')}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('NewsFeed')}>
-                <Text style={styles.seeAll}>{t('home.allNews')}</Text>
-              </TouchableOpacity>
-            </View>
-            <FlashList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              data={latestNews}
-              keyExtractor={(news: any, i: number) => news.id || String(i)}
-              renderItem={({ item: news }: { item: any }) => (
-                <TouchableOpacity
-                  style={[styles.newsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                  onPress={() => navigation.navigate('NewsFeed')}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.newsCategoryBadge, {
-                    backgroundColor: news.sentiment === 'positive' ? '#00C85320' : news.sentiment === 'negative' ? '#FF174420' : '#FFAB4020',
-                  }]}>
-                    <Text style={[styles.newsCategoryText, {
-                      color: news.sentiment === 'positive' ? '#00C853' : news.sentiment === 'negative' ? '#FF1744' : '#FFAB40',
-                    }]}>
-                      {news.category.toUpperCase()}
-                    </Text>
-                  </View>
-                  <Text style={[styles.newsTitle, { color: colors.text }]} numberOfLines={2}>
-                    {news.title}
-                  </Text>
-                  <Text style={[styles.newsSource, { color: colors.textMuted }]}>
-                    {news.source} · {new Date(news.publishedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
+            <MarketNews news={latestNews} navigation={navigation} colors={colors} />
           </ReanimatedAnimated.View>
         )}
 

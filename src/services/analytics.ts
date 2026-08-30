@@ -56,6 +56,12 @@ export interface AnalyticsEvents {
   ai_insight_viewed: { symbol: string };
   community_post_created: Record<string, never>;
   community_post_liked: Record<string, never>;
+  share_completed: {
+    platform: 'native' | 'copy' | 'whatsapp' | 'twitter' | 'telegram';
+    contentType: 'stock' | 'post' | 'course' | 'advisor' | 'general';
+    contentId?: string;
+    contentSymbol?: string;
+  };
   notification_opened: { type: string };
   onboarding_completed: { completed: boolean; skipped?: boolean; replay?: boolean };
   onboarding_started: { source: string; variant: 'default' | 'referral' };
