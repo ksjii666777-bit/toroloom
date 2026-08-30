@@ -8,7 +8,10 @@ const router = Router();
 
 // GET /api/community/posts
 router.get('/posts', optionalAuth, async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, tag, sort = 'hot' } = req.query;
+  const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
+  const limit = Math.max(1, Math.min(100, parseInt(String(req.query.limit ?? '10'), 10) || 10));
+  const tag = typeof req.query.tag === 'string' ? req.query.tag : undefined;
+  const sort = typeof req.query.sort === 'string' ? req.query.sort : 'hot';
 
   let posts = await getPosts();
 
