@@ -21,7 +21,7 @@ import path from 'path';
 
 const router = Router();
 
-const APP_NAME = 'Toroloom';
+const _APP_NAME = 'Toroloom';
 const IOS_BUNDLE_ID = 'com.toroloom.app';
 const ANDROID_PACKAGE = 'com.toroloom.app';
 const TEAM_ID = 'TEAM_ID';

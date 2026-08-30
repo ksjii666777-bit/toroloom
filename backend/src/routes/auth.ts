@@ -23,7 +23,7 @@ router.use(inputSanitizer);
  * Validate email format — strict but not ReDoS-vulnerable.
  * Max 254 chars per RFC 5321.
  */
-function isValidEmail(email: string): boolean {
+function _isValidEmail(email: string): boolean {
   if (email.length > 254) return false;
   // Simple but safe check: must have exactly one @, no spaces, valid domain
   const atIndex = email.indexOf('@');
