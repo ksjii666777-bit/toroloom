@@ -27,6 +27,8 @@ import AppScreen from '../../components/ui/AppScreen';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { api } from '../../services/api';
+import * as Sharing from 'expo-sharing';
+import { cacheDirectory, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 
@@ -54,17 +56,22 @@ export default function GDPRScreen({ navigation }: Props) {
     try {
       const response: any = await api.post('/gdpr/export', { format: 'json' });
       if (response.data.success) {
-        // Create and download the JSON file
         const dataStr = JSON.stringify(response.data.data, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `toroloom_data_export_${user?.id || 'user'}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const fileName = `toroloom_data_export_${user?.id || 'user'}.json`;
+
+        // Write to a temp file in the cache directory, then share it
+        const fileUri = `${cacheDirectory}${fileName}`;
+        await writeAsStringAsync(fileUri, dataStr, {
+          encoding: EncodingType.UTF8,
+        });
+
+        // Open the native share sheet so the user can save/send the file
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(fileUri, {
+            mimeType: 'application/json',
+            dialogTitle: t('gdpr.exportComplete'),
+          });
+        }
 
         Alert.alert(
           t('gdpr.exportComplete'),
