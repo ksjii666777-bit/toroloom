@@ -44,7 +44,12 @@ export const useAuthStore = create<AuthState>((set) => ({
           // Backend unavailable – use cached data
         });
       }
-    } catch { /* ignore */ }
+    } catch {
+      // Backend unavailable — use cached data silently
+      if (typeof __DEV__ !== 'undefined' && !__DEV__) {
+        console.warn('[Auth] Backend unavailable — using cached profile');
+      }
+    }
   },
 
   setIsAdmin: (value) => {
@@ -63,8 +68,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       analytics.setUserId(res.user.id);
       return true;
     } catch {
-      // Backend unavailable — fall back to mock login
+      // ── Production safety gate ──────────────────────────────────
+      // In production builds, NEVER allow mock login — the user must
+      // have a real backend to authenticate against. Show an error.
+      if (typeof __DEV__ !== 'undefined' && !__DEV__) {
+        set({ isLoading: false });
+        return false;
+      }
+      // Dev-only: fall back to mock login when backend is unavailable
       if (email && password) {
+        console.warn('[Auth] Backend unavailable — using mock login (dev only)');
         set({ user: mockUser, token: 'mock-token', isLoggedIn: true, isLoading: false });
         analytics.logEvent('login', { method: 'email' });
         return true;
@@ -91,7 +104,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       return true;
     } catch {
-      // Backend unavailable — fall back to mock
+      // ── Production safety gate ──────────────────────────────────
+      // In production builds, NEVER allow mock signup — the user must
+      // have a real backend to register against.
+      if (typeof __DEV__ !== 'undefined' && !__DEV__) {
+        set({ isLoading: false });
+        return false;
+      }
+      // Dev-only: fall back to mock signup when backend is unavailable
+      console.warn('[Auth] Backend unavailable — using mock signup (dev only)');
       const mockUserData = { ...mockUser, name, email, phone };
       set({ user: mockUserData, token: 'mock-token', isLoggedIn: true, isLoading: false });
       analytics.logEvent('signup', { method: 'email' });
