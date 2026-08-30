@@ -197,7 +197,9 @@ describe('POST /api/orders/execute — idempotency', () => {
     });
 
     expect(status).toBe(400);
-    expect(body.error).toContain('idempotencyKey');
+    // Zod validation puts field names in details[], not in the top-level error
+    expect(body.error).toBe('Validation failed');
+    expect(body.details?.some((d: any) => d.field === 'idempotencyKey')).toBe(true);
     expect(mockBroker.placeOrder).not.toHaveBeenCalled();
   });
 
