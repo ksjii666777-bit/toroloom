@@ -34,8 +34,8 @@
 --   updated_at      TIMESTAMPTZ
 --
 CREATE TABLE IF NOT EXISTS stock_alerts (
-  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  id              TEXT PRIMARY KEY,
+  user_id         TEXT NOT NULL,
   symbol          TEXT NOT NULL,
   target_price    NUMERIC(18,2) NOT NULL CHECK (target_price > 0),
   direction       TEXT NOT NULL CHECK (direction IN ('above', 'below')),

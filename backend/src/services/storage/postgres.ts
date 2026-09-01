@@ -465,10 +465,14 @@ export class PostgreSQLStorage implements StorageEngine {
           ALTER TABLE IF EXISTS parsed_ledgers DROP CONSTRAINT IF EXISTS parsed_ledgers_user_id_fkey;
           ALTER TABLE IF EXISTS stock_alerts ALTER COLUMN user_id TYPE TEXT USING user_id::text;
           ALTER TABLE IF EXISTS stock_alerts DROP CONSTRAINT IF EXISTS stock_alerts_user_id_fkey;
+          -- stock_alerts.id uses generateId() which returns 'sa_<uuid-slice>' (not a
+          -- valid UUID), so the column must be TEXT not UUID.
+          ALTER TABLE IF EXISTS stock_alerts ALTER COLUMN id TYPE TEXT USING id::text;
+          ALTER TABLE IF EXISTS stock_alerts ALTER COLUMN id DROP DEFAULT;
 
-              CREATE TABLE IF NOT EXISTS broker_sessions (
-                      id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                      user_id           TEXT NOT NULL,
+                  CREATE TABLE IF NOT EXISTS broker_sessions (
+                          id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                          user_id           TEXT NOT NULL,
                   broker_type       TEXT NOT NULL,
         encrypted_token   TEXT NOT NULL,
         encrypted_secret  TEXT,
@@ -531,9 +535,9 @@ export class PostgreSQLStorage implements StorageEngine {
     // migration runner runs (and is a no-op when it does).
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS stock_alerts (
-              id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id         TEXT NOT NULL,
-              symbol          TEXT NOT NULL,
+                    id              TEXT PRIMARY KEY,
+                    user_id         TEXT NOT NULL,
+                    symbol          TEXT NOT NULL,
         target_price    NUMERIC(18,2) NOT NULL CHECK (target_price > 0),
         direction       TEXT NOT NULL CHECK (direction IN ('above', 'below')),
         status          TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'triggered', 'cancelled')),
