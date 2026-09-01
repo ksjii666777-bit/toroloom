@@ -459,10 +459,17 @@ export class PostgreSQLStorage implements StorageEngine {
     `);
 
     await this.pool.query(`
-      CREATE TABLE IF NOT EXISTS broker_sessions (
-        id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        broker_type       TEXT NOT NULL,
+          ALTER TABLE IF EXISTS broker_sessions ALTER COLUMN user_id TYPE TEXT USING user_id::text;
+          ALTER TABLE IF EXISTS broker_sessions DROP CONSTRAINT IF EXISTS broker_sessions_user_id_fkey;
+          ALTER TABLE IF EXISTS parsed_ledgers ALTER COLUMN user_id TYPE TEXT USING user_id::text;
+          ALTER TABLE IF EXISTS parsed_ledgers DROP CONSTRAINT IF EXISTS parsed_ledgers_user_id_fkey;
+          ALTER TABLE IF EXISTS stock_alerts ALTER COLUMN user_id TYPE TEXT USING user_id::text;
+          ALTER TABLE IF EXISTS stock_alerts DROP CONSTRAINT IF EXISTS stock_alerts_user_id_fkey;
+
+              CREATE TABLE IF NOT EXISTS broker_sessions (
+                      id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                      user_id           TEXT NOT NULL,
+                  broker_type       TEXT NOT NULL,
         encrypted_token   TEXT NOT NULL,
         encrypted_secret  TEXT,
         status            TEXT NOT NULL DEFAULT 'active',
@@ -489,9 +496,9 @@ export class PostgreSQLStorage implements StorageEngine {
 
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS parsed_ledgers (
-        id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        broker_session_id   UUID REFERENCES broker_sessions(id) ON DELETE SET NULL,
+              id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              user_id             TEXT NOT NULL,
+              broker_session_id   UUID REFERENCES broker_sessions(id) ON DELETE SET NULL,
         execution_timestamp TIMESTAMPTZ NOT NULL,
         asset_symbol        TEXT NOT NULL,
         transaction_type    TEXT NOT NULL CHECK (transaction_type IN ('BUY', 'SELL')),
@@ -524,9 +531,9 @@ export class PostgreSQLStorage implements StorageEngine {
     // migration runner runs (and is a no-op when it does).
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS stock_alerts (
-        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        symbol          TEXT NOT NULL,
+              id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              user_id         TEXT NOT NULL,
+              symbol          TEXT NOT NULL,
         target_price    NUMERIC(18,2) NOT NULL CHECK (target_price > 0),
         direction       TEXT NOT NULL CHECK (direction IN ('above', 'below')),
         status          TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'triggered', 'cancelled')),
