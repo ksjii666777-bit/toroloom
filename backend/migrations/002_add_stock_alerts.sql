@@ -34,7 +34,7 @@
 --   updated_at      TIMESTAMPTZ
 --
 CREATE TABLE IF NOT EXISTS stock_alerts (
-  id              TEXT PRIMARY KEY,
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         TEXT NOT NULL,
   symbol          TEXT NOT NULL,
   target_price    NUMERIC(18,2) NOT NULL CHECK (target_price > 0),

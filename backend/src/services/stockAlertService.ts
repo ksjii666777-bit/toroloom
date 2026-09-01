@@ -84,7 +84,9 @@ function getPool(): Pool | null {
 // ──── ID Generation ─────────────────────────────────────────────────────
 
 function generateId(): string {
-  return `sa_${crypto.randomUUID().slice(0, 18)}`;
+  // Return a proper UUID v4 (matches the id UUID PRIMARY KEY column type).
+  // Earlier format 'sa_<uuid-slice>' caused Postgres to reject inserts.
+  return crypto.randomUUID();
 }
 
 // ──── CRUD Operations ───────────────────────────────────────────────────
