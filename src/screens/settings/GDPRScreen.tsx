@@ -17,7 +17,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
@@ -27,7 +27,8 @@ import AppScreen from '../../components/ui/AppScreen';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { api } from '../../services/api';
-import * as Sharing from 'expo-sharing';
+let Sharing: any = null;
+try { Sharing = require('expo-sharing'); } catch { /* Expo Go fallback */ }
 import { cacheDirectory, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';

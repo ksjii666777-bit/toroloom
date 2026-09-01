@@ -541,7 +541,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         const data = await RazorpayCheckout.open(options);
 
         // 4. Verify payment on backend
-        const verification = await paymentsApi.verifyPayment({
+        await paymentsApi.verifyPayment({
           razorpayPaymentId: data.razorpay_payment_id,
           razorpayOrderId: data.razorpay_order_id,
           razorpaySignature: data.razorpay_signature,

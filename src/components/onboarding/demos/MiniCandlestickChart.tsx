@@ -5,7 +5,6 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useT } from '../../../hooks/useT';
 import * as Haptics from 'expo-haptics';
 import { MOCK_CANDLE_DATA } from '../mockData';
 import { SPACING } from '../../../constants/theme';
@@ -19,7 +18,6 @@ interface MiniCandlestickChartProps {
 }
 
 export function MiniCandlestickChart({ onInteract, onDemoComplete }: MiniCandlestickChartProps) {
-  const { t } = useT();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const demoCompletedRef = useRef(false);
   const chartHeight = 100;

@@ -44,7 +44,8 @@ import { openExitOrder } from '../../utils/orderExit';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 import AppScreen from '../../components/ui/AppScreen';
-import SEBIComplianceBanner, { TradingRiskDisclosure } from '../../components/ui/SEBIComplianceBanner';
+import SEBIComplianceBanner from '../../components/ui/SEBIComplianceBanner';
+import StockNewsSection from '../../components/stock/StockNewsSection';
 
 
 const { width } = Dimensions.get('window');
@@ -83,9 +84,9 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
   const [chartOptions, setChartOptions] = useState({ hideSideToolbar: false, withDateRanges: true, saveImage: true });
 
   // ── Live chart mode ──
-  // TradingView widget (real, live data) by default; custom candlestick chart
-  // as a fallback when the widget cannot load (offline / blocked CDN).
-  const [chartMode, setChartMode] = useState<'live' | 'custom'>('live');
+  // Native candlestick chart by default (works offline, no CDN dependency).
+  // TradingView widget available as an opt-in option for live market data.
+  const [chartMode, setChartMode] = useState<'live' | 'custom'>('custom');
   const [tvFailed, setTvFailed] = useState(false);
   const isLiveChart = chartMode === 'live' && !tvFailed;
   const tvSymbol = useMemo(() => toTradingViewSymbol(stock.symbol, 'NSE'), [stock.symbol]);
@@ -607,6 +608,9 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
             </Text>
           </Card>
           </View>
+
+          {/* ── Stock News ── */}
+          <StockNewsSection symbol={stock.symbol} />
 
           {/* ── Extracted: Sector Context ── */}
           {sectorData && <SectorContext data={sectorData} />}

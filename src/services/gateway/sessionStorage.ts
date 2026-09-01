@@ -19,7 +19,8 @@
  * ============================================================================
  */
 
-import * as Keychain from 'react-native-keychain';
+let Keychain: typeof import('react-native-keychain') | null = null;
+try { Keychain = require('react-native-keychain'); } catch { /* Expo Go fallback */ }
 import type { BrokerSession, SessionPayload } from '../../types';
 import { log } from '../../utils/logger';
 
@@ -158,6 +159,7 @@ export async function storeBrokerSession(
     const key = storageKey(brokerType);
     const json = JSON.stringify(session);
 
+    if (!Keychain) return false;
     await Keychain.setGenericPassword(key, json, {
       service: KEYCHAIN_SERVICE,
       accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
@@ -180,6 +182,7 @@ export async function getBrokerSession(
 ): Promise<BrokerSession | null> {
   try {
     const key = storageKey(brokerType);
+    if (!Keychain) return null;
     const credentials = await Keychain.getGenericPassword({
       service: KEYCHAIN_SERVICE,
     });
@@ -218,6 +221,7 @@ export async function clearBrokerSession(
   _brokerType: string,
 ): Promise<boolean> {
   try {
+    if (!Keychain) return false;
     await Keychain.resetGenericPassword({
       service: KEYCHAIN_SERVICE,
     });

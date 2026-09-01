@@ -77,6 +77,9 @@ import socialRoutes from './routes/social';
 import kycRoutes from './routes/kyc';
 import twoFactorRoutes from './routes/twoFactor';
 import analyticsRoutes from './routes/analytics';
+import stockAlertsRoutes from './routes/stockAlerts';
+import webhooksRoutes from './routes/webhooks';
+import { configureWebhookPersistence } from './services/webhookService';
 import syncRoutes from './services/syncService';
 import globalStocksRoutes from './routes/globalStocks';
 import globalMarketsRoutes from './routes/globalMarkets';
@@ -280,6 +283,10 @@ app.use('/api/subscription-analytics', writeLimiter, authMiddleware, subscriptio
 
 // Razorpay webhook health & monitoring
 app.use('/api/webhooks', readLimiter, webhookHealthRoutes);
+// Full webhook management (CRUD — mounted at /api/user/webhooks per route file design)
+app.use('/api/user/webhooks', writeLimiter, authMiddleware, webhooksRoutes);
+// Stock price alerts (mounted at /api/user/alerts per route file design)
+app.use('/api/user/alerts', writeLimiter, authMiddleware, stockAlertsRoutes);
 app.use('/api/contract-note', writeLimiter, authMiddleware, requireSubscription('pro'), contractNoteRoutes);
 
 // ── F&O — 100 req / min (data reads), 50 req / min (writes) ────────────
@@ -440,6 +447,9 @@ async function initializeStorage(): Promise<void> {
 
     // Wire storage into the Coupon service for persistence
     configureCouponPersistence(storage);
+
+    // Wire storage into the Webhook service for persistence
+    configureWebhookPersistence(storage);
 
     // Wire storage into the API key service for persistence
     configureApiKeyPersistence(storage);

@@ -20,9 +20,10 @@
  * ============================================================================
  */
 
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+let DocumentPicker: any = null; let FileSystem: any = null; let Sharing: any = null;
+try { DocumentPicker = require('expo-document-picker'); } catch { /* Expo Go fallback */ }
+try { FileSystem = require('expo-file-system'); } catch { /* Expo Go fallback */ }
+try { Sharing = require('expo-sharing'); } catch { /* Expo Go fallback */ }
 import { api } from '../api/client';
 import { parseContractNote } from './tradeLedgerParser';
 import type { ParsedTrade } from '../../types';
@@ -241,7 +242,7 @@ export async function pickAndParseBatchContractNotes(
   const { brokerFormat } = options;
 
   // ── Step 1: Pick multiple PDFs ────────────────────────────────
-  let assets: DocumentPicker.DocumentPickerAsset[];
+  let assets: any[];
 
   try {
     const result = await DocumentPicker.getDocumentAsync({

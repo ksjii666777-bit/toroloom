@@ -3,7 +3,8 @@
 // Generates beautiful PDF completion certificates using expo-print
 // ============================================================================
 
-import * as Print from 'expo-print';
+let Print: any = null;
+try { Print = require('expo-print'); } catch { /* Expo Go fallback */ }
 import type { CourseCertificate } from '../types';
 
 // ─── HTML Template ──────────────────────────────────────────────────────────

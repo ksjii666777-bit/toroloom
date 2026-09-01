@@ -22,7 +22,8 @@
  * ============================================================================
  */
 
-import * as LocalAuthentication from 'expo-local-authentication';
+let LocalAuthentication: typeof import('expo-local-authentication') | null = null;
+try { LocalAuthentication = require('expo-local-authentication'); } catch { /* Expo Go fallback */ }
 
 export type BiometricType = 'fingerprint' | 'facial' | 'iris' | 'unknown';
 
@@ -44,6 +45,7 @@ export const biometricAuth = {
    */
   isAvailable: async (): Promise<boolean> => {
     try {
+      if (!LocalAuthentication) return false;
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       if (!hasHardware) return false;
 
@@ -59,6 +61,7 @@ export const biometricAuth = {
    */
   getBiometricType: async (): Promise<BiometricType> => {
     try {
+      if (!LocalAuthentication) return 'unknown';
       const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
       if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
         return 'fingerprint';
@@ -87,6 +90,7 @@ export const biometricAuth = {
     fallbackToPasscode: boolean = true,
   ): Promise<BiometricAuthResult> => {
     try {
+      if (!LocalAuthentication) return { success: false, error: 'Biometric not available' };
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: reason,
         fallbackLabel: fallbackToPasscode ? 'Enter Passcode' : undefined,

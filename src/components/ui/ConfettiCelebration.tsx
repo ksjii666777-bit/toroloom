@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -27,7 +27,6 @@ import Animated, {
   withRepeat,
   Easing,
   runOnJS,
-  interpolate,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

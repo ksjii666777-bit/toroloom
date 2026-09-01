@@ -44,7 +44,7 @@ export interface FetchResult {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const FRANKFURTER_API = 'https://api.frankfurter.dev/v2/latest';
+const FRANKFURTER_API = 'https://api.frankfurter.app/latest';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /** The subset of currency codes we care about */
@@ -127,7 +127,7 @@ function parseFrankfurterResponse(data: any): ForexRates | null {
  */
 export async function fetchLiveRates(): Promise<ForexRates | null> {
   try {
-    const url = `${FRANKFURTER_API}?base=EUR&to=${TRACKED_SYMBOLS}`;
+    const url = `${FRANKFURTER_API}?from=EUR&to=${TRACKED_SYMBOLS}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: { 'Accept': 'application/json' },

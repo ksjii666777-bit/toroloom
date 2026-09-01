@@ -144,18 +144,12 @@ describe('LoginScreen — Loaded Content', () => {
     expect(getByText('Log In')).toBeDefined();
   });
 
-  it('renders the social login divider', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
-    advanceAndRender(500);
-    expect(getByText('or continue with')).toBeDefined();
-  });
-
-  it('renders social login buttons', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
-    advanceAndRender(500);
-    // social buttons render as TouchableOpacity with Ionicons inside
-    expect(getByText("Don't have an account?")).toBeDefined();
-  });
+  it('renders the Sign Up link text', () => {
+      const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
+      advanceAndRender(500);
+      // social login was removed; the trailing CTAs are email + signup
+      expect(getByText("Don't have an account?")).toBeDefined();
+    });
 
   it('renders the Sign Up link', () => {
     const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);

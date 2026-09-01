@@ -208,7 +208,6 @@ export function computeTaxYearSummary(
 
   // Taxable LTCG after ₹1.25L exemption
   const taxableLtcg = Math.max(0, longTermGains - LTCG_EXEMPTION);
-  const ltcgTax = taxableLtcg * LTCG_RATE;
 
   // STCG tax (can be offset by STCL)
   const stclTotal = realizedLosses

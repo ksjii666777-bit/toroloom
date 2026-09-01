@@ -5,7 +5,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
@@ -25,8 +24,6 @@ interface QuickCalculatorsProps {
 }
 
 export function QuickCalculators({ calculators, navigation, colors }: QuickCalculatorsProps) {
-  const { t } = useT();
-
   return (
     <View style={styles.container}>
       {calculators.map((calc) => (

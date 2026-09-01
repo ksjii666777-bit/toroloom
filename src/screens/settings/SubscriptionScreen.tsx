@@ -134,12 +134,6 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
     await startTrial(plan.tier);
   }, [selectedPlanId, hasTrialAvailable, startTrial]);
 
-  const animatePayConfirmIn = useCallback(() => {
-    'worklet';
-    payConfirmBackdrop.value = withSpring(1, { damping: 20, stiffness: 300 });
-    payConfirmSheetY.value = withSpring(0, { damping: 18, stiffness: 200 });
-  }, [payConfirmBackdrop, payConfirmSheetY]);
-
   const animatePayConfirmOut = useCallback((onComplete: () => void) => {
     'worklet';
     payConfirmBackdrop.value = withSpring(0, { damping: 20, stiffness: 300 });

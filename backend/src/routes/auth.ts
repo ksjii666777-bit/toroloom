@@ -181,7 +181,13 @@ router.post('/referral', authMiddleware, (req: Request, res: Response) => {
 
 // GET /api/auth/demo — returns the documented demo credentials (mock mode only).
 // Helps testers log in after a backend restart.
+// BLOCKED in production: never expose credentials publicly.
 router.get('/demo', (_req: Request, res: Response) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (isProduction) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
   res.json({
     email: DEMO_EMAIL,
     password: DEMO_PASSWORD,

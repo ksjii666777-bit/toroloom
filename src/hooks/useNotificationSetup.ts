@@ -2,7 +2,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { Platform, AppState } from 'react-native';
 import { log } from '../utils/logger';
 import { useNavigation } from '@react-navigation/native';
-import * as Notifications from 'expo-notifications';
+let Notifications: typeof import('expo-notifications') | null = null;
+try { Notifications = require('expo-notifications'); } catch { /* Expo Go fallback */ }
 import {
   registerForPushNotifications,
   setupNotificationResponseListener,
@@ -14,8 +15,8 @@ import { useNotificationStore } from '../store/notificationStore';
 
 export function useNotificationSetup() {
   const navigation = useNavigation<any>();
-  const notificationListenerRef = useRef<Notifications.EventSubscription | null>(null);
-  const responseListenerRef = useRef<Notifications.EventSubscription | null>(null);
+  const notificationListenerRef = useRef<any>(null);
+  const responseListenerRef = useRef<any>(null);
 
   const onNavigate = useCallback(
     (screen: string, params?: any) => {
@@ -68,7 +69,7 @@ export function useNotificationSetup() {
     registerPortfolioAlertBackgroundTask();
 
     // Listen for notifications while app is foregrounded
-    notificationListenerRef.current = Notifications.addNotificationReceivedListener(notification => {
+    notificationListenerRef.current = Notifications?.addNotificationReceivedListener((notification: any) => {
       log.info('[Notifications] Received:', notification.request.content.title);
     });
 

@@ -412,7 +412,6 @@ export default function AppNavigator() {
         // Stock detail: toroloom://stock/RELIANCE?id=123&symbol=RELIANCE
         if (path.startsWith('stock/')) {
           const symbol = decodeURIComponent(path.replace('stock/', ''));
-          const stockId = params.id || '';
           if (symbol) {
             // Navigation handled by React Navigation linking config
             analytics.logScreenView('StockDetail');

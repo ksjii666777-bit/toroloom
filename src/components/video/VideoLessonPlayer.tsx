@@ -15,7 +15,10 @@ import {
   Dimensions, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useVideoPlayer, VideoView } from 'expo-video';
+let expoVideo: any = null;
+try { expoVideo = require('expo-video'); } catch { /* Expo Go fallback */ }
+const useVideoPlayer = expoVideo?.useVideoPlayer ?? (() => null);
+const VideoView = expoVideo?.VideoView ?? (() => null);
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING , BORDER_RADIUS } from '../../constants/theme';
@@ -123,7 +126,7 @@ export default function VideoLessonPlayer({
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const player = useVideoPlayer(videoUrl, (p) => { p.loop = false; });
+  const player = useVideoPlayer(videoUrl, (p: any) => { p.loop = false; });
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(progress?.lastPosition || 0);
   const [duration, setDuration] = useState(progress?.duration || 0);
@@ -136,8 +139,8 @@ export default function VideoLessonPlayer({
 
   // Listen for status changes
   useEffect(() => {
-    const unsubPlay = player.addListener('playingChange', (e) => { setIsPlaying(e.isPlaying); });
-    const unsubStatus = player.addListener('statusChange', (e) => {
+    const unsubPlay = player?.addListener('playingChange', (e: any) => { setIsPlaying(e.isPlaying); });
+    const unsubStatus = player?.addListener('statusChange', (e: any) => {
       if (e.status === 'readyToPlay') {
         setDuration(player.duration || 0);
         // Resume from last position if exists

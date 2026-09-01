@@ -237,7 +237,7 @@ export default function WidgetSettingsScreen({ navigation }: NativeStackScreenPr
   const metricOptions: { key: WidgetPreferences['highlightedMetric']; label: string; icon: string }[] = [
     { key: 'totalValue', label: t('widgetSettings.totalValue'), icon: 'wallet' },
     { key: 'pnl', label: t('widgetSettings.pnlAmount'), icon: 'trending-up' },
-    { key: 'pnlPercent', label: t('widgetSettings.pnlPercent'), icon: 'percent-outline' },
+    { key: 'pnlPercent', label: t('widgetSettings.pnlPercent'), icon: 'pricetag' },
     { key: 'topHolding', label: t('widgetSettings.topHolding'), icon: 'star' },
   ];
 

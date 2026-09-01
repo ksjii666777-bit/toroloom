@@ -509,6 +509,9 @@ const detailStyles = StyleSheet.create({
   },
 });
 
+// ─── Constants ─────────────────────────────────────────────
+const DEFAULT_TRENDING_SYMBOLS = ['NIFTY', 'SENSEX', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK'];
+
 // ─── Main Screen ──────────────────────────────────────────
 export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'NewsFeed'>) {
   const { colors } = useTheme();
@@ -604,11 +607,6 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const searchRef = useRef<TextInput>(null);
 
-  // BUG 3 FIX: Seed the trending-symbols strip with a curated list of
-  // popular Indian tickers. Before, the strip was derived ONLY from symbols
-  // present in the loaded news, so it was empty unless a backend article
-  // happened to mention that ticker.
-  const DEFAULT_TRENDING_SYMBOLS = ['NIFTY', 'SENSEX', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK'];
   const trendingSymbols = useMemo(() => {
     const symbols = new Set<string>(DEFAULT_TRENDING_SYMBOLS);
     news.forEach(a => {

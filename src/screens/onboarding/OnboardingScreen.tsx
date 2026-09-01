@@ -1,13 +1,12 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Dimensions,
-  Pressable, ActivityIndicator, ScrollView,
-  StyleProp, ViewStyle,
+  Pressable, ScrollView,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, useAnimatedScrollHandler,
-  withTiming, withSpring, withDelay, withSequence, withRepeat, interpolate,
-  Extrapolation, FadeInDown, BounceIn,
+  withTiming, withDelay, interpolate,
+  Extrapolation, FadeInDown,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

@@ -163,7 +163,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
         // Fire a local push notification for each mentioned user.
         // In production this would be handled server-side; here we fire
         // a local notification as a best-effort UX signal.
-        for (const username of mentionedUsernames) {
+        for (const _username of mentionedUsernames) {
           await sendMentionNotification(postAuthor, postId, content);
           // Only send one notification per post to avoid spam
           break;

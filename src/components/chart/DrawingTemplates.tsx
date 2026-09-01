@@ -132,7 +132,6 @@ export default function DrawingTemplates({
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const {
-    templates,
     applyTemplate,
     saveAsTemplate,
     deleteTemplate,

@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
+let Clipboard: typeof import('expo-clipboard') | null = null;
+try { Clipboard = require('expo-clipboard'); } catch { /* Expo Go fallback */ }
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
@@ -58,7 +59,7 @@ export default function ReferralScreen({ navigation }: NativeStackScreenProps<Ro
   const handleCopyCode = useCallback(async () => {
     if (!referralStats?.code) return;
     try {
-      await Clipboard.setStringAsync(referralStats.code);
+      await Clipboard?.setStringAsync(referralStats.code);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(t('referral.copiedTitle'), t('referral.copiedMsg', { code: referralStats.code }));
     } catch {

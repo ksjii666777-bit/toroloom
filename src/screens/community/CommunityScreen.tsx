@@ -235,7 +235,7 @@ export default function CommunityScreen({ navigation }: NativeStackScreenProps<R
 
   const [showPostInput, setShowPostInput] = useState(false);
   const [postContent, setPostContent] = useState('');
-  const [mentionQuery, setMentionQuery] = useState('');
+  const [_mentionQuery, setMentionQuery] = useState('');
   const [mentionSuggestions, setMentionSuggestions] = useState<UserSearchResult[]>([]);
   const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
 

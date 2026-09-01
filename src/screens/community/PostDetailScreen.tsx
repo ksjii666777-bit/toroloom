@@ -24,7 +24,8 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
+let Clipboard: typeof import('expo-clipboard') | null = null;
+try { Clipboard = require('expo-clipboard'); } catch { /* Expo Go fallback */ }
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useCommunityStore } from '../../store/communityStore';
@@ -237,7 +238,7 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
   }, [postId, commentText, addComment, isCommentSending]);
 
   const handleCopyComment = useCallback(async (commentId: string, content: string) => {
-    await Clipboard.setStringAsync(content);
+    await Clipboard?.setStringAsync(content);
     setCopiedCommentId(commentId);
     notificationAsync(NotificationFeedbackType.Success);
     setTimeout(() => setCopiedCommentId(null), 1500);

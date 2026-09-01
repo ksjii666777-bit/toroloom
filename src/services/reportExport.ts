@@ -18,8 +18,9 @@
  * ============================================================================
  */
 
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
+let Print: any = null; let Sharing: any = null;
+try { Print = require('expo-print'); } catch { /* Expo Go fallback */ }
+try { Sharing = require('expo-sharing'); } catch { /* Expo Go fallback */ }
 import { cacheDirectory, moveAsync, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import type { PortfolioAnalytics, Holding, Trade } from '../types';
 import { formatCurrency, formatPercent} from '../utils/formatters';

@@ -59,6 +59,6 @@ module.exports = ({ config }) => ({
   },
   plugins: [
     ...(baseConfig.expo.plugins || []),
-    'expo-video',
+    // 'expo-video', // Disabled — not available in Expo Go
   ],
 });

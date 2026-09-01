@@ -41,6 +41,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import AppScreen from '../../components/ui/AppScreen';
 
 import { brokerProxyApi, snapTradeApi } from '../../services/api';
+import { useAuthStore } from '../../store/authStore';
 import { log } from '../../utils/logger';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
@@ -177,12 +178,18 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
 
   // ── SnapTrade integration hooks ──
   const [_isConnectingSnapTrade, setIsConnectingSnapTrade] = useState(false);
+  const isConnectingRef = useRef(false);
   const [_snapTradeConnected, setSnapTradeConnected] = useState<boolean | null>(null);
+  const { isLoggedIn } = useAuthStore();
 
-  // Check existing sessions on mount
+  // Check existing sessions on mount — only if logged in
   useEffect(() => {
-    checkExistingSessions();
-  }, [checkExistingSessions]);
+    if (isLoggedIn) {
+      checkExistingSessions();
+    } else {
+      setIsLoading(false);
+    }
+  }, [checkExistingSessions, isLoggedIn]);
 
   // Entrance animation
   useEffect(() => {
@@ -267,6 +274,13 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
 
   const openSnapTradeConnect = useCallback(
     async (broker: BrokerMeta) => {
+      if (!isLoggedIn) {
+        Alert.alert('Login Required', 'Please login first to connect a broker.');
+        return;
+      }
+      // Prevent multiple simultaneous connect attempts using ref (not state)
+      if (isConnectingRef.current) return;
+      isConnectingRef.current = true;
       setSelectedBroker(broker);
       triggerHaptic(ImpactFeedbackStyle.Medium);
       setIsConnectingSnapTrade(true);
@@ -280,21 +294,19 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
 
         if (linkResult.oauthUrl) {
           // Step 3: Open the OAuth URL in device browser
-          // User will log into their broker there
-          // On completion, SnapTrade redirects back to toroloom://snaptrade/callback?authorizationId=xxx
           await Linking.openURL(linkResult.oauthUrl);
         } else {
           throw new Error(t('brokerConnect.noOauthUrl'));
         }
       } catch (err) {
-        // Technical details stay in the log — users get a friendly message.
         log.warn('[ConnectBroker] SnapTrade connect failed:', err);
         Alert.alert(t('brokerConnect.connectionFailed'), t('brokerConnect.checkConnection'));
+      } finally {
+        isConnectingRef.current = false;
         setIsConnectingSnapTrade(false);
       }
-      // Don't set isConnectingSnapTrade = false here — the deep link callback will handle it
     },
-    [setSelectedBroker, setIsConnectingSnapTrade, t],
+    [isLoggedIn, setSelectedBroker, setIsConnectingSnapTrade, t],
   );
 
   // ── Open SnapTrade Connect (all brokers) ────────────────────

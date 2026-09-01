@@ -30,7 +30,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 function getCouponTypeMeta(type: CouponCode['type']) {
   switch (type) {
     case 'percentage':
-      return { label: 'PERCENTAGE OFF', icon: 'percent-outline', color: '#3B82F6', gradient: ['#3B82F6', '#2563EB'] as [string, string] };
+      return { label: 'PERCENTAGE OFF', icon: 'pricetag', color: '#3B82F6', gradient: ['#3B82F6', '#2563EB'] as [string, string] };
     case 'fixed':
       return { label: 'FLAT DISCOUNT', icon: 'pricetag', color: '#10B981', gradient: ['#10B981', '#059669'] as [string, string] };
     case 'free_trial':

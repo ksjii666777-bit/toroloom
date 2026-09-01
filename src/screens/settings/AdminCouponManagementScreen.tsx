@@ -47,7 +47,8 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import AppScreen from '../../components/ui/AppScreen';
 import { cacheDirectory, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
-import * as Sharing from 'expo-sharing';
+let Sharing: any = null;
+try { Sharing = require('expo-sharing'); } catch { /* Expo Go fallback */ }
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ─── Type Helpers ─────────────────────────────────────────────
@@ -55,7 +56,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 type CouponType = 'percentage' | 'fixed' | 'free_trial';
 
 const COUPON_TYPES: { value: CouponType; label: string; icon: string; color: string }[] = [
-  { value: 'percentage', label: 'Percentage', icon: 'percent-outline', color: '#3B82F6' },
+  { value: 'percentage', label: 'Percentage', icon: 'pricetag', color: '#3B82F6' },
   { value: 'fixed', label: 'Fixed ₹', icon: 'pricetag', color: '#10B981' },
   { value: 'free_trial', label: 'Free Trial', icon: 'timer', color: '#FF9800' },
 ];

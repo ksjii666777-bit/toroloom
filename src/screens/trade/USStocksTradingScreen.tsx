@@ -99,7 +99,7 @@ function getSectorColor(sector: string): string {
 
 const SECTOR_ICONS: Record<string, string> = {
   Technology: 'desktop',
-  Semiconductors: 'chip',
+  Semiconductors: 'hardware-chip-outline',
   Finance: 'wallet',
   Healthcare: 'medical',
   Consumer: 'cart',

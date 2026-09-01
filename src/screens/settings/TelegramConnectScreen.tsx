@@ -28,7 +28,8 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
+let Clipboard: typeof import('expo-clipboard') | null = null;
+try { Clipboard = require('expo-clipboard'); } catch { /* Expo Go fallback */ }
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -164,7 +165,7 @@ export default function TelegramConnectScreen({ navigation }: NativeStackScreenP
   const handleCopyCode = async () => {
     if (!linkCode) return;
     try {
-      await Clipboard.setStringAsync(`/start ${linkCode}`);
+      await Clipboard?.setStringAsync(`/start ${linkCode}`);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       Alert.alert(t('telegramConnect.copiedTitle'), t('telegramConnect.copiedMsg', { code: linkCode, bot: BOT_USERNAME }));
     } catch {

@@ -32,7 +32,8 @@ import {
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ExpoSharing from 'expo-sharing';
+let ExpoSharing: any = null;
+try { ExpoSharing = require('expo-sharing'); } catch { /* Expo Go fallback */ }
 import { writeAsStringAsync, cacheDirectory, EncodingType } from 'expo-file-system/legacy';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

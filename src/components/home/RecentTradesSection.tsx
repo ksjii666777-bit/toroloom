@@ -6,7 +6,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useT } from '../../hooks/useT';
-import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, FONTS } from '../../constants/theme';
 
 interface Trade {
   id: string;
