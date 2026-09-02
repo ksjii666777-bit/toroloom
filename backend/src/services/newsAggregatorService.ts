@@ -246,7 +246,8 @@ async function fetchFromNewsData(opts: FetchOptions): Promise<AggregatedArticle[
   const params = new URLSearchParams({
     q: categoryToQuery(opts.category, opts.q),
     language: opts.language || 'en',
-    size: String(Math.min(opts.pageSize || 20, 50)),
+    // NewsData free tier caps `size` at 10. Requesting 20 returns HTTP 422.
+    size: String(Math.min(opts.pageSize || 10, 10)),
     apikey: k,
   });
 
