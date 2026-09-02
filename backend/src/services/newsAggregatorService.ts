@@ -203,7 +203,7 @@ function categoryToQuery(category?: NewsCategory, fallbackQ?: string): string {
     case 'ipo': return 'IPO India OR initial public offering';
     case 'global': return 'global markets OR Federal Reserve OR oil prices';
     case 'policy': return 'SEBI OR government policy India OR budget India';
-    default: return 'stock market finance investing';
+    default: return 'stock market OR finance OR investing OR economy';
   }
 }
 
