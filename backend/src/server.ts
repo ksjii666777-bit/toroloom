@@ -214,6 +214,26 @@ app.get('/health', async (_req, res) => {
   });
 });
 
+// Alias under /api — for monitoring tools (Prometheus blackbox, k8s probes, Grafana)
+// that default to /api/health. Must be defined OUTSIDE the /api apiLimiter mount
+// (which is at line ~124 in server.ts) — keeping it here means it never counts
+// against the global per-IP API rate limit and never returns 429 to a liveness probe.
+app.get('/api/health', async (_req, res) => {
+  const storage = getStorageIfInitialized();
+  let storageHealthy = false;
+  if (storage) {
+    try { storageHealthy = await storage.isHealthy(); } catch { /* not healthy */ }
+  }
+
+  res.json({
+    status: storageHealthy ? 'ok' : 'degraded',
+    storageBackend: env.storageBackend,
+    storageHealthy,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ============ Readiness Check ============
 // Separate from /health (liveness). Railway's healthcheckPath points here.
 // Returns 503 when a real storage backend (postgres/mongodb) is configured

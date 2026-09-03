@@ -111,6 +111,30 @@ describe('GET /ready', () => {
     expect(res.body.status).toBe('degraded');
     expect(res.body.storageHealthy).toBe(false);
   });
+
+  it('/api/health returns 200 (liveness alias) when postgres is unhealthy', async () => {
+    // /api/health is the /health alias that monitoring tools (Prometheus
+    // blackbox, k8s probes, Grafana) probe by default. It must NOT 503 when
+    // storage is degraded — same liveness semantics as /health.
+    mocks.storageHealthy = false;
+    setBackend('postgres');
+    const res = await request(app).get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('degraded');
+    expect(res.body.storageHealthy).toBe(false);
+    expect(res.body.storageBackend).toBe('postgres');
+    expect(typeof res.body.uptime).toBe('number');
+    expect(typeof res.body.timestamp).toBe('string');
+  });
+
+  it('/api/health returns ok when storage is healthy', async () => {
+    mocks.storageHealthy = true;
+    setBackend('postgres');
+    const res = await request(app).get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('ok');
+    expect(res.body.storageHealthy).toBe(true);
+  });
 });
 
 describe('Legal pages (privacy / terms)', () => {
