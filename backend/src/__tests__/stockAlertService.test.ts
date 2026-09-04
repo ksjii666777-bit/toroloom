@@ -44,7 +44,7 @@ describe('stockAlertService (in-memory)', () => {
         direction: 'above',
       });
 
-      expect(alert.id).toMatch(/^sa_/);
+      expect(alert.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
       expect(alert.userId).toBe(USER_A);
       expect(alert.symbol).toBe('RELIANCE');
       expect(alert.targetPrice).toBe(2890);
@@ -113,7 +113,7 @@ describe('stockAlertService (in-memory)', () => {
     });
 
     it('returns null for a non-existent alert', async () => {
-      const result = await service.getAlert('sa_nonexistent', USER_A);
+      const result = await service.getAlert('00000000-0000-4000-8000-000000000000', USER_A);
       expect(result).toBeNull();
     });
 
@@ -221,7 +221,7 @@ describe('stockAlertService (in-memory)', () => {
     });
 
     it('returns null for non-existent alert', async () => {
-      const result = await service.updateAlert('sa_nonexistent', USER_A, { targetPrice: 500 });
+      const result = await service.updateAlert('00000000-0000-4000-8000-000000000000', USER_A, { targetPrice: 500 });
       expect(result).toBeNull();
     });
 
@@ -246,7 +246,7 @@ describe('stockAlertService (in-memory)', () => {
     });
 
     it('returns false for a non-existent alert', async () => {
-      const deleted = await service.deleteAlert('sa_nonexistent', USER_A);
+      const deleted = await service.deleteAlert('00000000-0000-4000-8000-000000000000', USER_A);
       expect(deleted).toBe(false);
     });
 
@@ -296,7 +296,7 @@ describe('stockAlertService (in-memory)', () => {
     });
 
     it('returns null for non-existent alert', async () => {
-      const result = await service.triggerAlert('sa_nonexistent', USER_A, 100);
+      const result = await service.triggerAlert('00000000-0000-4000-8000-000000000000', USER_A, 100);
       expect(result).toBeNull();
     });
 
