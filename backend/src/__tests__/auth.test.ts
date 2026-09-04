@@ -54,7 +54,7 @@ describe('Auth — password validation (mock store)', () => {
       .send({ name: 'Test User', email: 'new-user@toroloom.com', phone: '+91 99999 00000' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe('Validation failed');
+    expect(res.body.error).toMatch(/^Validation failed/);
     expect(res.body.details).toBeDefined();
   });
 

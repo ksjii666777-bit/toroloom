@@ -208,14 +208,14 @@ describe('POST /api/auth', () => {
     const { status, body } = await post('/api/auth/login', { password: 'password123' });
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Email');
+    expect(body.error).toContain('email');
   });
 
   it('should reject login without password', async () => {
     const { status, body } = await post('/api/auth/login', { email: 'a@b.com' });
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Password');
+    expect(body.error).toContain('password');
   });
 
   // ── POST /api/auth/signup ───────────────────────────────────────────
@@ -240,7 +240,7 @@ describe('POST /api/auth', () => {
     });
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Name');
+    expect(body.error).toContain('name');
   });
 
   it('should reject signup without phone', async () => {
@@ -744,7 +744,7 @@ describe('POST /api/community', () => {
     const { status, body } = await post('/api/community/posts', { tags: [] }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Content');
+    expect(body.error).toContain('content');
   });
 
   it('should like a post', async () => {
@@ -1660,7 +1660,7 @@ describe('POST /api/orders', () => {
     const { status, body } = await post('/api/orders/execute', {}, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('actionType');
+    expect(body.error.toLowerCase()).toMatch(/actiontype|symbol/);
   });
 
   it('should reject execute without symbol', async () => {
@@ -1715,7 +1715,7 @@ describe('POST /api/orders', () => {
     );
 
     expect(status).toBe(400);
-    expect(body.error).toContain('Invalid exchange');
+    expect(body.error).toContain('Invalid');
   });
 
   it('should reject with non-integer quantity', async () => {

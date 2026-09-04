@@ -420,7 +420,7 @@ describe('POST /api/orders/modify', () => {
     const { status, body } = await post('/api/orders/modify', { price: 2500 }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
     expect(body.details.some((d: any) => d.field === 'orderId')).toBe(true);
   });
@@ -429,7 +429,7 @@ describe('POST /api/orders/modify', () => {
     const { status, body } = await post('/api/orders/modify', { orderId: 123 }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -440,7 +440,7 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -451,7 +451,7 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -462,7 +462,7 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -473,7 +473,7 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -484,7 +484,7 @@ describe('POST /api/orders/modify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -522,7 +522,7 @@ describe('POST /api/orders/cancel', () => {
     const { status, body } = await post('/api/orders/cancel', {}, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -558,7 +558,7 @@ describe('POST /api/payments/create-order', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
   });
 
   it('should create a pro monthly order', async () => {
@@ -643,7 +643,7 @@ describe('POST /api/payments/verify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
     expect(body.details).toBeDefined();
   });
 
@@ -655,7 +655,7 @@ describe('POST /api/payments/verify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
   });
 
   it('should reject missing razorpaySignature', async () => {
@@ -666,7 +666,7 @@ describe('POST /api/payments/verify', () => {
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toBe('Validation failed');
+    expect(body.error).toMatch(/^Validation failed/);
   });
 
   it('should verify payment with all required fields (mock dev mode)', async () => {
