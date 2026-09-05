@@ -24,6 +24,7 @@
 | # | Guide | Kya covered hai? |
 |:-:|-------|------------------|
 | 0 | [`README.md`](./README.md) | Project overview, architecture diagram, CI/CD badges, quick start commands |
+| 0a | [`LICENSE-READY.md`](./LICENSE-READY.md) | 📦 **Buyer anchor doc** — what's in the package, cleanup audit, 4-step onboarding. **Start here if acquiring the repo.** |
 
 ### 🏗️ 1. Deployment Guides
 
@@ -48,6 +49,7 @@
 | 10 | [`docs/zero-api-gateway.md`](./docs/zero-api-gateway.md) | Zero-API broker gateway — WebView session extraction, proxy client, add new broker | ~70 |
 | 11 | [`FUTURE.md`](./FUTURE.md) | Future roadmap — education platform, social trading, advanced analytics, monetization | ~100 |
 | 12 | [`docs/SESSION-SUMMARY-2026-06-06.md`](./docs/SESSION-SUMMARY-2026-06-06.md) | Technical deep-dive: storage consistency, cross-file isolation, integration test fixes | ~100 |
+| 12a | [`PITCH_DECK.md`](./PITCH_DECK.md) | 📑 One-page summary for investor first call — numbers, market, ask | 1 page |
 
 ### 🏢 3. Business & Legal
 
@@ -57,6 +59,7 @@
 | 14 | [`docs/privacy-policy.html`](./docs/privacy-policy.html) | Privacy Policy — DPDP Act, GDPR compliant. Data collection, sharing, retention | 1 page |
 | 15 | [`docs/terms-of-service.html`](./docs/terms-of-service.html) | Terms of Service — SEBI compliance, risk disclosure, dispute resolution | 1 page |
 | 16 | [`LICENSE`](./LICENSE) | MIT License | 1 page |
+| 16a | [`LEGAL_TEMPLATES.md`](./LEGAL_TEMPLATES.md) | ⚖️ **Legal starter templates** — NDA, LOI, APA outline, IP assignment, TSA, Bill of Sale. Fill-in-the-blank for buyer's counsel. | ~8 |
 
 ### 🛠️ 4. Infrastructure & Config
 
@@ -109,6 +112,7 @@ Kya karna chahte ho?
 
 | Guide | Audience | Difficulty | Time Required | Pages |
 |-------|----------|:----------:|:-------------:|:-----:|
+| `LICENSE-READY.md` | **Buyer** | 🟢 Easy | 5 min | 1 |
 | `DEPLOY.md` | Buyer | 🟢 Easy | 5-10 min | 80 |
 | `RDS_DEPLOY_GUIDE.md` | Buyer/DevOps | 🟡 Medium | 15-30 min | 60 |
 | `SCALING_BLUEPRINT.md` | CTO/Architect | 🟡 Medium | 10 min read | 50 |
@@ -132,8 +136,8 @@ Kya karna chahte ho?
 | `app-store` | STORE_SUBMISSION, APPLE_CONFIG |
 | `feature-overview` | FEATURE_CHECKLIST, DASHBOARD |
 | `technical` | zero-api-gateway, SESSION-SUMMARY, CONTRIBUTING |
-| `business` | ENTERPRISE_TRANSFER, FUTURE |
-| `legal` | privacy-policy, terms-of-service, LICENSE |
+| `business` | ENTERPRISE_TRANSFER, FUTURE, PITCH_DECK |
+| `legal` | privacy-policy, terms-of-service, LICENSE, LEGAL_TEMPLATES |
 
 ---
 
