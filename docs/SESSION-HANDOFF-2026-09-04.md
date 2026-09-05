@@ -81,9 +81,9 @@ Complete the **LICENSE-READY package** — make the Toroloom repo fully acquisit
 
 | Item | Why Not Done |
 |------|--------------|
-| Update `stockAlertService.test.ts` regex | Bug fix was task Sep 3 — separate session |
+| ~~Update `stockAlertService.test.ts` regex~~ | ✅ **Already done** — commit `04e7d34` (Sep 4, 13:29 IST). Service now UUIDs, regex updated + 4 placeholder IDs. Full suite: 2610 passed, 64 skipped, 0 failed. |
 | Frontend typecheck rerun post-changes | No frontend code touched this session |
-| Full backend test suite rerun | Time cost ~4 min, no code changed |
+| Full backend test suite rerun | **DONE** — 2610/2674 PASS (102 files), 524s |
 | Obsidian vault sync | No Obsidian vault detected locally; handoff note written in repo instead |
 
 ---
@@ -93,7 +93,7 @@ Complete the **LICENSE-READY package** — make the Toroloom repo fully acquisit
 If picking up tomorrow / next week:
 
 1. **Verify on pull:** `cd /e/toroloom-eas && git pull && npm ci`
-2. **Re-run backend tests:** `cd backend && npm test` (should be 1892/1894)
+2. **Re-run backend tests:** `cd backend && npm test` (expect 2610 PASS, 64 skipped, 102 files)
 3. **Sanity-check LICENSE-READY.md is in the rendered GitHub page**
 4. **If doing a buyer demo:** open `PITCH_DECK.md` → 1 page summary
 5. **If buyer requests legal docs:** point them to `LEGAL_TEMPLATES.md`, recommend their counsel
@@ -113,4 +113,4 @@ If picking up tomorrow / next week:
 
 ---
 
-> 📌 **Carry-forward:** The Sep 3 test bug fix (alert ID regex in `stockAlertService.test.ts`) is still pending. Address in next session.
+> 📌 **Carry-forward:** No pending items — Sep 3 test bug fix (alert ID regex) resolved in commit `04e7d34`. LICENSE-READY package + full test suite green as of Sep 4.
