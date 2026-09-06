@@ -44,18 +44,19 @@
       }
     },
     "production": {
-      "android": {
-        "buildType": "app-bundle"
-      },
-      "ios": {
-        "image": "latest"
-      },
-      "autoIncrement": true,
-      "env": {
-        "APP_VARIANT": "production"
-      },
-      "channel": "production"
-    },
+          "android": {
+            "buildType": "app-bundle"
+          },
+          "ios": {
+            "image": "latest"
+          },
+          "autoIncrement": true,
+          "env": {
+            "APP_VARIANT": "production",
+            "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api"
+          },
+          "channel": "production"
+        },
     "production-simulator": {
       "extends": "production",
       "ios": {
