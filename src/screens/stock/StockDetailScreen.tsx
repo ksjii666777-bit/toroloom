@@ -84,9 +84,11 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
   const [chartOptions, setChartOptions] = useState({ hideSideToolbar: false, withDateRanges: true, saveImage: true });
 
   // ── Live chart mode ──
-  // Native candlestick chart by default (works offline, no CDN dependency).
-  // TradingView widget available as an opt-in option for live market data.
-  const [chartMode, setChartMode] = useState<'live' | 'custom'>('custom');
+  // TradingView Advanced Chart by default for live market data + indicators.
+  // Native candlestick chart is the offline fallback when TradingView can't
+  // load (offline device, blocked CDN, etc.) and is reachable via the
+  // "Custom" toggle in the chart controls row.
+  const [chartMode, setChartMode] = useState<'live' | 'custom'>('live');
   const [tvFailed, setTvFailed] = useState(false);
   const isLiveChart = chartMode === 'live' && !tvFailed;
   const tvSymbol = useMemo(() => toTradingViewSymbol(stock.symbol, 'NSE'), [stock.symbol]);
