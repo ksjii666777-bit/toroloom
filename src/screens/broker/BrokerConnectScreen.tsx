@@ -211,8 +211,13 @@ export default function BrokerConnectScreen({ navigation }: any) {
       // reported as "broker connect error aata hai".
       setConnectionState(s => ({ ...s, isLoading: false }));
       const message = (err && (err.message || err.toString())) || '';
+      // Pro users get a specific upgrade CTA; others see the generic retry
+      // message so they understand they can come back once they upgrade.
+      const isProRequired = /pro subscription|upgrade/i.test(message);
       setLoadError(
-        message.includes('Network') || message.includes('Failed to fetch')
+        isProRequired
+          ? 'Live broker connect is a Pro feature. Upgrade to link your broker and place real trades.'
+          : message.includes('Network') || message.includes('Failed to fetch')
           ? 'Cannot reach Toroloom servers. Check your internet and try again.'
           : 'Broker status unavailable right now. Pull down to refresh.',
       );
