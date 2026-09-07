@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { getActiveWS } from '../services/wsRegistry';
 import { generateStockHistory, generateIntradayData } from '../constants/mockData';
+import { marketApi } from '../services/api/market';
 import type { StockHistoryPoint } from '../types';
 
 interface RealtimePriceState {
@@ -36,11 +37,23 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
     if (timeframe.endsWith('m')) {
       const minutes = parseInt(timeframe, 10);
       if (!isNaN(minutes) && minutes > 0) {
-        const candleData = generateIntradayData(minutes);
-        setState(prev => ({
-          ...prev,
-          candleHistory: candleData,
-        }));
+        // Try real backend first; fall back to mock on error
+        marketApi
+          .getOHLC(stockId, '1m', 1)
+          .then((data) => {
+            if (data && data.length > 0) {
+              setState((prev) => ({ ...prev, candleHistory: data }));
+              return;
+            }
+            // Empty data — fall through to mock
+            const candleData = generateIntradayData(minutes);
+            setState((prev) => ({ ...prev, candleHistory: candleData }));
+          })
+          .catch(() => {
+            // Backend unavailable — fall through to mock
+            const candleData = generateIntradayData(minutes);
+            setState((prev) => ({ ...prev, candleHistory: candleData }));
+          });
         return;
       }
     }
@@ -56,14 +69,26 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
       default: days = 365;
     }
 
-    const fullHistory = generateStockHistory();
-    const candleData = fullHistory.slice(-days);
-    
-    setState(prev => ({
-      ...prev,
-      candleHistory: candleData,
-    }));
-  }, []);
+    // Try real backend first; fall back to mock on error
+    marketApi
+      .getOHLC(stockId, 'day', days)
+      .then((data) => {
+        if (data && data.length > 0) {
+          setState((prev) => ({ ...prev, candleHistory: data }));
+          return;
+        }
+        // Empty data — fall through to mock
+        const fullHistory = generateStockHistory();
+        const candleData = fullHistory.slice(-days);
+        setState((prev) => ({ ...prev, candleHistory: candleData }));
+      })
+      .catch(() => {
+        // Backend unavailable — fall through to mock
+        const fullHistory = generateStockHistory();
+        const candleData = fullHistory.slice(-days);
+        setState((prev) => ({ ...prev, candleHistory: candleData }));
+      });
+  }, [stockId]);
 
   // ── Offline fallback: simulated price noise when WS is NOT connected ──
   // When connected (mock or real), live WS ticks drive the price instead,
