@@ -163,7 +163,7 @@ export default function AdminCourseReviewScreen({ navigation }: NativeStackScree
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerRow}>
-              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
+              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92} accessibilityLabel={t('app.goBack')}>
                 <Ionicons name="arrow-back" size={24} color={colors.text} />
               </AnimatedPressable>
               <Text style={styles.title}>{t('adminCourseReview.title')}</Text>

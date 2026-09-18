@@ -45,4 +45,10 @@ export default {
     prefEducationalReminders: 'Learning Reminders',
     prefEducationalRemindersDesc: 'Course & quiz notifications',
     prefSystemUpdatesDesc: 'KYC, account & app updates',
+    weeklyDisciplineTitle: '🛡️ Weekly Discipline Report (committed 1:{{ratio}})',
+    weeklyDisciplineBodyClean: 'Perfect week! Discipline score {{score}}/100 — all {{measured}} trades honoured your committed R:R.',
+    weeklyDisciplineBody: '{{breaches}} trade(s) fell below your committed R:R this week. Discipline score: {{score}}/100.',
+    weeklyDisciplineBodyLoss: '{{breaches}} trade(s) fell below your committed R:R this week — ₹{{loss}} lost. Discipline score: {{score}}/100.',
+    streakRebuildTitle: '🔥 One clean trade from rebuilding your streak',
+    streakRebuildBody: 'Your {{weeks}}-week clean streak is waiting — journal one trade that honours your committed R:R (1 trade at your target) to rebuild it.',
 };

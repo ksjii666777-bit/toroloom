@@ -48,6 +48,10 @@ vi.mock('../components/ui/AnimatedPressable', () => ({
   default: 'AnimatedPressable',
 }));
 
+vi.mock('../store/authStore', () => ({
+  useAuthStore: vi.fn(() => ({ isLoggedIn: true })),
+}));
+
 // Mock useT to return English text for brokerConnect keys for brokerConnect keys so existing test assertions work
 const brokerConnectTranslations: Record<string, string> = {
   'brokerConnect.title': 'Connect Broker',
@@ -89,6 +93,7 @@ vi.mock('../context/ThemeContext', () => ({
     },
   }),
 }));
+
 
 import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
 

@@ -103,7 +103,7 @@ export default function IPOCalendarScreen({ navigation: _navigation  }: NativeSt
       >
   {/* Header */}
         <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <TouchableOpacity onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ipos.calendarTitle')}</Text>

@@ -27,6 +27,7 @@ import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useAuthStore } from '../../store/authStore';
+import { useTradingPrefsStore } from '../../store/tradingPrefsStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -113,6 +114,9 @@ export default function AITradeAssistantScreen({ navigation }: NativeStackScreen
     });
   }, [showResults, selectedStock, tradeType, qtyNum, priceNum, holdings, availableBalance, riskTolerance]);
 
+  // User's committed R:R from broker-connect onboarding (null → profile default)
+  const userRewardRiskRatio = useTradingPrefsStore(s => s.rewardRiskRatio);
+
   const tradePlan = useMemo(() => {
     if (!showResults || !selectedStock || qtyNum <= 0) return null;
     return suggestTradePlan({
@@ -120,8 +124,9 @@ export default function AITradeAssistantScreen({ navigation }: NativeStackScreen
       tradeType,
       entryPrice: priceNum,
       riskTolerance,
+      userRewardRiskRatio: userRewardRiskRatio ?? undefined,
     });
-  }, [showResults, selectedStock, tradeType, priceNum, riskTolerance, qtyNum]);
+  }, [showResults, selectedStock, tradeType, priceNum, riskTolerance, qtyNum, userRewardRiskRatio]);
 
   const impactResult = useMemo(() => {
     if (!showResults || !selectedStock || qtyNum <= 0) return null;
@@ -153,7 +158,7 @@ export default function AITradeAssistantScreen({ navigation }: NativeStackScreen
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={styles.header}>
           <View style={styles.headerRow}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={22} color="#fff" />
             </Pressable>
             <Text style={styles.headerTitle}>{t('ai.tradeAssistant')}</Text>
@@ -258,12 +263,61 @@ export default function AITradeAssistantScreen({ navigation }: NativeStackScreen
               </View>
               <View style={styles.profileDetailRow}>
                 <Text style={styles.profileDetailLabel}>{t('ai.minRiskReward')}</Text>
-                <Text style={styles.profileDetailValue}>{profile.minRewardRiskRatio}:1</Text>
+                {/* Effective ratio: the user's broker-connect commitment wins over the profile default */}
+                <Text style={styles.profileDetailValue}>
+                  {userRewardRiskRatio ?? profile.minRewardRiskRatio}:1
+                </Text>
               </View>
               <View style={styles.profileDetailRow}>
                 <Text style={styles.profileDetailLabel}>{t('ai.maxPositions')}</Text>
                 <Text style={styles.profileDetailValue}>{profile.maxOpenPositions}</Text>
               </View>
+            </View>
+
+            {/* ─── User's R:R Commitment (set at broker connect) ─── */}
+            <View
+              testID="rr-commit-banner"
+              style={[styles.rrCommitBanner, {
+                backgroundColor: colors.bgInput,
+                borderColor: userRewardRiskRatio != null ? colors.primary + '55' : colors.border,
+              }]}
+            >
+              <Ionicons
+                name="trending-up"
+                size={18}
+                color={userRewardRiskRatio != null ? colors.primary : colors.textMuted}
+              />
+              <View style={styles.rrCommitTextWrap}>
+                {userRewardRiskRatio != null ? (
+                  <>
+                    <Text style={[styles.rrCommitTitle, { color: colors.text }]}>
+                      {t('ai.rrCommitmentTitle')}: 1:{userRewardRiskRatio}
+                    </Text>
+                    <Text style={[styles.rrCommitSub, { color: colors.textMuted }]}>
+                      {t('ai.rrCommitmentUsed')}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={[styles.rrCommitTitle, { color: colors.text }]}>
+                      {t('ai.rrCommitmentSetTitle')}
+                    </Text>
+                    <Text style={[styles.rrCommitSub, { color: colors.textMuted }]}>
+                      {t('ai.rrCommitmentNone')}
+                    </Text>
+                  </>
+                )}
+              </View>
+              <Pressable
+                testID="rr-commit-link"
+                onPress={() => navigation.navigate('BrokerConnect')}
+                style={styles.rrCommitLink}
+              >
+                <Text style={[styles.rrCommitLinkText, { color: colors.primary }]}>
+                  {userRewardRiskRatio != null ? t('ai.rrCommitmentChange') : t('ai.rrCommitmentSet')}
+                </Text>
+                <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+              </Pressable>
             </View>
           </View>
 
@@ -653,6 +707,17 @@ const createStyles = (colors: any) => StyleSheet.create({
   profileDetailRow: { flexDirection: 'row', justifyContent: 'space-between' },
   profileDetailLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted },
   profileDetailValue: { ...FONTS.semiBold, fontSize: FONTS.size.xs, color: colors.text },
+
+  // ── R:R Commitment Banner ──
+  rrCommitBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md, borderWidth: 1, padding: SPACING.md, marginTop: SPACING.sm,
+  },
+  rrCommitTextWrap: { flex: 1 },
+  rrCommitTitle: { ...FONTS.semiBold, fontSize: FONTS.size.xs },
+  rrCommitSub: { ...FONTS.regular, fontSize: 10, marginTop: 2 },
+  rrCommitLink: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  rrCommitLinkText: { ...FONTS.semiBold, fontSize: FONTS.size.xs },
 
   // ── Analyze Button ──
   analyzeBtn: {

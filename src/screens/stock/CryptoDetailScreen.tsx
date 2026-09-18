@@ -253,7 +253,7 @@ export default function CryptoDetailScreen({ route, navigation }: NativeStackScr
     return (
       <AppScreen scroll={false} padded={false} header={
         <View style={styles.header}>
-          <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
         </View>
@@ -271,7 +271,7 @@ export default function CryptoDetailScreen({ route, navigation }: NativeStackScr
     return (
       <AppScreen scroll={false} padded={false} header={
         <View style={styles.header}>
-          <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
         </View>
@@ -301,7 +301,7 @@ export default function CryptoDetailScreen({ route, navigation }: NativeStackScr
     >
         {/* Header */}
         <Animated.View entering={FadeInRight.duration(300)} style={styles.header}>
-          <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <Pressable onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
 

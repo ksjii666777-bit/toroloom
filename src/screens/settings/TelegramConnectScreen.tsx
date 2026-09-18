@@ -153,6 +153,9 @@ export default function TelegramConnectScreen({ navigation }: NativeStackScreenP
         setLinkCode(result.code);
         setCodeExpiresIn(result.expiresIn);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        // API responded but code generation failed — surface it.
+        Alert.alert(t('telegramConnect.errTitle'), t('telegramConnect.genCodeFailed'));
       }
     } catch {
       Alert.alert(t('telegramConnect.errTitle'), t('telegramConnect.genCodeFailed'));
@@ -256,7 +259,7 @@ export default function TelegramConnectScreen({ navigation }: NativeStackScreenP
             <AppScreen scroll={false} padded={false}
       header={
   <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.title}>{t('telegramConnect.connect')}</Text>
@@ -277,7 +280,7 @@ export default function TelegramConnectScreen({ navigation }: NativeStackScreenP
   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.title}>{t('telegramConnect.connect')}</Text>

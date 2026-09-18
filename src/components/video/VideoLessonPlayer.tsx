@@ -242,7 +242,7 @@ export default function VideoLessonPlayer({
         {!isPlaying && (
           <Pressable style={({pressed}) => [styles.centerOverlay, {opacity: pressed ? 1 : 1}]} onPress={togglePlay}>
             <View style={styles.centerPlayBtn}>
-              <Ionicons name="play" size={40} color="#FFF" />
+              <Ionicons name="play" size={40} color="#FFF" accessibilityLabel={t('app.a11y.play')} />
             </View>
           </Pressable>
         )}

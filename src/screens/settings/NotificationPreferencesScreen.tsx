@@ -30,6 +30,7 @@ const PREFERENCE_SECTIONS = [
       { key: 'tradeConfirmations' as const, icon: 'swap-horizontal', color: '#00C853', labelKey: 'notificationPrefs.tradeConfirmations', descKey: 'notificationPrefs.tradeConfirmationsScreenDesc' },
       { key: 'educationalReminders' as const, icon: 'school', color: '#6C63FF', labelKey: 'notificationPrefs.learningReminders', descKey: 'notificationPrefs.learningRemindersDesc' },
       { key: 'systemUpdates' as const, icon: 'settings', color: '#6E6E9A', labelKey: 'notificationPrefs.systemUpdates', descKey: 'notificationPrefs.systemUpdatesDesc' },
+      { key: 'weeklyDisciplineReport' as const, icon: 'shield-checkmark', color: '#00C853', labelKey: 'notificationPrefs.weeklyDisciplineReport', descKey: 'notificationPrefs.weeklyDisciplineReportDesc' },
     ],
   },
   {
@@ -84,7 +85,7 @@ export default function NotificationPreferencesScreen({ navigation }: NativeStac
   {/* Header */}
         <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
           <View style={styles.headerTop}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View style={styles.headerInfo}>

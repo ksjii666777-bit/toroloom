@@ -626,7 +626,7 @@ export default function LiveFeedScreen({ navigation }: NativeStackScreenProps<Ro
       header={
         <View style={styles.header}>
           <View style={styles.headerRow}>
-            <Pressable onPress={() => { triggerHaptic(); navigation.goBack(); }} style={styles.backBtn}>
+            <Pressable onPress={() => { triggerHaptic(); navigation.goBack(); }} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View style={{ flex: 1 }}>

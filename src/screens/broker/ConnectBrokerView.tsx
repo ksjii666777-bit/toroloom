@@ -42,6 +42,7 @@ import AppScreen from '../../components/ui/AppScreen';
 
 import { brokerProxyApi, snapTradeApi } from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
+import { useTradingPrefsStore, REWARD_RISK_OPTIONS } from '../../store/tradingPrefsStore';
 import { log } from '../../utils/logger';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
@@ -150,6 +151,18 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
   // Modal states
   const [selectedBroker, setSelectedBroker] = useState<BrokerMeta | null>(null);
 
+  // ── Risk-Reward commitment (asked once after first successful connect) ──
+  const { rewardRiskRatio, setRewardRiskRatio } = useTradingPrefsStore();
+  const [showRRPicker, setShowRRPicker] = useState(false);
+  const [pendingRR, setPendingRR] = useState<number>(3);
+
+  const maybeAskRiskReward = useCallback(() => {
+    if (rewardRiskRatio == null) {
+      setPendingRR(3);
+      setShowRRPicker(true);
+    }
+  }, [rewardRiskRatio]);
+
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -209,8 +222,10 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
     successTimerRef.current = setTimeout(() => {
       setShowSuccess(false);
       successTimerRef.current = null;
+      // Ask the R:R commitment question once, right after the success flash
+      maybeAskRiskReward();
     }, 2500);
-  }, []);
+  }, [maybeAskRiskReward]);
 
   useEffect(() => {
     return () => {
@@ -239,6 +254,11 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
           setConnectedLabel(result.connection.brokerName || selectedBroker?.label || null);
           notificationAsync(NotificationFeedbackType.Success);
           showConnectedSuccess();
+        } else {
+          // Handshake completed but the broker session was NOT created —
+          // never leave the user staring at a silent screen.
+          log.warn('[ConnectBroker] OAuth callback unsuccessful:', result);
+          Alert.alert(t('brokerConnect.connectionFailed'), t('brokerConnect.checkConnection'));
         }
       } catch (err) {
         // Technical details stay in the log — users get a friendly message.
@@ -584,6 +604,63 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
       {/* ── All brokers use SnapTrade OAuth Gateway ──────────── */}
 
       {/* ── Success Overlay ──────────────────────────────────── */}
+      {/* ── Risk-Reward Commitment Picker ─────────────── */}
+      {showRRPicker && (
+        <View style={styles.rrOverlay} testID="rr-picker-overlay">
+          <View style={styles.rrCard}>
+            <View style={styles.rrIconCircle}>
+              <Ionicons name="trending-up" size={26} color={NEON_CYAN} />
+            </View>
+            <Text style={styles.rrQuestion}>{t('brokerConnect.rrQuestion')}</Text>
+            <Text style={styles.rrSubtitle}>
+              {t('brokerConnect.rrSubtitle', { reward: String(pendingRR) })}
+            </Text>
+            <View style={styles.rrOptionsRow}>
+              {REWARD_RISK_OPTIONS.map((ratio) => {
+                const isSelected = pendingRR === ratio;
+                return (
+                  <TouchableOpacity
+                    key={ratio}
+                    testID={`rr-option-${ratio}`}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      triggerHaptic(ImpactFeedbackStyle.Light);
+                      setPendingRR(ratio);
+                    }}
+                    style={[styles.rrOption, isSelected && styles.rrOptionSelected]}
+                  >
+                    <Text style={[styles.rrOptionRatio, isSelected && styles.rrOptionRatioSelected]}>
+                      1:{ratio}
+                    </Text>
+                    <Text style={[styles.rrOptionUnit, isSelected && styles.rrOptionUnitSelected]}>
+                      {t('brokerConnect.rrUnit')}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <TouchableOpacity
+              testID="rr-confirm"
+              activeOpacity={0.85}
+              onPress={async () => {
+                triggerHaptic(ImpactFeedbackStyle.Medium);
+                await setRewardRiskRatio(pendingRR);
+                setShowRRPicker(false);
+              }}
+            >
+              <LinearGradient
+                colors={GRADIENTS.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.rrConfirmBtn}
+              >
+                <Text style={styles.rrConfirmText}>{t('brokerConnect.rrDone')}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {showSuccess && (
         <View style={styles.successOverlay}>
           <Animated.View style={styles.successContent}>
@@ -898,6 +975,97 @@ const createStyles = (_colors: any) =>
       color: 'rgba(255,255,255,0.6)',
       textAlign: 'center',
       paddingHorizontal: 40,
+    },
+
+    // ── Risk-Reward Commitment Picker ────────────────────
+    rrOverlay: {
+      ...StyleSheet.absoluteFill,
+      backgroundColor: 'rgba(7,8,11,0.92)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
+      paddingHorizontal: SPACING.xl,
+    },
+    rrCard: {
+      width: '100%',
+      maxWidth: 380,
+      backgroundColor: GLASS_WHITE,
+      borderWidth: 1,
+      borderColor: GLASS_BORDER,
+      borderRadius: BORDER_RADIUS.xl,
+      padding: SPACING.xl,
+      alignItems: 'center',
+    },
+    rrIconCircle: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: 'rgba(0,242,254,0.12)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    rrQuestion: {
+      ...FONTS.bold,
+      fontSize: 18,
+      color: '#FFFFFF',
+      textAlign: 'center',
+      marginBottom: 6,
+    },
+    rrSubtitle: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.xs,
+      color: 'rgba(255,255,255,0.55)',
+      textAlign: 'center',
+      marginBottom: SPACING.lg,
+      lineHeight: 18,
+    },
+    rrOptionsRow: {
+      flexDirection: 'row',
+      gap: SPACING.md,
+      marginBottom: SPACING.lg,
+    },
+    rrOption: {
+      width: 88,
+      paddingVertical: SPACING.md,
+      borderRadius: BORDER_RADIUS.lg,
+      borderWidth: 1,
+      borderColor: GLASS_BORDER,
+      backgroundColor: 'rgba(255,255,255,0.04)',
+      alignItems: 'center',
+    },
+    rrOptionSelected: {
+      borderColor: NEON_CYAN,
+      backgroundColor: 'rgba(0,242,254,0.10)',
+    },
+    rrOptionRatio: {
+      ...FONTS.bold,
+      fontSize: 22,
+      color: '#FFFFFF',
+    },
+    rrOptionRatioSelected: {
+      color: NEON_CYAN,
+    },
+    rrOptionUnit: {
+      ...FONTS.regular,
+      fontSize: 10,
+      color: 'rgba(255,255,255,0.45)',
+      marginTop: 2,
+    },
+    rrOptionUnitSelected: {
+      color: 'rgba(0,242,254,0.8)',
+    },
+    rrConfirmBtn: {
+      borderRadius: BORDER_RADIUS.lg,
+      paddingVertical: SPACING.md + 2,
+      paddingHorizontal: SPACING.xxl,
+      alignItems: 'center',
+      width: '100%',
+    },
+    rrConfirmText: {
+      ...FONTS.bold,
+      fontSize: FONTS.size.md,
+      color: '#FFFFFF',
     },
 
     // (Removed legacy Angel Options modal & SmartAPI TOTP form styles)

@@ -81,7 +81,7 @@ export default function FundsDashboardScreen({ navigation }: NativeStackScreenPr
           <AppScreen scroll={false} padded={false}
       >
   {/* Header */}
-        <View style={[styles.header]}>          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+        <View style={[styles.header]}>          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('funds.dashboardTitle')}</Text>

@@ -10,8 +10,8 @@
  *   - Wash-sale detection (30-day rule)
  *   - Priority scoring for opportunities
  *
- * Indian tax rules (FY 2025-26):
- *   - STCG: taxed at slab rate (~30% for most traders)
+ * Indian tax rules (FY 2024-25 onwards, post-July-2024 budget):
+ *   - STCG: 20% for listed equity
  *   - LTCG: 12.5% above ₹1.25L exemption
  *   - STCL offsets both STCG + LTCG
  *   - LTCL offsets only LTCG
@@ -27,9 +27,9 @@ import type {
   TaxYearSummary,
 } from '../types';
 
-// ─── Tax Constants (FY 2025-26) ───────────────────────────────────────────
+// ─── Tax Constants (FY 2024-25 onwards) ───────────────────────────────────
 
-const STCG_RATE = 0.20; // 20% for listed equity (slab rate approximation)
+const STCG_RATE = 0.20; // 20% for listed equity
 const LTCG_RATE = 0.125; // 12.5% for listed equity
 const LTCG_EXEMPTION = 125_000; // ₹1.25L exemption per year
 const LONG_TERM_DAYS = 365; // 1 year for equity

@@ -297,7 +297,7 @@ export default function GlossaryScreen({ navigation }: NativeStackScreenProps<Ro
       >
   {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={styles.headerTextContainer}>

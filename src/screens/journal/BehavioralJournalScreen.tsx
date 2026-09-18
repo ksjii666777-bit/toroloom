@@ -19,11 +19,16 @@ import { SegmentedTabs } from '../../components/ui/SegmentedTabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 import AppScreen from '../../components/ui/AppScreen';
+import JournalEntryModal from '../../components/journal/JournalEntryModal';
+import DisciplineScoreWidget from '../../components/journal/DisciplineScoreWidget';
+import StreakRebuildBanner from '../../components/journal/StreakRebuildBanner';
+import { computeDisciplineSummary, computeDisciplineScore, computeDisciplineStreak, computeBrokenStreak, isRebuiltWeek } from '../../utils/analytics/disciplineAnalytics';
+import { useTradingPrefsStore } from '../../store/tradingPrefsStore';
 
 
 type TabKey = 'Dashboard' | 'Entries' | 'Reports';
 
-export default function BehavioralJournalScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'BehavioralJournal'>) {
+export default function BehavioralJournalScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'BehavioralJournal'>) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useT();
@@ -32,7 +37,32 @@ export default function BehavioralJournalScreen({ navigation: _navigation  }: Na
   const entries = useBehaviorJournalStore(s => s.entries);
   const allMetrics = useBehaviorJournalStore(s => s.allMetrics);
   const reports = useBehaviorJournalStore(s => s.reports);
+  const showEntryModal = useBehaviorJournalStore(s => s.showEntryModal);
   const setShowEntryModal = useBehaviorJournalStore(s => s.setShowEntryModal);
+  const openEntryModalWithPrefill = useBehaviorJournalStore(s => s.openEntryModalWithPrefill);
+  const committedRR = useTradingPrefsStore(s => s.rewardRiskRatio);
+
+  // ── R:R discipline score for the dashboard ─────────────────
+  const disciplineSummary = useMemo(
+    () => computeDisciplineSummary(entries, committedRR),
+    [entries, committedRR],
+  );
+  const disciplineScore = useMemo(
+    () => computeDisciplineScore(disciplineSummary),
+    [disciplineSummary],
+  );
+  const disciplineStreak = useMemo(
+    () => computeDisciplineStreak(entries, committedRR),
+    [entries, committedRR],
+  );
+  const brokenStreak = useMemo(
+    () => computeBrokenStreak(entries, committedRR),
+    [entries, committedRR],
+  );
+  const rebuiltWeek = useMemo(
+    () => isRebuiltWeek(entries, committedRR),
+    [entries, committedRR],
+  );
 
   const latestReport = reports[0];
   const topMistakeFreq = useMemo(() => {
@@ -63,6 +93,25 @@ export default function BehavioralJournalScreen({ navigation: _navigation  }: Na
 
   const renderDashboard = () => (
     <>
+      {/* Streak rebuild nudge — subtle in-context banner while broken.
+          Title tap = one-tap rebuild: opens the entry modal pre-filled
+          from the user's last closed trade (any symbol). */}
+      <StreakRebuildBanner
+        brokenStreakWeeks={brokenStreak}
+        onTitlePress={() => openEntryModalWithPrefill()}
+      />
+
+      {/* R:R Discipline Score */}
+      <DisciplineScoreWidget
+        score={disciplineScore}
+        summary={disciplineSummary}
+        committedRatio={committedRR}
+        streakWeeks={disciplineStreak}
+        brokenStreakWeeks={brokenStreak}
+        rebuiltWeek={rebuiltWeek}
+        onPress={() => navigation.navigate('PeriodReport', {})}
+      />
+
       {/* Performance Overview */}
       <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('journal.perfOverview')}</Text>
       <View style={styles.metricsGrid}>
@@ -260,6 +309,9 @@ export default function BehavioralJournalScreen({ navigation: _navigation  }: Na
         >
           <Ionicons name="add" size={24} color="#FFF" />
         </Pressable>
+
+        {/* ── Add-entry form (records planned stop/target for R:R discipline) ── */}
+        {showEntryModal && <JournalEntryModal />}
       </AppScreen>
   );
 }

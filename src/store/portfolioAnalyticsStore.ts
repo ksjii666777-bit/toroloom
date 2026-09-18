@@ -492,10 +492,10 @@ function computeCapitalGains(trades: Trade[]): CapitalGains {
     }
   }
 
-  // Indian tax rules (FY 2025-26)
-  const stcgTaxRate = 0.15; // 15% for equity STCG
-  const ltcgTaxRate = 0.10; // 10% for equity LTCG above ₹1L
-  const ltexemptLimit = 100000; // ₹1L exempt
+  // Indian tax rules (FY 2024-25 onwards, post-July-2024 budget)
+  const stcgTaxRate = 0.20; // 20% for listed equity STCG
+  const ltcgTaxRate = 0.125; // 12.5% for listed equity LTCG above ₹1.25L
+  const ltexemptLimit = 125000; // ₹1.25L exempt
 
   const ltcgTaxable = Math.max(0, longTermGains - ltexemptLimit);
   const stcgTax = Math.max(0, shortTermGains) * stcgTaxRate;

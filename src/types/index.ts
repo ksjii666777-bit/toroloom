@@ -815,6 +815,10 @@ export interface JournalEntry {
   emotionalState: EmotionalState;
   mistakes: TradingMistake[];
   planCompliance: number;          // 0-100%
+  /** Stop-loss price planned BEFORE the trade (optional — enables R:R discipline measurement) */
+  plannedStop?: number;
+  /** Target price planned BEFORE the trade (optional — pairs with plannedStop) */
+  plannedTarget?: number;
   notes: string;
   setupType: string;               // e.g., 'breakout', 'pullback', 'trend_follow'
   exitReason: string;              // e.g., 'stop_loss', 'target', 'manual'
@@ -3001,7 +3005,7 @@ export type RootStackParamList = {
 
   // ── AI & analytics ──
   AIInsights: undefined;
-  AIChat: undefined;
+  AIChat: { symbol?: string } | undefined;
   AITradeAssistant: undefined;
   EarningsCall: undefined;
   SentimentAnalysis: undefined;
@@ -3071,7 +3075,7 @@ export type RootStackParamList = {
 
   // ── Reports, alerts & notifications ──
   Reports: undefined;
-  PeriodReport: undefined;
+  PeriodReport: { startDate?: string }; // optional ISO date pinning the report to a specific weekly window
   ContractNoteParser: { brokerFormat?: string } | undefined;
   Notifications: undefined;
   NotificationPreferences: undefined;
@@ -3081,6 +3085,7 @@ export type RootStackParamList = {
   // ── Settings & security ──
   Settings: undefined;
   Help: undefined;
+  Legal: { section?: 'terms' | 'privacy' | 'sebi' };
   WidgetSettings: undefined;
   TenantConfig: undefined;
   VoiceSettings: undefined;

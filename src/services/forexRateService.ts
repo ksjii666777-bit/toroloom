@@ -44,7 +44,9 @@ export interface FetchResult {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const FRANKFURTER_API = 'https://api.frankfurter.app/latest';
+// api.frankfurter.app is the legacy domain — api.frankfurter.dev/v2 is the
+// current official endpoint (the .app domain still redirects but can rate-limit).
+const FRANKFURTER_API = 'https://api.frankfurter.dev/v2/latest';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /** The subset of currency codes we care about */

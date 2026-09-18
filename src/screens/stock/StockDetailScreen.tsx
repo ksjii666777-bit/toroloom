@@ -611,6 +611,23 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
           </Card>
           </View>
 
+          {/* ── AI Deep Research (per-stock chat) ── */}
+          <TouchableOpacity
+            testID="stock-ai-chat-button"
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('AIChat', { symbol: stock.symbol })}
+            style={styles.aiChatCard}
+          >
+            <View style={styles.aiChatIconCircle}>
+              <Ionicons name="chatbubbles" size={20} color="#00F2FE" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.aiChatTitle}>AI Deep Research: {stock.symbol}</Text>
+              <Text style={styles.aiChatSubtitle}>Chat about news, targets & fundamentals</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.4)" />
+          </TouchableOpacity>
+
           {/* ── Stock News ── */}
           <StockNewsSection symbol={stock.symbol} />
 
@@ -703,6 +720,36 @@ const createStyles = (colors: any) =>
     scrollContent: {
       paddingHorizontal: SPACING.xl,
       paddingBottom: 20,
+    },
+    aiChatCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.md,
+      padding: SPACING.md,
+      borderRadius: 16,
+      backgroundColor: 'rgba(0,242,254,0.06)',
+      borderWidth: 1,
+      borderColor: 'rgba(0,242,254,0.25)',
+      marginBottom: SPACING.md,
+    },
+    aiChatIconCircle: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(0,242,254,0.12)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    aiChatTitle: {
+      ...FONTS.bold,
+      fontSize: FONTS.size.sm,
+      color: '#FFFFFF',
+    },
+    aiChatSubtitle: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.xs,
+      color: 'rgba(255,255,255,0.55)',
+      marginTop: 2,
     },
     header: {
       flexDirection: 'row',

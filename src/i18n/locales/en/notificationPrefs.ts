@@ -29,6 +29,8 @@ export default {
     learningRemindersDesc: 'Course, lesson & quiz notifications',
     systemUpdates: 'System Updates',
     systemUpdatesDesc: 'KYC, account & app version updates',
+    weeklyDisciplineReport: 'Weekly Discipline Digest',
+    weeklyDisciplineReportDesc: 'R:R breaches, score & ₹ lost — once a week',
     soundLabel: 'Sound',
     soundDesc: 'Play a sound for new notifications',
     vibrationLabel: 'Vibration',

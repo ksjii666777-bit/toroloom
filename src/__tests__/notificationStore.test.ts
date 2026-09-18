@@ -50,6 +50,7 @@ const defaultPrefs: NotificationPreferences = {
   tradeConfirmations: true,
   educationalReminders: true,
   systemUpdates: true,
+  weeklyDisciplineReport: true,
   sentimentAlerts: true,
   mentionNotifications: true,
   replyNotifications: true,

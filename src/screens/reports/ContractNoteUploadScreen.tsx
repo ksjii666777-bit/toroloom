@@ -310,7 +310,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: NativeSt
     <AppScreen padded={false} contentStyle={styles.scrollContent} header={
       /* ── Header ────────────────────────────────────────── */
       <View style={[styles.header, { paddingTop: 60 + insets.top }]}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
+        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </AnimatedPressable>
         <View style={styles.headerTitleContainer}>
@@ -627,7 +627,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: NativeSt
                         selectedFiles.has(i) && styles.checkboxSelected,
                       ]}>
                         {selectedFiles.has(i) && (
-                          <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                          <Ionicons name="checkmark" size={12} color="#FFFFFF" accessibilityLabel={t('app.a11y.selectFile')} />
                         )}
                       </View>
                     </TouchableOpacity>

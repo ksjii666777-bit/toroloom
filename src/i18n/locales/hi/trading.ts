@@ -172,6 +172,14 @@ export default {
     noFnoPositionsDesc: 'आपकी खुली फ्यूचर्स और ऑप्शन पोजीशन यहां दिखाई देंगी',
     tradeFutures: 'फ्यूचर्स ट्रेड',
     orderPlaced: 'ऑर्डर दिया गया ✅',
+    // ── Emergency Exit ───────────────────────────────────────────────────
+    squareOffTitle: '{{symbol}} स्क्वायर ऑफ करें?',
+    squareOffIntro: 'इसे क्लिक करने पर {{symbol}} की पोजीशन मार्केट ऑर्डर से बंद हो जाएगी। सिमुलेशन मोड के बाहर यह आपके कनेक्टेड ब्रोकर से संपर्क करेगा।',
+    exitConfirm: 'स्क्वायर ऑफ',
+    exitCancel: 'रद्द करें',
+    exitAllButton: 'इस सिंबल को बंद करें',
+    positionStatus: '{{symbol}}: स्क्वायर ऑफ का अनुरोध',
+    positionSquareOffDone: '{{symbol}}: स्क्वायर ऑफ पूरा',
     // ── Strategy Builder ──────────────────────────────────────────────────
     underlyingPrice: 'अंतर्निहित मूल्य',
     analyze: 'विश्लेषण करें',
@@ -340,4 +348,5 @@ export default {
     marketCap: 'मार्केट कैप',
     noCoinsFound: 'कोई कॉइन नहीं मिला',
     cryptoHoldings: 'क्रिप्टो होल्डिंग्स',
+    orderFailedMsg: 'ऑर्डर दिया नहीं जा सका। कृपया पुनः प्रयास करें।',
 };

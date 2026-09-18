@@ -451,7 +451,7 @@ export default function PortfolioAlertsScreen({ navigation }: NativeStackScreenP
   {/* Header */}
         <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
           <View style={styles.headerTop}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View style={styles.headerInfo}>

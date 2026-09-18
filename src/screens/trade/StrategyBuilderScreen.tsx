@@ -392,7 +392,7 @@ export default function StrategyBuilderScreen({ navigation }: NativeStackScreenP
       >
   {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>

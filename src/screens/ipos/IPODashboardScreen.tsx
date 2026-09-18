@@ -826,6 +826,7 @@ export default function IPODashboardScreen({ navigation }: NativeStackScreenProp
               </Text>
             </View>
             <TouchableOpacity
+              accessibilityLabel={t('app.goBack')}
               style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
               onPress={() => navigation.goBack()}
             >

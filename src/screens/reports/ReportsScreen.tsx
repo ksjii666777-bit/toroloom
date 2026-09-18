@@ -192,7 +192,7 @@ export default function ReportsScreen({ navigation }: NativeStackScreenProps<Roo
           <AppScreen scroll={false} padded={false}
       header={
   <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerContent}>
@@ -270,7 +270,7 @@ export default function ReportsScreen({ navigation }: NativeStackScreenProps<Roo
           {/* ── Tools: Period Report ──────────────────────────── */}
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => navigation.navigate('PeriodReport')}
+            onPress={() => navigation.navigate('PeriodReport', {})}
             style={{
               flexDirection: 'row',
               alignItems: 'center',

@@ -15,7 +15,7 @@ name: CI
 
 on:
   push:
-    branches: [master, main]
+    branches: ['**']   # every branch push — e2e/coverage-badge jobs self-guard to master/main
   pull_request:
     branches: [master, main]
   workflow_dispatch:           # Allow manual trigger from the Actions tab
@@ -49,11 +49,37 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
+      - name: Cache node_modules (backend)
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
       - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: npm ci
 
+
+      - name: Restore TypeScript build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            *.tsbuildinfo
+            backend/tsconfig.tsbuildinfo
+          key: tsb-${{ github.job }}-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
       - name: TypeScript compilation check
         run: npm run typecheck
+      - name: Save TypeScript build cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            *.tsbuildinfo
+            backend/tsconfig.tsbuildinfo
+          key: tsb-${{ github.job }}-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
 
       - name: Lint check
         run: npm run lint
@@ -178,12 +204,80 @@ jobs:
           path: backend/badge-artifact/
           retention-days: 7
 
-  # ── Frontend: TypeScript compilation + vitest unit tests + coverage ─────
+  # ── Frontend: TypeScript compilation + lint + i18n parity (static) ─────
   frontend:
-    name: Frontend
+    name: Frontend — Static Checks (typecheck, lint, i18n parity)
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
+      - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+
+      - name: Validate import paths (vi.mock paths must resolve to real files)
+        run: node scripts/validate-imports.mjs
+
+      # Vitest globals (`vi`, `describe`, `it`, `expect`) are made available
+      # to TypeScript via src/vitest.d.ts  —  no separate test tsconfig needed.
+      - name: Restore TypeScript build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            *.tsbuildinfo
+            backend/tsconfig.tsbuildinfo
+          key: tsb-${{ github.job }}-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+
+      - name: TypeScript compilation check
+        run: npm run typecheck
+
+      - name: Save TypeScript build cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            *.tsbuildinfo
+            backend/tsconfig.tsbuildinfo
+          key: tsb-${{ github.job }}-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Check locale parity (en/ vs hi/)
+        run: node scripts/check-locale-parity.mjs
+
+      # Unit tests run in the parallel frontend-tests matrix (see below).
+      # This job intentionally keeps only fast static checks so test shards
+      # do not wait behind typecheck + lint. Coverage gates and the badge
+      # live in frontend-test-merge after all shard blobs are combined.
+
+  # ── Frontend unit tests: parallel shards with per-shard blob reports ────
+  frontend-tests:
+    name: Frontend Tests (${{ matrix.shard }}/${{ strategy.job-total }})
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
     strategy:
       fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
 
     steps:
       - uses: actions/checkout@v4
@@ -195,25 +289,75 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
       - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Validate import paths (vi.mock paths must resolve to real files)
-        run: node scripts/validate-imports.mjs
+      # Shards each run with coverage enabled so v8 results are embedded in
+      # the blob report; frontend-test-merge combines all four and enforces
+      # the real thresholds once (per-shard coverage is partial by design,
+      # so threshold errors here are expected and ignored).
+      - name: Run vitest shard ${{ matrix.shard }}
+        run: npx vitest run --shard=${{ matrix.shard }}/${{ strategy.job-total }} --reporter=blob --coverage || true
 
-      # Vitest globals (`vi`, `describe`, `it`, `expect`) are made available
-      # to TypeScript via src/vitest.d.ts  —  no separate test tsconfig needed.
-      - name: TypeScript compilation check
-        run: npm run typecheck
+      - name: Upload shard blob report
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-blob-${{ matrix.shard }}
+          path: .vitest-reports/
+          retention-days: 3
+          if-no-files-found: error
 
-      - name: Lint check
-        run: npm run lint
+  # ── Frontend test merge: combines shards, enforces coverage gates ───────
+  frontend-test-merge:
+    name: Frontend Tests — Merge & Coverage Gates
+    runs-on: ubuntu-latest
+    needs: [frontend-tests]
 
-      - name: Check locale parity (en/ vs hi/)
-        run: node scripts/check-locale-parity.mjs
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Run vitest tests with coverage
-        run: npx vitest run --reporter=verbose --coverage
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
+      - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Download all shard blob reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: vitest-blob-*
+          merge-multiple: true
+          path: .vitest-reports/
+
+      # Combines all shard blobs (results + v8 coverage) and enforces
+      # vitest.config.ts coverage thresholds in one place. Fails the job if
+      # any shard failed or any coverage metric drops below threshold.
+      - name: Merge shard reports and check coverage
+        run: npx vitest --merge-reports --reporter=json --coverage
         env:
           NODE_ENV: test
 
@@ -326,6 +470,124 @@ jobs:
           path: badge-artifact/
           retention-days: 7
 
+  # ── Bundle size guard ──────────────────────────────────────────────────
+  # Builds the production JS bundle with `expo export` and compares its size
+  # against scripts/bundle-size-baseline-<platform>.json (one baseline per
+  # matrix leg). Fails when the bundle grew more than 5% vs the baseline —
+  # catching accidental dependency bloat before release. Re-baseline
+  # intentionally via `BUNDLE_PLATFORM=<p> npm run bundle:size:update`.
+  # PRs get one sticky size comment per platform.
+  bundle-size:
+    name: Frontend — Bundle Size Guard (${{ matrix.platform }})
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write   # sticky PR comment (fork PRs still get a read-only token — handled below)
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ios, android]
+    env:
+      BUNDLE_PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
+      - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Check bundle size vs baseline (max +5%)
+        id: bundle-size
+        run: npm run bundle:size
+
+      # PR comment: size impact before merge. Sticky comment (identified by a
+      # hidden nonce marker) so repeat runs EDIT the same comment instead of
+      # spamming one per push. Read-only token: create fails silently on
+      # forks without write access; the size check itself already failed the
+      # job if the limit was exceeded, so no gate is lost.
+      - name: Post bundle size PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          MATRIX_PLATFORM: ${{ matrix.platform }}
+          PLATFORM: ${{ steps.bundle-size.outputs.platform }}
+          BASELINE_MB: ${{ steps.bundle-size.outputs.baseline_mb }}
+          CURRENT_MB: ${{ steps.bundle-size.outputs.current_mb }}
+          GROWTH_PCT: ${{ steps.bundle-size.outputs.growth_pct }}
+          THRESHOLD_PCT: ${{ steps.bundle-size.outputs.threshold_pct }}
+          VERDICT: ${{ steps.bundle-size.outputs.verdict }}
+        with:
+          script: |
+            // Per-platform marker: each matrix leg keeps its own sticky comment.
+            const marker = `<!-- toroloom-bundle-size-${process.env.MATRIX_PLATFORM} -->`;
+            const verdict = process.env.VERDICT === 'fail';
+            const growth = Number(process.env.GROWTH_PCT);
+            const icon = verdict ? '🔴' : (growth < 0 ? '🟢' : '🟡');
+            const sign = growth >= 0 ? '+' : '';
+            const body = [
+              marker,
+              `## ${icon} Bundle size report — ${process.env.PLATFORM}`,
+              '',
+              `| | Size |`,
+              `|---|---|`,
+              `| Baseline (${process.env.PLATFORM}) | ${process.env.BASELINE_MB} MB |`,
+              `| **This PR** | **${process.env.CURRENT_MB} MB** |`,
+              `| Growth | **${sign}${growth.toFixed(2)}%** (limit +${process.env.THRESHOLD_PCT}%) |`,
+              '',
+              verdict
+                ? `⚠️ **Over limit** — check recent dependency additions. Intentional change? Re-baseline with \`npm run bundle:size:update\` and include the updated baseline in this PR.`
+                : `Within limit. Baseline: \`scripts/bundle-size-baseline.json\` — update via \`npm run bundle:size:update\` when size changes are intentional.`,
+              '',
+              `<sub>Updated automatically on every push to this PR.</sub>`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+
+            try {
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+                console.log('Updated existing comment #' + existing.id);
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+                console.log('Created new comment');
+              }
+            } catch (error) {
+              // Fork PRs get a read-only token — commenting is impossible there.
+              // The size gate already ran in the previous step, so never mask it.
+              console.warn('Could not post PR comment (likely fork PR / read-only token): ' + error.message);
+            }
+
   # ── Backend cross-file isolation test ─────────────────────────────────────
   # Runs all 10 cross-file test files (riskEngine, auditTrail, brokerState,
   # circuitBreaker, wsState — each as File A + File B pairs) in the SAME
@@ -352,8 +614,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
+      - name: Cache node_modules (backend)
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
       - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: npm ci
+
 
       - name: Run cross-file isolation test (singleFork = same process)
         # All 10 cross-file test files (5 singleton pairs) run in the same
@@ -415,8 +688,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
+      - name: Cache node_modules (backend)
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
       - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: npm ci
+
 
       # Integration tests share databases (MongoDB/PostgreSQL) and
       # singletons (riskEngine, auditTrail).  fileParallelism: false is
@@ -454,8 +738,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
+      - name: Cache node_modules (backend)
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
       - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: npm ci
+
 
       - name: Run WebSocket PnL bridge stress test
         run: npx vitest run --reporter=verbose src/__tests__/websocketPnLBridge.stress.test.ts
@@ -512,8 +807,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
       - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: npm ci
+
 
       - name: Install Maestro CLI
         run: |
@@ -613,7 +919,7 @@ jobs:
   e2e-pr:
     if: github.event_name == 'pull_request'
     name: E2E — Critical Flows (PR)
-    needs: [frontend]
+    needs: [frontend, frontend-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 40
     continue-on-error: false
@@ -630,8 +936,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+        id: nm-cache
+
       - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: npm ci
+
 
       - name: Install Maestro CLI
         run: |
@@ -724,7 +1041,7 @@ jobs:
   coverage-badge:
     name: Coverage Badge
     runs-on: ubuntu-latest
-    needs: [frontend, backend]
+    needs: [frontend-test-merge, backend]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     permissions:
       contents: write

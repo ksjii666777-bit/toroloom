@@ -17,7 +17,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View, Text, StyleSheet, Dimensions,
+  View, Text, StyleSheet, Dimensions, Alert, TouchableOpacity,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, withRepeat, withSequence, interpolate, runOnJS } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +28,10 @@ import { useRiskStore, selectIsLockdownActive } from '../store/riskStore';
 import { useVoiceStore, VOICE_MESSAGES } from '../store/voiceStore';
 import { useT } from '../hooks/useT';
 import { BORDER_RADIUS} from '../constants/theme';
+import {
+  executeEmergencyExit,
+  summarizeEmergencyExit,
+} from '../services/emergencyExitService';
 
 const { width } = Dimensions.get('window');
 
@@ -44,6 +48,7 @@ export default function IronLockOverlay() {
   const prevLockdownRef = useRef(lockdown.status);
 
   const [visible, setVisible] = useState(false);
+  const [isEmergencyExiting, setIsEmergencyExiting] = useState(false);
 
   // Animations
   const fadeAnim = useSharedValue(0);
@@ -286,6 +291,66 @@ export default function IronLockOverlay() {
           </Text>
         </View>
 
+        {/* ── Emergency Exit — the ONLY action allowed during lockdown ── */}
+        <Text style={styles.emergencyNote}>
+          {t('components.ironLock.emergencyNote')}
+        </Text>
+        <TouchableOpacity
+          testID="emergency-exit-button"
+          activeOpacity={0.85}
+          disabled={isEmergencyExiting}
+          onPress={() => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            Alert.alert(
+              t('components.ironLock.emergencyTitle'),
+              t('components.ironLock.emergencyConfirm'),
+              [
+                { text: t('components.ironLock.emergencyCancel'), style: 'cancel' },
+                {
+                  text: t('components.ironLock.emergencyGo'),
+                  style: 'destructive',
+                  onPress: () => {
+                    void (async () => {
+                      setIsEmergencyExiting(true);
+                      try {
+                        const report = await executeEmergencyExit();
+                        const summary = summarizeEmergencyExit(report);
+                        if (report.failed.length === 0 && !report.fetchFailed) {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                          Alert.alert(t('components.ironLock.emergencyTitle'), summary);
+                        } else {
+                          Alert.alert(t('components.ironLock.emergencyPartial'), summary);
+                        }
+                      } catch {
+                        Alert.alert(
+                          t('components.ironLock.emergencyFailed'),
+                          t('components.ironLock.emergencyFailedMsg'),
+                        );
+                      } finally {
+                        setIsEmergencyExiting(false);
+                      }
+                    })();
+                  },
+                },
+              ],
+            );
+          }}
+        >
+          <LinearGradient
+            colors={['#FF3366', '#C2185B']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.emergencyButton}
+          >
+            <Ionicons name="exit-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.emergencyButtonText}>
+              {isEmergencyExiting
+                ? t('components.ironLock.emergencyWorking')
+                : t('components.ironLock.emergencyButton')}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
         {/* Safe area spacer */}
         <View style={{ height: insets.bottom + 20 }} />
       </LinearGradient>
@@ -409,5 +474,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.6)',
     lineHeight: 18,
+  },
+
+  // ── Emergency Exit ────────────────────────────────────
+  emergencyNote: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.45)',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+    paddingHorizontal: 24,
+    lineHeight: 16,
+  },
+  emergencyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: BORDER_RADIUS.lg,
+  },
+  emergencyButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
 });

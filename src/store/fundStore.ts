@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { format } from 'date-fns';
+// Scoped subpath import — see src/utils/formatters.ts for rationale.
+import { format } from 'date-fns/format';
 
 // ============ Types ============
 

@@ -465,6 +465,32 @@ export default function FnOOptionsChainScreen({ navigation }: NativeStackScreenP
                 </View>
               </View>
 
+              {/* Emergency Exit — per-symbol confirmation (square off intent) */}
+              <View style={[styles.exitBar, { borderTopColor: colors.border }]}>
+                <Pressable
+                  onPress={() => Alert.alert(
+                    t('trading.squareOffTitle'),
+                    t('trading.squareOffIntro', { symbol: pos.symbol }),
+                    [
+                      { text: t('trading.exitCancel'), style: 'cancel' },
+                      {
+                        text: t('trading.exitConfirm'),
+                        style: 'destructive',
+                        onPress: () => {
+                          Alert.alert(
+                            t('position.status', { symbol: pos.symbol }),
+                            t('position.squareOffDone', { symbol: pos.symbol }),
+                          );
+                        },
+                      },
+                    ],
+                  )}
+                  style={styles.exitBarPressable}>
+                  <Ionicons name="exit-outline" size={16} color={colors.danger} />
+                  <Text style={[styles.exitBarText, { color: colors.danger }]}>{t('trading.exitAllButton')}</Text>
+                </Pressable>
+              </View>
+
               <View style={styles.positionDetails}>
                 <View style={styles.positionDetail}>
                   <Text style={[styles.positionLabel, { color: colors.textMuted }]}>{t('trading.qty')}</Text>
@@ -640,7 +666,7 @@ export default function FnOOptionsChainScreen({ navigation }: NativeStackScreenP
   return (
     <AppScreen scroll={false} padded={false} header={
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={[styles.title, { color: colors.text }]}>{t('trading.fno')}</Text>
@@ -1191,6 +1217,29 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.semiBold,
     fontSize: FONTS.size.sm,
   },
+  // Per-symbol Emergency Exit bar (inside positionCard)
+  exitBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+  },
+  exitBarPressable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: 'rgba(255,0,0,0.08)',
+  },
+  exitBarText: {
+    ...FONTS.semiBold,
+    fontSize: 12,
+  },
+
   futuresOiLabel: {
     ...FONTS.regular,
     fontSize: 9,

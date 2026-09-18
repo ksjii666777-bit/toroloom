@@ -117,7 +117,7 @@ export default function HelpScreen({ navigation }: NativeStackScreenProps<RootSt
         >
           {/* Header */}
           <View style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View style={styles.headerContent}>
@@ -239,11 +239,17 @@ export default function HelpScreen({ navigation }: NativeStackScreenProps<RootSt
               </View>
             </View>
             <View style={styles.footerLinks}>
-              <Pressable style={styles.footerLink}>
+              <Pressable
+                style={styles.footerLink}
+                onPress={() => navigation.navigate('Legal', { section: 'privacy' })}
+              >
                 <Text style={styles.footerLinkText}>{t('help.privacyPolicy')}</Text>
               </Pressable>
               <View style={styles.footerLinkDot} />
-              <Pressable style={styles.footerLink}>
+              <Pressable
+                style={styles.footerLink}
+                onPress={() => navigation.navigate('Legal', { section: 'terms' })}
+              >
                 <Text style={styles.footerLinkText}>{t('help.termsOfService')}</Text>
               </Pressable>
               <View style={styles.footerLinkDot} />

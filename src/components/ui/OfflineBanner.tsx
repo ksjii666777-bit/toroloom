@@ -414,7 +414,7 @@ export default function OfflineBanner() {
                     </Pressable>
                   )}
                   <Pressable onPress={handleRefresh} style={styles.refreshBtn} hitSlop={8}>
-                    <Ionicons name="refresh-outline" size={13} color="#0D0D0D" />
+                    <Ionicons name="refresh-outline" size={13} color="#0D0D0D" accessibilityLabel={t('app.a11y.retry')} />
                   </Pressable>
                 </>
               )}
@@ -423,7 +423,7 @@ export default function OfflineBanner() {
                   <ActivityIndicator size="small" color="#0D0D0D" />
                 </View>
               )}
-              <Pressable onPress={handleDismiss} style={styles.dismissBtn} hitSlop={8}>
+              <Pressable onPress={handleDismiss} style={styles.dismissBtn} hitSlop={8} accessibilityLabel={t('app.a11y.dismiss')}>
                 <Ionicons name="close" size={14} color="rgba(255,255,255,0.5)" />
               </Pressable>
             </View>
@@ -537,7 +537,7 @@ export default function OfflineBanner() {
               )}
             </Pressable>
             <Pressable onPress={handleToastDismiss} hitSlop={6}>
-              <Ionicons name="close" size={12} color="rgba(255,255,255,0.4)" />
+              <Ionicons name="close" size={12} color="rgba(255,255,255,0.4)" accessibilityLabel={t('app.a11y.dismiss')} />
             </Pressable>
           </View>
         </Animated.View>

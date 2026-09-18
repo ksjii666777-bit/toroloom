@@ -551,7 +551,7 @@ function QuizEditor({
                   q.correctAnswer === optIdx && styles.optionRadioSelected,
                 ]}>
                   {q.correctAnswer === optIdx && (
-                    <Ionicons name="checkmark" size={12} color="#fff" />
+                    <Ionicons name="checkmark" size={12} color="#fff" accessibilityLabel={t('app.a11y.markCorrect')} />
                   )}
                 </View>
               </AnimatedPressable>

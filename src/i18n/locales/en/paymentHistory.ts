@@ -27,4 +27,7 @@ export default {
     coupon: 'Coupon',
     discount: 'Discount',
     amountCharged: 'Amount Charged',
+    downloadFailed: 'Download Failed',
+    downloadFailedDesc: 'The invoice could not be downloaded. Please try again later.',
+    generating: 'Generating…',
 };

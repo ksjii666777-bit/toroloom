@@ -12,6 +12,7 @@ import { useMarketStore } from '../../store/marketStore';
 import { useMutualFundStore } from '../../store/mutualFundStore';
 import { useAIStore } from '../../store/aiStore';
 import { aiApi } from '../../services/api/ai';
+import { newsApi } from '../../services/api/news';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -32,6 +33,13 @@ interface ChatMessage {
 // ============================================================================
 // Sample questions for quick access
 // ============================================================================
+
+/** Per-stock quick questions — shown when chat is opened with a focus symbol */
+const STOCK_QUESTION_KEYS = [
+  { icon: '📰', labelKey: 'ai.qStockNews', query: 'What is the latest news and sentiment?' },
+  { icon: '🎯', labelKey: 'ai.qStockTarget', query: 'What entry and target levels do you suggest?' },
+  { icon: '🧮', labelKey: 'ai.qStockValuation', query: 'How are the fundamentals and valuation?' },
+];
 
 const SAMPLE_QUESTION_KEYS = [
   { icon: '💰', labelKey: 'ai.qPortfolioValue', query: 'What is my total portfolio value?' },
@@ -111,6 +119,47 @@ function buildPortfolioContext(): PortfolioContext {
     bestHolding, worstHolding,
     topSector, sipCount, sipTotalInvested, sipTotalValue, marketStatus,
   };
+}
+
+/**
+ * Stock-focused response generator — active when the chat was opened with a
+ * symbol (per-stock AI chat from a stock detail screen). Answers questions
+ * about the focused stock's price, technicals, fundamentals, and news.
+ */
+export function generateStockResponse(
+  query: string,
+  stock: { name: string; symbol: string; price: number; sector?: string },
+  t: any,
+): string {
+  const q = query.toLowerCase();
+  const base = {
+    name: stock.name,
+    symbol: stock.symbol,
+    price: formatCurrency(stock.price),
+  };
+
+  // Price / level questions
+  if (q.includes('price') || q.includes('ltp') || q.includes('level')) {
+    return t('ai.chatStockPrice', base);
+  }
+
+  // Buy / sell / entry advice
+  if (q.includes('buy') || q.includes('sell') || q.includes('entry') || q.includes('target')) {
+    return t('ai.chatStockAdvice', base);
+  }
+
+  // News / sentiment
+  if (q.includes('news') || q.includes('sentiment') || q.includes('headline')) {
+    return t('ai.chatStockNewsPrompt', base);
+  }
+
+  // Fundamentals / valuation
+  if (q.includes('fundamental') || q.includes('valuation') || q.includes('pe ') || q.includes('balance sheet')) {
+    return t('ai.chatStockFundamentals', base);
+  }
+
+  // Default: stock overview
+  return t('ai.chatStockOverview', base);
 }
 
 function generateResponse(query: string, ctx: PortfolioContext, t: any): string {
@@ -245,18 +294,44 @@ function generateResponse(query: string, ctx: PortfolioContext, t: any): string 
 // Component
 // ============================================================================
 
-export default function AIChatScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AIChat'>) {
+export default function AIChatScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'AIChat'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const flatListRef = useRef<FlatList>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      text: t('ai.chatWelcome'),
-      timestamp: Date.now(),
-    },
-  ]);
+
+  // ── Per-stock focus mode (opened from a stock detail screen) ──
+  const focusSymbol = route.params?.symbol ?? null;
+
+  const stockIntro = useMemo(() => {
+    if (!focusSymbol) return null;
+    const stocks = useMarketStore.getState().stocks;
+    return stocks.find(s => s.symbol.toUpperCase() === focusSymbol.toUpperCase()) ?? null;
+  }, [focusSymbol]);
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (stockIntro) {
+      return [
+        {
+          id: 'welcome',
+          role: 'assistant',
+          text: t('ai.chatStockFocusWelcome', {
+            name: stockIntro.name,
+            symbol: stockIntro.symbol,
+            price: formatCurrency(stockIntro.price),
+          }),
+          timestamp: Date.now(),
+        },
+      ];
+    }
+    return [
+      {
+        id: 'welcome',
+        role: 'assistant',
+        text: t('ai.chatWelcome'),
+        timestamp: Date.now(),
+      },
+    ];
+  });
   const [inputText, setInputText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [activeProvider, setActiveProvider] = useState<string | null>(null);
@@ -288,7 +363,9 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
     await new Promise(r => setTimeout(r, 800 + Math.random() * 700));
 
     const ctx = buildPortfolioContext();
-    const responseText = generateResponse(query, ctx, t);
+    const responseText = stockIntro
+      ? generateStockResponse(query, stockIntro, t)
+      : generateResponse(query, ctx, t);
 
     const assistantMsg: ChatMessage = {
       id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -298,7 +375,47 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
     };
     setMessages(prev => [...prev, assistantMsg]);
     setIsThinking(false);
-  }, [inputText, isThinking, t]);
+  }, [inputText, isThinking, t, stockIntro]);
+
+  // ── Deep research on the focused stock (fetches live news) ──
+  const handleDeepResearch = useCallback(async () => {
+    if (!stockIntro || isThinking) return;
+    setIsThinking(true);
+    const userMsg: ChatMessage = {
+      id: `user_${Date.now()}_research`,
+      role: 'user',
+      text: t('ai.chatDeepResearchQuery', { symbol: stockIntro.symbol }),
+      timestamp: Date.now(),
+    };
+    setMessages(prev => [...prev, userMsg]);
+
+    let newsBlock = '';
+    try {
+      const res = await newsApi.getNewsForSymbol(stockIntro.symbol);
+      const articles = (res.articles ?? []).slice(0, 4);
+      if (articles.length > 0) {
+        newsBlock = '\n\n📰 **' + t('ai.chatLatestNews') + '**\n' + articles
+          .map(a => `• ${a.title}`)
+          .join('\n');
+      }
+    } catch {
+      // News fetch is best-effort — research continues without it
+    }
+
+    const responseMsg: ChatMessage = {
+      id: `ai_${Date.now()}_research`,
+      role: 'assistant',
+      text: t('ai.chatDeepResearchReport', {
+        name: stockIntro.name,
+        symbol: stockIntro.symbol,
+        price: formatCurrency(stockIntro.price),
+        sector: stockIntro.sector ?? '—',
+      }) + newsBlock,
+      timestamp: Date.now(),
+    };
+    setMessages(prev => [...prev, responseMsg]);
+    setIsThinking(false);
+  }, [stockIntro, isThinking, t]);
 
   const handleQuickQuestion = useCallback((query: string) => {
     handleSend(query);
@@ -352,7 +469,7 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
     >
       <AppScreen scroll={false} padded={false} header={
       <View style={[styles.header, { backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+        <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
         </Pressable>
         <View style={styles.headerCenter}>
@@ -385,7 +502,7 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
             timestamp: Date.now(),
           }])}
         >
-          <Ionicons name="refresh" size={18} color={colors.textMuted} />
+          <Ionicons name="refresh" size={18} color={colors.textMuted} accessibilityLabel={t('app.a11y.newChat')} />
         </Pressable>
       </View>
       } footer={
@@ -425,10 +542,31 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
         showsVerticalScrollIndicator={false}
         ListFooterComponent={
           <>
+            {/* Deep Research (per-stock focus mode) */}
+            {stockIntro && (
+              <Pressable
+                testID="deep-research-button"
+                style={[styles.deepResearchBtn, { backgroundColor: colors.primary + '14', borderColor: colors.primary + '55' }]}
+                onPress={() => { void handleDeepResearch(); }}
+                disabled={isThinking}
+              >
+                <Ionicons name="search-circle" size={22} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.deepResearchTitle, { color: colors.text }]}>
+                    {t('ai.chatDeepResearchBtn', { symbol: stockIntro.symbol })}
+                  </Text>
+                  <Text style={[styles.deepResearchSub, { color: colors.textMuted }]}>
+                    {t('ai.chatDeepResearchSub')}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </Pressable>
+            )}
+
             {/* Quick questions (show only when no messages besides welcome) */}
             {messages.length === 1 && (
               <View style={styles.quickGrid}>
-                {SAMPLE_QUESTION_KEYS.map((q, i) => (
+                {(stockIntro ? STOCK_QUESTION_KEYS : SAMPLE_QUESTION_KEYS).map((q, i) => (
                   <Pressable
                     key={`chat_${i}`}
                     style={[styles.quickChip, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
@@ -586,6 +724,27 @@ const createStyles = (colors: any) =>
       fontSize: FONTS.size.xs,
       fontFamily: FONTS.regular.fontFamily,
       marginTop: 4,
+    },
+    // ── Deep Research (per-stock focus mode) ──
+    deepResearchBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      padding: SPACING.md,
+      borderRadius: BORDER_RADIUS.lg,
+      borderWidth: 1,
+      marginTop: SPACING.sm,
+      marginBottom: SPACING.xs,
+    },
+    deepResearchTitle: {
+      fontSize: FONTS.size.md,
+      fontFamily: FONTS.bold.fontFamily,
+      fontWeight: FONTS.bold.fontWeight,
+    },
+    deepResearchSub: {
+      fontSize: FONTS.size.xs,
+      fontFamily: FONTS.regular.fontFamily,
+      marginTop: 2,
     },
     // ── Quick question chips ──
     quickGrid: {

@@ -227,10 +227,10 @@ function CouponListItem({
         <View style={s.itemActions}>
           <AnimatedPressable onPress={() => onEdit(coupon)} haptic="light" scaleTo={0.9}>
             <View style={[s.actionBtn, { backgroundColor: colors.primary + '15' }]}>
-              <Ionicons name="create-outline" size={18} color={colors.primary} />
+              <Ionicons name="create-outline" size={18} color={colors.primary} accessibilityLabel={t('app.a11y.edit')} />
             </View>
           </AnimatedPressable>
-          <AnimatedPressable onPress={() => onDelete(coupon)} haptic="warning" scaleTo={0.9}>
+          <AnimatedPressable onPress={() => onDelete(coupon)} haptic="warning" scaleTo={0.9} accessibilityLabel={t('app.a11y.delete')}>
             <View style={[s.actionBtn, { backgroundColor: colors.danger + '15' }]}>
               <Ionicons name="trash-outline" size={18} color={colors.danger} />
             </View>
@@ -1355,7 +1355,7 @@ export default function AdminCouponManagementScreen({ navigation }: NativeStackS
       header={
         <>
           <View style={styles.header}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9} accessibilityLabel={t('app.goBack')}>
               <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <Ionicons name="chevron-back" size={24} color={colors.text} />
               </View>

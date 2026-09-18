@@ -23,6 +23,7 @@
 
 import { Router, Request, Response } from 'express';
 import { marketstack, isMarketStackConfigured } from '../services/marketstack';
+import { MARKET_HOLIDAYS, getHolidaysForYear } from '../data/marketHolidays';
 
 const router = Router();
 
@@ -189,6 +190,31 @@ router.get('/status', (_req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/global-markets/holidays?country=india&year=2026
+ * Returns the public-holiday calendar that closes the country's primary
+ * stock market. `country` accepts one of: india, us, uk, japan, germany,
+ * china (default: all countries). `year` defaults to the current year.
+ */
+router.get('/holidays', (req: Request, res: Response) => {
+  const yearParam = parseInt(String(req.query.year ?? ''), 10);
+  const year = Number.isFinite(yearParam) && yearParam > 2000 && yearParam < 2100
+    ? yearParam
+    : new Date().getUTCFullYear();
+
+  const countryParam = String(req.query.country ?? '').toLowerCase();
+  const countries = countryParam && countryParam in MARKET_HOLIDAYS
+    ? [countryParam as keyof typeof MARKET_HOLIDAYS]
+    : (Object.keys(MARKET_HOLIDAYS) as Array<keyof typeof MARKET_HOLIDAYS>);
+
+  const data: Record<string, { year: number; holidays: { date: string; name: string }[] }> = {};
+  for (const c of countries) {
+    data[c] = { year, holidays: getHolidaysForYear(c, year) };
+  }
+
+  res.json({ success: true, data, fetchedAt: new Date().toISOString() });
+});
+
+/**
  * GET /api/global-markets/indices
  * Returns all global indices (US + Europe + Asia-Pacific) with realistic
  * simulated fluctuations.
@@ -210,6 +236,56 @@ router.get('/indices', async (_req: Request, res: Response) => {
   } catch {
     res.json(MOCK_INDICES.map(i => ({ ...i, high: i.price * 1.01, low: i.price * 0.99, volume: 0 })));
   }
+});
+
+/**
+ * GET /api/global-markets/indices/history
+ * Returns a synthetic 30-day closing-price trend per global index, suitable
+ * for sparkline charts in the country views. Shaped like the crypto history
+ * ({ timestamp, price }[]), deterministic per day+symbol so refetches look
+ * stable within a session.
+ *
+ * Query: ?symbols=SPX,N225,FTSE (default: all indices)
+ */
+router.get('/indices/history', (req: Request, res: Response) => {
+  const symbolsParam = String(req.query.symbols ?? '');
+  const requested = symbolsParam
+    ? symbolsParam.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
+    : null;
+
+  const out: Record<string, { timestamp: number; price: number }[]> = {};
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  // Anchor timestamps to UTC day boundaries so repeated calls within the
+  // same day return byte-identical series (sparkline determinism).
+  const dayAnchor = Math.floor(now / dayMs) * dayMs;
+
+  for (const idx of MOCK_INDICES) {
+    if (requested && !requested.includes(idx.symbol.toUpperCase())) continue;
+
+    // Deterministic pseudo-random walk seeded by symbol+dayIndex so the
+    // sparkline is stable across refetches within the same day.
+    const series: { timestamp: number; price: number }[] = [];
+    let price = idx.price * (1 - (idx.changePercent / 100) * 1.2); // walk toward today's price
+    for (let d = 29; d >= 0; d--) {
+      const seed =
+        [...idx.symbol].reduce((acc, ch) => acc + ch.charCodeAt(0), 0) * 31 +
+        Math.floor(now / dayMs) - d;
+      const pseudo = Math.sin(seed) * 10000;
+      const frac = pseudo - Math.floor(pseudo); // 0..1
+      const drift = (frac - 0.5) * 0.012; // ±0.6% daily move
+      price = price * (1 + drift);
+      // Pin the final point to the current simulated price
+      if (d === 0) price = idx.price;
+      series.push({
+        timestamp: dayAnchor - d * dayMs,
+        price: +price.toFixed(2),
+      });
+    }
+    out[idx.symbol.toUpperCase()] = series;
+  }
+
+  res.json({ success: true, data: out, generatedAt: new Date().toISOString() });
 });
 
 /**

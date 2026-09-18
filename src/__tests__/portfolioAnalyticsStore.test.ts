@@ -307,7 +307,7 @@ describe('PortfolioAnalyticsStore — Capital Gains', () => {
     expect(result.capitalGains.shortTerm.count).toBe(0);
   });
 
-  it('calculates STCG tax at 15% on short-term gains', () => {
+  it('calculates STCG tax at 20% on short-term gains', () => {
     setPortfolioData([], [
       { id: 'b1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'buy', quantity: 10, price: 3000, total: 30000, timestamp: new Date(Date.now() - 60 * 86400000).toISOString() },
       { id: 's1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'sell', quantity: 10, price: 4000, total: 40000, timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
@@ -316,37 +316,38 @@ describe('PortfolioAnalyticsStore — Capital Gains', () => {
     const result = usePortfolioAnalyticsStore.getState().compute();
 
     // STCG gains = 40000 - (3000 * 10) = 10000
-    // STCG tax = 10000 * 0.15 = 1500
+    // STCG tax = 10000 * 0.20 = 2000
     expect(result.capitalGains.shortTerm.gains).toBeCloseTo(10000, 0);
-    expect(result.capitalGains.shortTerm.taxRate).toBe(15);
-    expect(result.capitalGains.shortTerm.estimatedTax).toBeCloseTo(1500, 0);
+    expect(result.capitalGains.shortTerm.taxRate).toBe(20);
+    expect(result.capitalGains.shortTerm.estimatedTax).toBeCloseTo(2000, 0);
   });
 
-  it('calculates LTCG at 10% on gains above ₹1L exemption (gains exactly ₹1L → no tax)', () => {
-    // Buy 50 TCS @ ₹2,000 = ₹1,00,000 invested
-    // Sell 50 TCS @ ₹4,000 = ₹2,00,000 received
-    // Gain = 200000 - (2000*50) = 200000 - 100000 = ₹1,00,000 (equals exemption limit)
-    // Taxable = max(0, 100000 - 100000) = ₹0
+  it('calculates LTCG at 12.5% on gains above ₹1.25L exemption (gains exactly ₹1.25L → no tax)', () => {
+    // Buy 25 TCS @ ₹2,000 = ₹0,000 invested
+    // Sell 25 TCS @ ₹6,000 = ₹1,50,000 received
+    // Gain = 150000 - (2000*25) = 150000 - 50000 = ₹1,00,000... need exactly ₹1.25L:
+    // Buy 25 TCS @ ₹3,000 = ₹75,000 invested; Sell 25 @ ₹8,000 = ₹2,00,000 → Gain ₹1,25,000
+    // Taxable = max(0, 125000 - 125000) = ₹0
     // LTCG Tax = 0
     setPortfolioData([], [
-      { id: 'b1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'buy', quantity: 50, price: 2000, total: 100000, timestamp: new Date(Date.now() - 500 * 86400000).toISOString() },
-      { id: 's1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'sell', quantity: 50, price: 4000, total: 200000, timestamp: new Date(Date.now() - 10 * 86400000).toISOString() },
+      { id: 'b1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'buy', quantity: 25, price: 3000, total: 75000, timestamp: new Date(Date.now() - 500 * 86400000).toISOString() },
+      { id: 's1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'sell', quantity: 25, price: 8000, total: 200000, timestamp: new Date(Date.now() - 10 * 86400000).toISOString() },
     ]);
 
     const result = usePortfolioAnalyticsStore.getState().compute();
     const ltcg = result.capitalGains.longTerm;
 
-    expect(ltcg.gains).toBeCloseTo(100000, 0);
+    expect(ltcg.gains).toBeCloseTo(125000, 0);
     expect(ltcg.taxableGains).toBe(0);
     expect(ltcg.estimatedTax).toBe(0);
   });
 
-  it('calculates LTCG tax correctly when gains exceed ₹1L exemption', () => {
+  it('calculates LTCG tax correctly when gains exceed ₹1.25L exemption', () => {
     // Buy 50 TCS @ ₹2,000 = ₹1,00,000 invested
     // Sell 50 TCS @ ₹7,000 = ₹3,50,000 received
     // Gain = 350000 - (2000*50) = 350000 - 100000 = ₹2,50,000
-    // Taxable = max(0, 250000 - 100000) = ₹1,50,000
-    // LTCG Tax = 150000 * 0.10 = ₹15,000
+    // Taxable = max(0, 250000 - 125000) = ₹1,25,000
+    // LTCG Tax = 125000 * 0.125 = ₹15,625
     setPortfolioData([], [
       { id: 'b1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'buy', quantity: 50, price: 2000, total: 100000, timestamp: new Date(Date.now() - 500 * 86400000).toISOString() },
       { id: 's1', stockId: 'TCS', symbol: 'TCS', name: 'TCS', type: 'sell', quantity: 50, price: 7000, total: 350000, timestamp: new Date(Date.now() - 10 * 86400000).toISOString() },
@@ -356,10 +357,10 @@ describe('PortfolioAnalyticsStore — Capital Gains', () => {
     const ltcg = result.capitalGains.longTerm;
 
     expect(ltcg.gains).toBeCloseTo(250000, 0);
-    expect(ltcg.taxableGains).toBe(150000);
-    expect(ltcg.estimatedTax).toBeCloseTo(15000, 0);
-    expect(ltcg.taxRate).toBe(10);
-    expect(ltcg.exemptLimit).toBe(100000);
+    expect(ltcg.taxableGains).toBe(125000);
+    expect(ltcg.estimatedTax).toBeCloseTo(15625, 0);
+    expect(ltcg.taxRate).toBe(12.5);
+    expect(ltcg.exemptLimit).toBe(125000);
   });
 
   it('estimates STT and brokerage based on total trade volume', () => {

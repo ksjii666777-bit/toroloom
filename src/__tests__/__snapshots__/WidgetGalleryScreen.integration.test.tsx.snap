@@ -43,6 +43,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
         {
           "type": "TouchableOpacity",
           "props": {
+            "accessibilityLabel": "Go back",
             "style": [
               {
                 "width": 40,

@@ -130,7 +130,7 @@ export default function AISettingsScreen({ navigation }: NativeStackScreenProps<
         >
           {/* Header */}
           <View style={[styles.header]}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={22} color={colors.text} />
             </TouchableOpacity>
             <View style={styles.headerCenter}>

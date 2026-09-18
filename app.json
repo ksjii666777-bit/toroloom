@@ -30,6 +30,7 @@
     },
 
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#0D1117",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -88,6 +89,15 @@
         {
           "icon": "./assets/icon.png",
           "color": "#3B82F6"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0D1117"
         }
       ],
       "./plugins/withToroloomWidgets"

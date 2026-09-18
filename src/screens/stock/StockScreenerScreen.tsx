@@ -810,7 +810,7 @@ export default function StockScreenerScreen({ navigation }: NativeStackScreenPro
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <AppScreen scroll={false} padded={false} header={
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>

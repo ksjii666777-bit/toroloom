@@ -203,7 +203,7 @@ export default function AadhaarVerificationScreen({ navigation }: NativeStackScr
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.title}>{t('kyc.aadhaarTitle')}</Text>

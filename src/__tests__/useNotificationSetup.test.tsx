@@ -29,6 +29,45 @@ const {
   mockSetupResponseListener: vi.fn((_onNavigate: any) => ({ remove: vi.fn() })),
 }));
 
+// Hoisted capture for AppState listeners (react-native re-mock below)
+const { mockAppStateAdd, mockMaybeSendWeeklyDigest, mockMaybeSendRebuildNudge } = vi.hoisted(() => {
+  const listeners: Array<(state: string) => void> = [];
+  return {
+    mockAppStateAdd: vi.fn((_type: string, cb: (state: string) => void) => {
+      listeners.push(cb);
+      return { remove: () => {} };
+    }),
+    getAppStateListeners: () => listeners,
+    mockMaybeSendWeeklyDigest: vi.fn(() => Promise.resolve(null)),
+    mockMaybeSendRebuildNudge: vi.fn(() => Promise.resolve(null)),
+  };
+});
+
+// Re-mock react-native for THIS file: identical to the setup mock except that
+// AppState.addEventListener captures its callback so tests can emit 'active'.
+vi.mock('react-native', async () => {
+  const actual = await vi.importActual<any>('./react-native.mock');
+  return {
+    ...actual,
+    default: actual.default ?? actual,
+    AppState: {
+      currentState: 'active' as const,
+      addEventListener: mockAppStateAdd,
+      removeEventListener: vi.fn(),
+    },
+  };
+});
+
+// Mock the weekly discipline digest service so tests can verify the hook calls it
+vi.mock('../services/weeklyDisciplineNotification', () => ({
+  maybeSendWeeklyDisciplineNotification: mockMaybeSendWeeklyDigest,
+}));
+
+// Mock the streak rebuild nudge service so tests can verify the hook calls it
+vi.mock('../services/streakRebuildNudge', () => ({
+  maybeSendStreakRebuildNudge: mockMaybeSendRebuildNudge,
+}));
+
 // Mock react-navigation/native for useNavigation
 vi.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate }),
@@ -90,6 +129,8 @@ vi.mock('../services/notificationService', () => ({
 import { useNotificationSetup } from '../hooks/useNotificationSetup';
 import { notificationApi } from '../services/api/notifications';
 import * as notificationService from '../services/notificationService';
+import { maybeSendWeeklyDisciplineNotification } from '../services/weeklyDisciplineNotification';
+import { maybeSendStreakRebuildNudge } from '../services/streakRebuildNudge';
 
 // ==================== Test Component ====================
 
@@ -278,5 +319,141 @@ describe('useNotificationSetup — onNavigate Screen Mapping', () => {
     });
 
     expect(mockNavigate).toHaveBeenCalledWith('MainTabs', { screen: 'Home' });
+  });
+
+  it('navigates to PeriodReport for the weekly discipline digest tap', () => {
+    act(() => {
+      TestRenderer.create(<TestComponent />);
+    });
+
+    const onNavigate = (mockSetupResponseListener.mock.calls as any)[0][0];
+
+    act(() => {
+      onNavigate('PeriodReport', { startDate: '2026-09-08T00:00:00.000Z' });
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith('PeriodReport', { startDate: '2026-09-08T00:00:00.000Z' });
+  });
+});
+
+describe('useNotificationSetup — foreground weekly digest check', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockNavigate.mockClear();
+  });
+
+  it('checks the weekly discipline digest 500ms after foregrounding', async () => {
+    vi.useFakeTimers();
+    try {
+      act(() => {
+        TestRenderer.create(<TestComponent />);
+      });
+
+      expect(mockAppStateAdd).toHaveBeenCalledWith('change', expect.any(Function));
+      const listener = (mockAppStateAdd.mock.calls as any)[0][1];
+
+      act(() => {
+        listener('active');
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(500);
+      });
+
+      expect(maybeSendWeeklyDisciplineNotification).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not check the digest on background state changes', async () => {
+    vi.useFakeTimers();
+    try {
+      act(() => {
+        TestRenderer.create(<TestComponent />);
+      });
+
+      const listener = (mockAppStateAdd.mock.calls as any)[0][1];
+
+      act(() => {
+        listener('background');
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(500);
+      });
+
+      expect(maybeSendWeeklyDisciplineNotification).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('useNotificationSetup — foreground streak rebuild nudge check', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockNavigate.mockClear();
+  });
+
+  it('checks the streak rebuild nudge 500ms after foregrounding (with the digest)', async () => {
+    vi.useFakeTimers();
+    try {
+      act(() => {
+        TestRenderer.create(<TestComponent />);
+      });
+
+      const listener = (mockAppStateAdd.mock.calls as any)[0][1];
+
+      act(() => {
+        listener('active');
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(500);
+      });
+
+      // Both foreground checks fire together on the same AppState tick.
+      expect(maybeSendWeeklyDisciplineNotification).toHaveBeenCalledTimes(1);
+      expect(maybeSendStreakRebuildNudge).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not check the rebuild nudge on background state changes', async () => {
+    vi.useFakeTimers();
+    try {
+      act(() => {
+        TestRenderer.create(<TestComponent />);
+      });
+
+      const listener = (mockAppStateAdd.mock.calls as any)[0][1];
+
+      act(() => {
+        listener('background');
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(500);
+      });
+
+      expect(maybeSendStreakRebuildNudge).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('navigates to the BehavioralJournal when the nudge is tapped', () => {
+    act(() => {
+      TestRenderer.create(<TestComponent />);
+    });
+
+    const onNavigate = mockSetupResponseListener.mock.calls[0][0];
+    act(() => {
+      onNavigate('BehavioralJournal');
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith('BehavioralJournal');
   });
 });

@@ -125,7 +125,7 @@ export default function CouponHistoryScreen({ navigation }: NativeStackScreenPro
       contentStyle={styles.scrollContent}
       header={
         <View style={styles.header}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9} accessibilityLabel={t('app.goBack')}>
             <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="chevron-back" size={24} color={colors.text} />
             </View>

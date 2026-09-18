@@ -75,6 +75,7 @@ exports[`PortfolioAnalyticsDashboard — Integration > matches snapshot with ful
                 {
                   "type": "TouchableOpacity",
                   "props": {
+                    "accessibilityLabel": "Go back",
                     "style": [
                       {
                         "width": 40,

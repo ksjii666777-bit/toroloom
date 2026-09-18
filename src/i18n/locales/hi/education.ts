@@ -210,4 +210,10 @@ export default {
     openPdf: 'PDF खोलें',
     pdfOpenError: 'PDF फ़ाइल नहीं खोली जा सकी।',
     level: 'स्तर',
+    certificate: 'प्रमाणपत्र',
+    certificatesTitle: 'प्रमाणपत्र',
+    noCertificatesYet: 'अभी तक कोई प्रमाणपत्र नहीं',
+    lessonsCount: '{{count}} पाठ',
+    description: 'विवरण',
+    delete: 'हटाएं',
 };

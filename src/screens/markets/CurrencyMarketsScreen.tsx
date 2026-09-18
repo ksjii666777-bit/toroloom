@@ -549,7 +549,7 @@ export default function CurrencyMarketsScreen({ navigation }: NativeStackScreenP
       header={
   <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.headerTop}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable onPress={() => navigation.goBack()} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View style={{ flex: 1 }}>

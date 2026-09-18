@@ -108,15 +108,23 @@ export default function NotificationsScreen({ navigation }: NativeStackScreenPro
         style={[styles.notifItem, !notification.read && styles.notifUnread]}
         onPress={() => {
           if (!notification.read) markAsRead(notification.id);
-          const screen =
-            notification.type === 'price_alert'
-              ? 'StockDetail'
-              : notification.type === 'trade'
-              ? 'Portfolio'
-              : notification.type === 'educational'
-              ? 'Learn'
-              : 'Home';
-          (navigation.navigate as (screenName: string, params?: unknown) => void)(screen, notification.data || {});
+          // Prefer an explicit deep-link target from the notification payload
+          // (e.g. the weekly discipline digest pins the report to its exact week).
+          const targetScreen =
+            notification.data && typeof notification.data.screen === 'string'
+              ? notification.data.screen
+              : notification.type === 'price_alert'
+                ? 'StockDetail'
+                : notification.type === 'trade'
+                  ? 'Portfolio'
+                  : notification.type === 'educational'
+                    ? 'Learn'
+                    : 'Home';
+          const targetParams =
+            (notification.data && typeof notification.data.screen === 'string')
+              ? { ...(notification.data as any) }
+              : notification.data || {};
+          (navigation.navigate as (screenName: string, params?: unknown) => void)(targetScreen, targetParams);
         }}
         onLongPress={() => {
           Alert.alert(t('notifications.removeTitle'), t('notifications.removeMsg'), [
@@ -390,7 +398,7 @@ export default function NotificationsScreen({ navigation }: NativeStackScreenPro
   {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View>
@@ -404,11 +412,11 @@ export default function NotificationsScreen({ navigation }: NativeStackScreenPro
             <View style={styles.headerActions}>
               {unreadCountLocal > 0 && (
                 <Pressable onPress={markAllAsRead} style={styles.headerActionBtn}>
-                  <Ionicons name="checkmark-done" size={20} color={colors.primary} />
+                  <Ionicons name="checkmark-done" size={20} color={colors.primary} accessibilityLabel={t('app.a11y.markAllRead')} />
                 </Pressable>
               )}
               {notifications.length > 0 && (
-                <Pressable onPress={handleClearAll} style={styles.headerActionBtn}>
+                <Pressable onPress={handleClearAll} style={styles.headerActionBtn} accessibilityLabel={t('app.a11y.clearAll')}>
                   <Ionicons name="trash-outline" size={20} color={colors.danger} />
                 </Pressable>
               )}

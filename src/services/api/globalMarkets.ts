@@ -140,6 +140,23 @@ export interface GlobalMarketsStatus {
   coinGeckoConfigured: boolean;
 }
 
+export interface MarketHolidayEntry {
+  date: string;
+  name: string;
+}
+
+export interface MarketHolidaysResponse {
+  success: boolean;
+  data: Record<string, { year: number; holidays: MarketHolidayEntry[] }>;
+  fetchedAt: string;
+}
+
+export interface IndexHistoryResponse {
+  success: boolean;
+  data: Record<string, { timestamp: number; price: number }[]>;
+  generatedAt: string;
+}
+
 /**
  * Global index data with region info from backend.
  * Used for both US and International indices.
@@ -161,6 +178,21 @@ export interface GlobalIndexData {
 export const globalMarketsApi = {
   /** Check which external APIs are configured */
   getStatus: () => api.get<GlobalMarketsStatus>('/global-markets/status'),
+
+  /** Public-holiday calendar per country (closes the primary market) */
+  getHolidays: (params: { country?: string; year?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.country) qs.set('country', params.country);
+    if (params.year) qs.set('year', String(params.year));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return api.get<MarketHolidaysResponse>(`/global-markets/holidays${suffix}`);
+  },
+
+  /** 30-day closing-price trend per index symbol (for sparklines) */
+  getIndexHistory: (symbols: string[]) =>
+    api.get<IndexHistoryResponse>(
+      `/global-markets/indices/history?symbols=${symbols.map(encodeURIComponent).join(',')}`,
+    ),
 
   /** Get all global indices (US + Europe + Asia-Pacific) */
   getIndices: () => api.get<GlobalIndexData[]>('/global-markets/indices'),

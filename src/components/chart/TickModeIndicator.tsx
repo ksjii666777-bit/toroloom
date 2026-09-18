@@ -124,7 +124,7 @@ export default function TickModeIndicator({
           style={({pressed}) => [styles.closeBtn, { opacity: pressed ? 0.6 : 1 }]}
           onPress={onDisable}
           hitSlop={8}
-        >
+         accessibilityLabel={t('app.a11y.disableTickMode')}>
           <Ionicons name="close-circle" size={18} color={colors.textMuted} />
         </Pressable>
       </View>

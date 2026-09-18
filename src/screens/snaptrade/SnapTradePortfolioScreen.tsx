@@ -136,7 +136,7 @@ export default function SnapTradePortfolioScreen({ navigation }: NativeStackScre
     return (
       <AppScreen padded={false} header={
         <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </AnimatedPressable>
           <View style={{ marginLeft: SPACING.md }}>
@@ -172,7 +172,7 @@ export default function SnapTradePortfolioScreen({ navigation }: NativeStackScre
       header={
         <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
             <Text style={[styles.title, { color: colors.text, flex: 1, marginLeft: SPACING.md }]}>{t('snaptrade.usPortfolio')}</Text>

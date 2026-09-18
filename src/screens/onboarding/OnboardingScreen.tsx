@@ -475,6 +475,7 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
           {/* Previous / Back */}
           {currentStep > 0 ? (
             <Pressable
+              accessibilityLabel={t('app.goBack')}
               style={styles.backBtn}
               onPress={() => scrollToStep(currentStep - 1)}
             >

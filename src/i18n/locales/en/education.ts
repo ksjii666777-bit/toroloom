@@ -210,4 +210,10 @@ export default {
     openPdf: 'Open PDF',
     pdfOpenError: 'Could not open PDF file.',
     level: 'Level',
+    certificate: 'Certificate',
+    certificatesTitle: 'Certificates',
+    noCertificatesYet: 'No certificates yet',
+    lessonsCount: '{{count}} lessons',
+    description: 'Description',
+    delete: 'Delete',
 };

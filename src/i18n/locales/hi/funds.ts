@@ -190,4 +190,6 @@ export default {
     txAccount: 'खाता',
     txStatus: 'स्थिति',
     txDateTime: 'दिनांक और समय',
+    transferFailedMsg: 'ट्रांसफर पूरा नहीं हो सका। कृपया पुनः प्रयास करें।',
+    withdrawFailedMsg: 'निकासी पूरी नहीं हो सकी। कृपया पुनः प्रयास करें।',
 };

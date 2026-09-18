@@ -153,7 +153,7 @@ export default function SnapTradeConnectScreen({ navigation }: NativeStackScreen
       >
   {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.bgSecondary, }]}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </AnimatedPressable>
           <View style={{ marginLeft: SPACING.md }}>

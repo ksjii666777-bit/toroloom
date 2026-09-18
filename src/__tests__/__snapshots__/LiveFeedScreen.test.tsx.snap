@@ -39,6 +39,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
       }
     >
       <Pressable
+        accessibilityLabel="Go back"
         onPress={[Function]}
         style={
           {
@@ -3208,6 +3209,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
       }
     >
       <Pressable
+        accessibilityLabel="Go back"
         onPress={[Function]}
         style={
           {
@@ -6377,6 +6379,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
       }
     >
       <Pressable
+        accessibilityLabel="Go back"
         onPress={[Function]}
         style={
           {

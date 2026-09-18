@@ -66,7 +66,7 @@ export default function TransactionHistoryScreen({ navigation }: NativeStackScre
       >
   {/* Header */}
         <View style={[styles.header]}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('funds.txHistoryTitle')}</Text>

@@ -16,10 +16,10 @@ import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import AppScreen from '../../components/ui/AppScreen';
 
-// Indian tax regime constants (FY 2025-26)
-const STCG_TAX_RATE = 0.20; // 20% for STCG on equities (if STT paid)
-const LTCG_TAX_RATE = 0.10; // 10% for LTCG over ₹1L on equities
-const LTCG_EXEMPTION = 100000; // ₹1L exemption on LTCG
+// Indian tax regime constants (FY 2024-25 onwards, post-July-2024 budget)
+const STCG_TAX_RATE = 0.20; // 20% for listed equity STCG
+const LTCG_TAX_RATE = 0.125; // 12.5% for listed equity LTCG over ₹1.25L
+const LTCG_EXEMPTION = 125000; // ₹1.25L exemption on LTCG
 const SURCHARGE_RATE = 0.10; // 10% surcharge on tax > ₹50L (simplified)
 const CESS_RATE = 0.04; // 4% health & education cess
 
@@ -101,7 +101,7 @@ export default function TaxCalculator() {
       >
   {/* Header */}
         <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={20} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>

@@ -53,7 +53,7 @@ export default {
     stcg: 'STCG (≤12 months)',
     ltcg: 'LTCG (>12 months)',
     stcgDesc: 'Short-term: Equity held ≤12 months — taxed at 20%',
-    ltcgDesc: 'Long-term: Equity held >12 months — taxed at 10% on gains over ₹1L',
+    ltcgDesc: 'Long-term: Equity held >12 months — taxed at 12.5% on gains over ₹1.25L',
     shortTermGains: 'Short-Term Capital Gains',
     longTermGains: 'Long-Term Capital Gains',
     profit: 'PROFIT',

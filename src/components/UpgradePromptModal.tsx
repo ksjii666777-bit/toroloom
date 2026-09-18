@@ -212,7 +212,7 @@ export default function UpgradePromptModal() {
           <View style={styles.closeRow}>
             <TouchableWithoutFeedback onPress={handleDismiss}>
               <View style={styles.closeBtn}>
-                <Ionicons name="close" size={20} color="rgba(255,255,255,0.5)" />
+                <Ionicons name="close" size={20} color="rgba(255,255,255,0.5)" accessibilityLabel={t('app.a11y.close')} />
               </View>
             </TouchableWithoutFeedback>
           </View>

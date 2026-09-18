@@ -251,6 +251,7 @@ export default function UPIScreen({ navigation }: NativeStackScreenProps<RootSta
     <AppScreen scroll={false} padded={false} header={
       <View style={styles.header}>
         <TouchableOpacity
+          accessibilityLabel={t('app.goBack')}
           style={[styles.backBtn, { backgroundColor: colors.bgCard }]}
           onPress={() => navigation.goBack()}
         >

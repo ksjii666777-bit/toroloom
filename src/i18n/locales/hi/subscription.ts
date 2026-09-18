@@ -72,4 +72,13 @@ export default {
     rupeeOff: '₹ छूट',
     accessDenied: 'पहुंच अस्वीकृत',
     accessDeniedMsg: 'केवल एडमिन ही सब्सक्रिप्शन एनालिटिक्स तक पहुंच सकते हैं।',
+    premium: 'प्रीमियम',
+    yourTrialEnds: 'आपका ट्रायल समाप्त होता है',
+    monthly: 'मासिक',
+    yearly: 'वार्षिक',
+    confirmPayment: 'भुगतान की पुष्टि करें',
+    securePaymentDesc: 'आपका भुगतान 256-bit एन्क्रिप्शन के साथ सुरक्षित है। हम आपके कार्ड की जानकारी संग्रहीत नहीं करते।',
+    plan: 'प्लान',
+    total: 'कुल',
+    payNow: 'अभी भुगतान करें',
 };

@@ -200,7 +200,7 @@ export default function FeatureFlagsScreen({ navigation }: NativeStackScreenProp
       contentStyle={styles.scrollContent}
       header={
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>

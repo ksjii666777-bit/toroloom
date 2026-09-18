@@ -22,10 +22,10 @@ export default {
   // Tax Section
   taxSummary: 'Tax Summary',
   estimatedTax: 'Estimated Tax',
-  stcgLabel: 'STCG (15%)',
-  ltcgLabel: 'LTCG (10%)',
+  stcgLabel: 'STCG (20%)',
+  ltcgLabel: 'LTCG (12.5%)',
   taxableGains: 'Taxable Gains',
-  taxExemptLimit: '₹1L Exempt',
+  taxExemptLimit: '₹1.25L Exempt',
   taxHarvestingTip: 'Harvest unrealized losses before year-end to offset capital gains.',
 
   // Behavioral / Overtrading
@@ -107,4 +107,19 @@ export default {
   // Empty state
   emptyTitle: 'No Data Yet',
   emptySubtitle: 'Start trading to see your period report',
+
+  // R:R Discipline section
+  disciplineTitle: 'R:R Discipline',
+  disciplineCommitment: 'Committed ratio: 1:{{ratio}}',
+  disciplineMeasured: 'Measured',
+  disciplineBreaches: 'Below Commitment',
+  disciplineAvgRR: 'Avg Realized',
+  disciplineAllClean: 'Every trade honoured your committed R:R — discipline holding',
+  disciplineBreachAlert: '{{count}} trade{{count, plural, one "" other "s"}} fell below your committed R:R',
+  disciplineLossNote: '₹{{loss}} lost to below-commitment trades this period',
+  disciplineFlagDetail: 'realized 1:{{realized}} vs committed 1:{{committed}}',
+  disciplineFootnote: 'Review entry timing and stop placement for these trades in your journal.',
+  disciplineNoCommitment: 'No R:R commitment yet — choose a ratio when connecting your broker to unlock discipline tracking.',
+  disciplineNoData: 'Add a planned stop-loss to journal entries to measure realized risk-reward against your commitment.',
+  pinnedWeek: 'Pinned week: {{start}} — {{end}}',
 };

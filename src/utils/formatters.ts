@@ -1,4 +1,9 @@
-import { format, differenceInDays, formatDistanceToNow } from 'date-fns';
+// Scoped subpath imports — the barrel `date-fns` index pulls ~300 modules
+// into the Hermes bundle (144KB) for 3 functions; per-function subpaths keep
+// only what is used.
+import { format } from 'date-fns/format';
+import { differenceInDays } from 'date-fns/differenceInDays';
+import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 
 export const formatCurrency = (amount: number, compact: boolean = false): string => {
   if (compact) {

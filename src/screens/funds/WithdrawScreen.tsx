@@ -170,7 +170,7 @@ export default function WithdrawScreen({ navigation }: NativeStackScreenProps<Ro
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <AppScreen scroll={false} padded={false} header={
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={24} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('funds.withdrawTitle')}</Text>

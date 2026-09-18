@@ -190,4 +190,6 @@ export default {
     txAccount: 'Account',
     txStatus: 'Status',
     txDateTime: 'Date & Time',
+    transferFailedMsg: 'The transfer could not be completed. Please try again.',
+    withdrawFailedMsg: 'The withdrawal could not be completed. Please try again.',
 };

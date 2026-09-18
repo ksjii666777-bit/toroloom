@@ -27,4 +27,7 @@ export default {
     coupon: 'कूपन',
     discount: 'छूट',
     amountCharged: 'शुल्क ली गई राशि',
+    downloadFailed: 'डाउनलोड विफल',
+    downloadFailedDesc: 'इनवॉइस डाउनलोड नहीं हो सकी। कृपया बाद में पुनः प्रयास करें।',
+    generating: 'जेनरेट हो रहा है…',
 };

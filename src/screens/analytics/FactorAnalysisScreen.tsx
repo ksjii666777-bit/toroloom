@@ -96,7 +96,7 @@ export default function FactorAnalysisScreen({ navigation }: NativeStackScreenPr
         >
           {/* ── Header ───────────────────────────────────────── */}
           <View style={styles.header}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9} accessibilityLabel={t('app.goBack')}>
               <View style={styles.backBtn}>
                 <Ionicons name="arrow-back" size={22} color={colors.text} />
               </View>

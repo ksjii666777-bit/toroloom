@@ -2,14 +2,15 @@ import { useEffect, useRef, useCallback } from 'react';
 import { Platform, AppState } from 'react-native';
 import { log } from '../utils/logger';
 import { useNavigation } from '@react-navigation/native';
-let Notifications: typeof import('expo-notifications') | null = null;
-try { Notifications = require('expo-notifications'); } catch { /* Expo Go fallback */ }
+import * as Notifications from 'expo-notifications';
 import {
   registerForPushNotifications,
   setupNotificationResponseListener,
   registerPortfolioAlertBackgroundTask,
   evaluatePortfolioAlertsInBackground,
 } from '../services/notificationService';
+import { maybeSendWeeklyDisciplineNotification } from '../services/weeklyDisciplineNotification';
+import { maybeSendStreakRebuildNudge } from '../services/streakRebuildNudge';
 import { notificationApi } from '../services/api/notifications';
 import { useNotificationStore } from '../store/notificationStore';
 
@@ -36,6 +37,16 @@ export function useNotificationSetup() {
         case 'Notifications':
         case 'PortfolioAlerts':
           navigation.navigate('Notifications');
+          break;
+        case 'PeriodReport':
+          // Weekly-discipline digest taps pin the report to the exact weekly
+          // window it summarized (a 7-day window ending at the digest timestamp).
+          navigation.navigate('PeriodReport', { startDate: params?.startDate });
+          break;
+        case 'BehavioralJournal':
+          // Streak-rebuild nudge taps open the journal, where the user can
+          // journal the clean trade that rebuilds the streak.
+          navigation.navigate('BehavioralJournal');
           break;
         default:
           navigation.navigate('MainTabs', { screen: 'Home' });
@@ -69,7 +80,7 @@ export function useNotificationSetup() {
     registerPortfolioAlertBackgroundTask();
 
     // Listen for notifications while app is foregrounded
-    notificationListenerRef.current = Notifications?.addNotificationReceivedListener((notification: any) => {
+    notificationListenerRef.current = Notifications.addNotificationReceivedListener((notification: any) => {
       log.info('[Notifications] Received:', notification.request.content.title);
     });
 
@@ -83,6 +94,11 @@ export function useNotificationSetup() {
         // Small delay to ensure stores have rehydrated from persistence
         setTimeout(() => {
           evaluatePortfolioAlertsInBackground();
+          // Weekly R:R discipline digest — internal 7-day throttle, no-ops when not due
+          maybeSendWeeklyDisciplineNotification().catch(() => {});
+          // Streak-rebuild nudge — one clean trade away from rebuilding;
+          // internal 7-day throttle, no-ops when there is no broken streak.
+          maybeSendStreakRebuildNudge().catch(() => {});
         }, 500);
       }
     });

@@ -8,4 +8,5 @@ export default {
     redo: 'Redo',
     clear: 'Clear ({{count}})',
     tick: 'TICK',
+    templates: 'Drawing Templates',
 };

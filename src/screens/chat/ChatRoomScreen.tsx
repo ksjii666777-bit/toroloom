@@ -76,7 +76,7 @@ export default function ChatRoomScreen({ navigation, route }: NativeStackScreenP
     >
       <AppScreen scroll={false} padded={false} header={
       <View style={[styles.header, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-        <Pressable onPress={() => navigation.goBack?.()} style={styles.backBtn}>
+        <Pressable onPress={() => navigation.goBack?.()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
         <View style={styles.headerInfo}>

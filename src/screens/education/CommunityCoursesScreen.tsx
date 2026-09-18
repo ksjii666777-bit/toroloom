@@ -139,7 +139,7 @@ export default function CommunityCoursesScreen({ navigation }: NativeStackScreen
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerRow}>
-              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
+              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92} accessibilityLabel={t('app.goBack')}>
                 <Ionicons name="arrow-back" size={24} color={colors.text} />
               </AnimatedPressable>
               <Text style={styles.title}>{t('education.communityCourses')}</Text>
@@ -163,10 +163,10 @@ export default function CommunityCoursesScreen({ navigation }: NativeStackScreen
             />
             {searchQuery.length > 0 && (
               <AnimatedPressable onPress={() => setSearchQuery('')} haptic="light" scaleTo={0.88}>
-                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} accessibilityLabel={t('app.a11y.clearSearch')} />
               </AnimatedPressable>
             )}
-            <AnimatedPressable onPress={() => setShowFilters(!showFilters)} haptic="selection" scaleTo={0.88}>
+            <AnimatedPressable onPress={() => setShowFilters(!showFilters)} haptic="selection" scaleTo={0.88} accessibilityLabel={t('app.a11y.filter')}>
               <Ionicons
                 name={showFilters ? 'options' : 'options-outline'}
                 size={20}

@@ -17,6 +17,8 @@ export interface NotificationPreferences {
   tradeConfirmations: boolean;
   educationalReminders: boolean;
   systemUpdates: boolean;
+  /** Weekly R:R discipline digest (breaches + score) — foreground check, 7-day throttle */
+  weeklyDisciplineReport: boolean;
   sentimentAlerts: boolean;
   mentionNotifications: boolean;
   replyNotifications: boolean;
@@ -32,6 +34,7 @@ const defaultPreferences: NotificationPreferences = {
   tradeConfirmations: true,
   educationalReminders: true,
   systemUpdates: true,
+  weeklyDisciplineReport: true,
   sentimentAlerts: true,
   mentionNotifications: true,
   replyNotifications: true,
@@ -278,6 +281,14 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     const { preferences } = get();
     const typeKey = getPreferenceKeyForType(notification.type);
     if (typeKey && !preferences[typeKey]) {
+      return undefined;
+    }
+    // Weekly discipline digest entries (system-type, data.screen === 'PeriodReport')
+    // should only appear in-app when the user has the digest enabled — mirrors the
+    // skip gate used when composing the OS notification itself.
+    if (notification.type === 'system' &&
+        notification.data && (notification.data as any).screen === 'PeriodReport' &&
+        !preferences.weeklyDisciplineReport) {
       return undefined;
     }
     const scheduledId = await sendLocalNotification(notification);

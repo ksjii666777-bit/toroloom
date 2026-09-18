@@ -8,4 +8,5 @@ export default {
     redo: 'फिर से करें',
     clear: 'साफ़ करें ({{count}})',
     tick: 'टिक',
+    templates: 'ड्रॉइंग टेम्पलेट्स',
 };

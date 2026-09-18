@@ -28,6 +28,7 @@ vi.mock('expo-haptics', () => ({
   default: { notificationAsync: vi.fn(), impactAsync: vi.fn(), NotificationFeedbackType: { Success: 0 } },
   notificationAsync: vi.fn(),
   impactAsync: vi.fn(),
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
   NotificationFeedbackType: { Success: 0 },
 }));
 

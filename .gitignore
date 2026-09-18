@@ -44,6 +44,7 @@ storybook-static/
 
 # ===================== Test & Coverage =====================
 coverage/
+.vitest-reports/
 
 # ===================== Logs & Debug =====================
 *.log

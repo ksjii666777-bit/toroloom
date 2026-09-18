@@ -357,7 +357,7 @@ export function GoalDetailScreen({ route, navigation }: any) {
       header={
   <View style={[styles.header, {backgroundColor: colors.bgSecondary }]}>
           <View style={styles.headerRow}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <Text style={[styles.headerTitle, { color: colors.text }]}>{t('wealth.goalDetails')}</Text>

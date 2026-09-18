@@ -303,7 +303,7 @@ export default function BondDashboardScreen({ navigation }: NativeStackScreenPro
       header={
   <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.headerTop}>
-            <Pressable onPress={() => navigation.goBack()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+            <Pressable onPress={() => navigation.goBack()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View style={styles.headerTitles}>

@@ -557,6 +557,7 @@ export default function QuizComponent({
         <View style={styles.navRow}>
           {currentQuestionIndex > 0 && (
             <Pressable
+              accessibilityLabel={t('app.goBack')}
               style={[styles.navBtn, styles.navBtnPrev, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
               onPress={handlePrevious}
             >

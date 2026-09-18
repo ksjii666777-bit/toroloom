@@ -49,6 +49,7 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
         >
           <View style={styles.headerTop}>
             <TouchableOpacity
+              accessibilityLabel={t('app.goBack')}
               style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
               onPress={() => navigation.goBack()}
             >

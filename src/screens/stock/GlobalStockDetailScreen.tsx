@@ -183,7 +183,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: NativeSta
             <AppScreen scroll={false} padded={false}
       header={
   <View style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={22} color={colors.text} />
             </Pressable>
           </View>
@@ -213,7 +213,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: NativeSta
   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <Animated.View entering={FadeInRight.duration(300)} style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={22} color={colors.text} />
             </Pressable>
             <View style={styles.headerTags}>

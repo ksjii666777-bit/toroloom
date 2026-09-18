@@ -74,7 +74,7 @@ export default {
     methodScan: 'स्कैन',
     methodScanDesc: 'हम अवास्तविक नुकसान के लिए आपकी होल्डिंग्स और रियलाइज़्ड नुकसान के लिए बंद ट्रेडों का विश्लेषण करते हैं।',
     methodCalculate: 'गणना',
-    methodCalculateDesc: 'ST नुकसान STCG और LTCG दोनों को ऑफसेट करता है। LT नुकसान केवल LTCG को ऑफसेट करता है। ₹1L LTCG छूट लागू की गई।',
+    methodCalculateDesc: 'ST नुकसान STCG और LTCG दोनों को ऑफसेट करता है। LT नुकसान केवल LTCG को ऑफसेट करता है। ₹1.25L LTCG छूट लागू की गई।',
     methodOptimize: 'ऑप्टिमाइज़',
     methodOptimizeDesc: 'वर्ष के अंत (31 मार्च) से पहले नुकसान हार्वेस्ट करें। वॉश सेल नियमों (30 दिन की विंडो) का ध्यान रखें।',
     methodCarryForward: 'आगे बढ़ाना',

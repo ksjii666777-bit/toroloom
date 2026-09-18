@@ -249,18 +249,18 @@ export default function CapitalGainsScreen({ navigation }: any) {
       recs.push({
         icon: '⚠️',
         title: 'High STCG Tax Exposure',
-        description: `You have ₹${taxData.shortTermGains.toLocaleString()} in short-term gains. Consider holding positions &gt;12 months to qualify for LTCG treatment at 10% (over ₹1L exemption) instead of 15% STCG rate.`,
+        description: `You have ₹${taxData.shortTermGains.toLocaleString()} in short-term gains. Consider holding positions &gt;12 months to qualify for LTCG treatment at 12.5% (over ₹1.25L exemption) instead of 20% STCG rate.`,
         color: '#FFC107',
         type: 'warning',
       });
     }
 
-    if (taxData.longTermGains > 100000) {
-      const taxableLTCG = taxData.longTermGains - 100000;
+    if (taxData.longTermGains > 125000) {
+      const taxableLTCG = taxData.longTermGains - 125000;
       recs.push({
         icon: '📊',
-        title: 'LTCG Above ₹1L Exemption',
-        description: `Your LTCG of ₹${taxData.longTermGains.toLocaleString()} exceeds the ₹1L exemption by ₹${taxableLTCG.toLocaleString()}. Estimated LTCG tax: ₹${taxData.estimatedTaxLTCG.toLocaleString()}. Consider tax harvesting to offset gains.`,
+        title: 'LTCG Above ₹1.25L Exemption',
+        description: `Your LTCG of ₹${taxData.longTermGains.toLocaleString()} exceeds the ₹1.25L exemption by ₹${taxableLTCG.toLocaleString()}. Estimated LTCG tax: ₹${taxData.estimatedTaxLTCG.toLocaleString()}. Consider tax harvesting to offset gains.`,
         color: '#FF5252',
         type: 'warning',
       });
@@ -339,7 +339,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
             <View style={{ flex: 1, marginLeft: SPACING.md }}>

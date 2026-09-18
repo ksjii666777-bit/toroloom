@@ -90,7 +90,7 @@ export default function CurrencyConverterScreen() {
           borderBottomColor: colors.border,
         }]}>
           <View style={styles.headerRow}>
-            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={20} color={colors.text} />
             </Pressable>
             <View style={{ flex: 1 }}>

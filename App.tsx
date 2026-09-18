@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from './src/context/ThemeContext';
@@ -13,7 +14,6 @@ import { useUpgradePromptStore } from './src/store/subscriptionUIStore';
 import { onPaymentRequired } from './src/services/api/client';
 import Sentry, { isSentryEnabled } from './src/services/sentry';
 import './src/utils/debugTextError'; // Debug: catches Text error with component stack
-import Constants from 'expo-constants';
 
 // Initialize notification channels on app launch
 // notificationService uses lazy imports internally, so this won't crash if native modules aren't available
@@ -26,28 +26,10 @@ setupChannels().catch(() => {});
 //   .env.local:     EXPO_PUBLIC_API_URL=https://your-domain.up.railway.app/api
 //   eas.json build:  "EXPO_PUBLIC_API_URL": "https://your-domain.up.railway.app/api"
 //
-// We read the URL from `expo-constants` (expoConfig.extra.apiUrl, set by
-// app.config.js from EXPO_PUBLIC_API_URL at build time). Reading from
-// `process.env.EXPO_PUBLIC_*` at runtime does NOT work in React Native —
-// `process.env` is replaced at bundle time with empty strings for unknown
-// vars, so any non-inlined value (the common case) becomes `''`.
-// `Constants.expoConfig.extra.apiUrl` is the supported, reliable way.
-const API_BASE_URL: string =
-  (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl ||
-  // Fallback for safety: try the legacy inline env, then warn loudly.
-  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
-  '';
-
-if (!API_BASE_URL) {
-  // eslint-disable-next-line no-console
-  console.warn(
-    '[Toroloom] EXPO_PUBLIC_API_URL is not set. API calls will fail. ' +
-      'Add it to .env, eas.json build.production.env, or your CI build env.',
-  );
-}
-
+// ⚠️  No hardcoded fallback! Buyer MUST set EXPO_PUBLIC_API_URL.
+// The configureApi() call below will warn clearly if it's missing.
 configureApi({
-  baseUrl: API_BASE_URL,
+  baseUrl: process.env.EXPO_PUBLIC_API_URL || '',
   getToken: () => useAuthStore.getState().token,
 });
 
@@ -73,6 +55,23 @@ onPaymentRequired((body) => {
 });
 
 function AppRoot() {
+  // Hold the native splash screen until fonts are ready + first render lands.
+  // Prevents the blank/white flash between native launch and JS content —
+  // the JS side is gated behind FontLoadingGate anyway, so nothing is
+  // visible before this resolves. Safe no-op where native module is absent.
+  useEffect(() => {
+    let cancelled = false;
+    SplashScreen.preventAutoHideAsync().catch(() => {});
+    // Small delay lets the first frame commit before the splash crossfades out.
+    const timer = setTimeout(() => {
+      if (!cancelled) SplashScreen.hideAsync().catch(() => {});
+    }, 100);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

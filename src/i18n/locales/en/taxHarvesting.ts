@@ -82,7 +82,7 @@ export default {
     methodScan: 'Scan',
     methodScanDesc: 'We analyze your holdings for unrealized losses and closed trades for realized losses.',
     methodCalculate: 'Calculate',
-    methodCalculateDesc: 'ST losses offset both STCG & LTCG. LT losses offset LTCG only. ₹1L LTCG exemption applied.',
+    methodCalculateDesc: 'ST losses offset both STCG & LTCG. LT losses offset LTCG only. ₹1.25L LTCG exemption applied.',
     methodOptimize: 'Optimize',
     methodOptimizeDesc: 'Harvest losses before year-end (31 Mar) to reduce taxable gains. Watch for wash sale rules (30 day window).',
     methodCarryForward: 'Carry Forward',

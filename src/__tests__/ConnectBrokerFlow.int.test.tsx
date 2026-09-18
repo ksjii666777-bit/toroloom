@@ -76,10 +76,56 @@ vi.mock('../components/ui/AnimatedPressable', () => ({
   default: 'AnimatedPressable',
 }));
 
+// Mock authStore — component gates session check behind isLoggedIn
+vi.mock('../store/authStore', () => ({
+  useAuthStore: vi.fn(() => ({ isLoggedIn: true })),
+}));
+
+// Mock useT with English brokerConnect strings
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: (key: string) => mockBrokerConnectT[key] || key,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
 // ==================== Imports ====================
 
 import { render, fireEvent } from './testUtils';
 import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
+
+// ==================== English translations for brokerConnect ====================
+const mockBrokerConnectT: Record<string, string> = {
+  'brokerConnect.title': 'Connect Broker',
+  'brokerConnect.subtitle': '1-tap OAuth — powered by SnapTrade',
+  'brokerConnect.oAuth': 'O AUTH 2.0',
+  'brokerConnect.brokers': '20+ BROKERS',
+  'brokerConnect.secure': 'SECURE',
+  'brokerConnect.connected': 'Connected',
+  'brokerConnect.secureSessionActive': 'Secure Session Active',
+  'brokerConnect.testApi': 'Test API',
+  'brokerConnect.disconnect': 'Disconnect',
+  'brokerConnect.disconnectTitle': 'Disconnect Broker',
+  'brokerConnect.disconnectMsg': 'Are you sure you want to disconnect?',
+  'brokerConnect.chooseBroker': 'Choose Your Broker',
+  'brokerConnect.switchBroker': 'Switch to a different broker below',
+  'brokerConnect.selectBroker': 'Select a broker — no API keys needed',
+  'brokerConnect.sessionActive': 'Session Active',
+  'brokerConnect.oauthConnect': 'OAuth Connect',
+  'brokerConnect.tapToConnect': 'Tap to Connect',
+  'brokerConnect.snapTradeOauthTitle': 'SnapTrade OAuth Gateway',
+  'brokerConnect.snapTradeDesc': 'Connect your Zerodha, Angel One, Dhan, Upstox, Groww, or Interactive Brokers account with 1-tap OAuth. Your credentials are never shared with us.',
+  'brokerConnect.checkingStatus': 'Checking connection status...',
+  'brokerConnect.apiSuccess': 'API Test Successful',
+  'brokerConnect.apiFailed': 'API Test Failed',
+  'brokerConnect.apiError': 'API Error',
+  'brokerConnect.checkConnection': 'Please check your connection and try again.',
+  'brokerConnect.connectionFailed': 'Connection Failed',
+  'brokerConnect.noOauthUrl': 'No OAuth URL received',
+  'app.cancel': 'Cancel',
+};
 
 // ==================== Helpers ====================
 

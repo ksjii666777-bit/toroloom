@@ -170,6 +170,16 @@ export default {
     selectSymbolFutures: 'Select a symbol to view futures data',
     noFnoPositions: 'No F&O Positions',
     noFnoPositionsDesc: 'Your open futures and options positions will appear here',
+
+    // Per-symbol Emergency Exit UI (F&O positions tab)
+    squareOffTitle: 'Square Off {{symbol}}?',
+    squareOffIntro: 'This intent would square off the {{symbol}} position with a market order. Outside simulation mode this would contact your connected broker.',
+    exitConfirm: 'Square Off',
+    exitCancel: 'Cancel',
+    exitAllButton: 'Exit THIS Symbol',
+    // Position card status / result messages
+    positionStatus: '{{symbol}}: square off requested',
+    positionSquareOffDone: '{{symbol}}: square off done',
     tradeFutures: 'Trade Futures',
     orderPlaced: 'Order Placed ✅',
     // ── Strategy Builder ──────────────────────────────────────────────────
@@ -340,4 +350,5 @@ export default {
     marketCap: 'Market Cap',
     noCoinsFound: 'No coins found',
     cryptoHoldings: 'Crypto Holdings',
+    orderFailedMsg: 'The order could not be placed. Please try again.',
 };

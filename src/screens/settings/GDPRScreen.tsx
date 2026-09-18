@@ -22,6 +22,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
+import { useTradingPrefsStore } from '../../store/tradingPrefsStore';
+import { useBehaviorJournalStore } from '../../store/behavioralJournalStore';
+import { useNotificationStore } from '../../store/notificationStore';
+import { useLegalConsentStore } from '../../store/legalConsentStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AppScreen from '../../components/ui/AppScreen';
 import Card from '../../components/ui/Card';
@@ -124,12 +128,28 @@ export default function GDPRScreen({ navigation }: Props) {
       });
 
       if (response.data.success) {
+        // GDPR Article 17 — erase all local remnants before the session ends:
+        // the persisted R:R commitment (AsyncStorage), the journal session,
+        // and in-app notifications.
+        useBehaviorJournalStore.getState().resetJournal();
+        useNotificationStore.getState().clearAll();
+        await useTradingPrefsStore.getState().clearPrefs();
+        // Wipe the recorded ToS/Privacy acceptance (personal data under GDPR)
+        useLegalConsentStore.getState().resetConsent();
+        // Ends the session → the auth gate in AppNavigator swaps to Login.
+        await useAuthStore.getState().logout();
         Alert.alert(
           t('gdpr.accountDeleted'),
           t('gdpr.accountDeletedMessage'),
           [{ text: 'OK' }]
         );
-        // TODO: Logout user and navigate to login screen
+      } else {
+        // Deletion rejected server-side — the user MUST know it didn't happen
+        Alert.alert(
+          t('gdpr.deletionFailed'),
+          t('gdpr.deletionFailedMessage'),
+          [{ text: 'OK' }]
+        );
       }
     } catch (error) {
       console.error('Delete error:', error);
@@ -149,7 +169,7 @@ export default function GDPRScreen({ navigation }: Props) {
     <AppScreen scroll={true} padded={true}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>

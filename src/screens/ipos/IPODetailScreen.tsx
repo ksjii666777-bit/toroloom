@@ -238,6 +238,7 @@ export default function IPODetailScreen({ route, navigation }: NativeStackScreen
             {/* Back + Bookmark */}
             <View style={styles.heroTop}>
               <TouchableOpacity
+                accessibilityLabel={t('app.goBack')}
                 style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
                 onPress={() => navigation.goBack()}
               >

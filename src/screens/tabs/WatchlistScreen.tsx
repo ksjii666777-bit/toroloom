@@ -530,7 +530,7 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
                   performanceView === 'gainers' && { backgroundColor: '#00C85320', borderColor: '#00C853' },
                 ]}
               >
-                <Ionicons name="arrow-up" size={12} color={performanceView === 'gainers' ? '#00C853' : colors.textMuted} />
+                <Ionicons name="arrow-up" size={12} color={performanceView === 'gainers' ? '#00C853' : colors.textMuted} accessibilityLabel={t('app.a11y.moveUp')} />
                 <Text
                   style={[
                     styles.perfBtnCount,
@@ -549,7 +549,7 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
                   performanceView === 'losers' && { backgroundColor: '#FF174420', borderColor: '#FF1744' },
                 ]}
               >
-                <Ionicons name="arrow-down" size={12} color={performanceView === 'losers' ? '#FF1744' : colors.textMuted} />
+                <Ionicons name="arrow-down" size={12} color={performanceView === 'losers' ? '#FF1744' : colors.textMuted} accessibilityLabel={t('app.a11y.moveDown')} />
                 <Text
                   style={[
                     styles.perfBtnCount,
@@ -560,7 +560,7 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
                 </Text>
               </TouchableOpacity>
               {/* Sentiment Analysis Button */}
-              <AnimatedPressable onPress={() => navigation.navigate('SentimentAnalysis')} haptic="light" scaleTo={0.92}>
+              <AnimatedPressable onPress={() => navigation.navigate('SentimentAnalysis')} haptic="light" scaleTo={0.92} accessibilityLabel={t('app.a11y.sentiment')}>
                 <View style={[styles.sortBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                   <Ionicons name="pulse" size={18} color={colors.primary} />
                 </View>
@@ -569,7 +569,7 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
               {/* Sort Menu Button */}
               <AnimatedPressable onPress={() => setShowSortMenu(true)} haptic="light" scaleTo={0.92}>
                 <View style={[styles.sortBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                  <Ionicons name="funnel" size={18} color={colors.primary} />
+                  <Ionicons name="funnel" size={18} color={colors.primary} accessibilityLabel={t('app.a11y.sort')} />
                 </View>
               </AnimatedPressable>
             </View>
@@ -951,7 +951,7 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
                         haptic="light"
                         scaleTo={0.9}
                       >
-                        <Ionicons name="add-circle" size={28} color={colors.primary} />
+                        <Ionicons name="add-circle" size={28} color={colors.primary} accessibilityLabel={t('app.a11y.add')} />
                       </AnimatedPressable>
                     </View>
                   </Animated.View>

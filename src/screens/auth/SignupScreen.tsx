@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Pressable, View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import AppScreen from '../../components/ui/AppScreen';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
+import { useLegalConsentStore } from '../../store/legalConsentStore';
 import { useT } from '../../hooks/useT';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -25,7 +26,9 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const { signup, isLoading } = useAuthStore();
+  const acceptConsent = useLegalConsentStore((s) => s.accept);
 
   // Detect referral source from navigation route params (e.g., from deep link)
   const referralSource = route?.params?.ref;
@@ -43,8 +46,16 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
       setError(t('auth.passwordMinLength'));
       return;
     }
+    if (!acceptedTerms) {
+      setError(t('auth.termsAcceptRequired'));
+      return;
+    }
     setError('');
-    await signup(name, email, phone, password, referralSource);
+    const ok = await signup(name, email, phone, password, referralSource);
+    // Record the accepted ToS/Privacy version only after a successful signup
+    if (ok) {
+      await acceptConsent('signup');
+    }
   };
 
   return (
@@ -61,6 +72,7 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
       >
         {/* Back Button */}
         <TouchableOpacity
+          accessibilityLabel={t('app.goBack')}
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
@@ -156,14 +168,45 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             testID="signup-confirm-password-input"
           />
 
-          {/* Terms */}
+          {/* Terms — checkbox gate + links to the in-app Legal screen.
+              Acceptance is tracked per document version in legalConsentStore. */}
           <View style={styles.termsContainer}>
-            <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
+            <Pressable
+              onPress={() => setAcceptedTerms((v) => !v)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: acceptedTerms }}
+              accessibilityLabel={t('auth.termsCheckboxLabel')}
+              testID="signup-terms-checkbox"
+              hitSlop={8}
+            >
+              <Ionicons
+                name={acceptedTerms ? 'checkbox' : 'checkbox-outline'}
+                size={22}
+                color={acceptedTerms ? colors.primary : colors.textMuted}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              />
+            </Pressable>
             <Text style={styles.termsText}>
-              {t('auth.termsAndPrivacy', {
-                terms: t('auth.termsOfService'),
-                privacy: t('auth.privacyPolicy'),
-              })}
+              {t('auth.agreePrefix')}
+              <Text
+                style={styles.termsLink}
+                onPress={() => navigation.navigate('Legal', { section: 'terms' })}
+                accessibilityRole="link"
+                accessibilityLabel={t('auth.termsOfService')}
+              >
+                {t('auth.termsOfService')}
+              </Text>
+              {t('auth.agreeMiddle')}
+              <Text
+                style={styles.termsLink}
+                onPress={() => navigation.navigate('Legal', { section: 'privacy' })}
+                accessibilityRole="link"
+                accessibilityLabel={t('auth.privacyPolicy')}
+              >
+                {t('auth.privacyPolicy')}
+              </Text>
+              {t('auth.agreeSuffix')}
             </Text>
           </View>
 

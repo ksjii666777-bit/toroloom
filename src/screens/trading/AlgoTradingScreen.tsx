@@ -353,7 +353,7 @@ export default function AlgoTradingScreen() {
   return (
     <AppScreen scroll={false} padded={false} header={
       <View style={[screenStyles.header, { borderBottomColor: colors.border, backgroundColor: colors.bgSecondary }]}>
-        <Pressable onPress={() => navigation.goBack()} style={screenStyles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={screenStyles.backBtn} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <View style={screenStyles.headerInfo}>

@@ -455,15 +455,24 @@ export interface TradePlan {
 
 /**
  * Generate stop-loss and target suggestions based on stock data.
+ *
+ * @param userRewardRiskRatio Optional user-committed R:R (from broker-connect
+ *        onboarding, e.g. 1:3 = 3). When provided it overrides the profile's
+ *        default minRewardRiskRatio so targets match the user's discipline.
  */
 export function suggestTradePlan(params: {
   stock: Stock;
   tradeType: 'buy' | 'sell';
   entryPrice: number;
   riskTolerance: RiskTolerance;
+  userRewardRiskRatio?: number;
 }): TradePlan {
   const { stock, tradeType, entryPrice, riskTolerance } = params;
-  const profile = RISK_PROFILES[riskTolerance];
+  const baseProfile = RISK_PROFILES[riskTolerance];
+  const profile: RiskProfile =
+    params.userRewardRiskRatio != null && params.userRewardRiskRatio > 0
+      ? { ...baseProfile, minRewardRiskRatio: params.userRewardRiskRatio }
+      : baseProfile;
 
   // Determine technical levels from 52-week range
   const _range = stock.high52 - stock.low52;

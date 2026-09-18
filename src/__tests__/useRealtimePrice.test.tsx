@@ -429,7 +429,7 @@ describe('useRealtimePrice — loadHistory', () => {
     vi.useRealTimers();
   });
 
-  it('populates candleHistory with historical data', () => {
+  it('populates candleHistory with historical data', async () => {
     render(<Harness stockId="RELIANCE" basePrice={2890} />);
 
     expect(harnessResult.candleHistory).toHaveLength(0);
@@ -438,39 +438,65 @@ describe('useRealtimePrice — loadHistory', () => {
       harnessResult.loadHistory('1M');
     });
 
+    // loadHistory tries the backend (mock getOHLC → empty) then falls
+    // back to generated mock data — wait for the promise chain to settle.
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
     // Should have some candle data
     expect(harnessResult.candleHistory.length).toBeGreaterThan(0);
     expect(harnessResult.candleHistory[0]).toHaveProperty('date');
     expect(harnessResult.candleHistory[0]).toHaveProperty('close');
   });
 
-  it('loadHistory with 1D returns ~1 day of data', () => {
+  it('loadHistory with 1D returns ~1 day of data', async () => {
     render(<Harness stockId="RELIANCE" basePrice={2890} />);
 
     act(() => {
       harnessResult.loadHistory('1D');
     });
 
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
     // 1 day should return exactly 1 data point (weekends filtered)
     expect(harnessResult.candleHistory.length).toBeGreaterThan(0);
   });
 
-  it('loadHistory with 1Y returns ~365 days of data', () => {
+  it('loadHistory with 1Y returns ~365 days of data', async () => {
     render(<Harness stockId="RELIANCE" basePrice={2890} />);
     act(() => {
       harnessResult.loadHistory('1Y');
     });
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
     // Should have significant data, but weekends are filtered so < 365
     expect(harnessResult.candleHistory.length).toBeGreaterThanOrEqual(200);
   });
 
-  it('loadHistory is callable multiple times', () => {
+  it('loadHistory is callable multiple times', async () => {
     render(<Harness stockId="RELIANCE" basePrice={2890} />);
 
     act(() => harnessResult.loadHistory('1W'));
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
     const len1 = harnessResult.candleHistory.length;
 
     act(() => harnessResult.loadHistory('3M'));
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
     const len2 = harnessResult.candleHistory.length;
 
     expect(len2).toBeGreaterThan(len1);

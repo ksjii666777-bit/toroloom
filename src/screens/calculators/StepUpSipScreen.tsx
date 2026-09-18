@@ -95,7 +95,7 @@ export default function StepUpSipScreen() {
       >
   {/* Header */}
         <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={20} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>

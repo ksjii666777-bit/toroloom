@@ -306,7 +306,7 @@ export default function CustomIndicatorManagerScreen() {
   return (
     <AppScreen scroll={false} padded={false} header={
       <View style={[containerStyles.header, { borderBottomColor: colors.border }]}>
-        <Pressable onPress={() => navigation.goBack()} style={containerStyles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={containerStyles.backBtn} accessibilityLabel={t('app.goBack')}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <View style={containerStyles.headerInfo}>

@@ -45,4 +45,10 @@ export default {
     prefEducationalReminders: 'सीखने के अनुस्मारक',
     prefEducationalRemindersDesc: 'कोर्स और प्रश्नोत्तरी सूचनाएँ',
     prefSystemUpdatesDesc: 'KYC, खाता और ऐप अपडेट',
+    weeklyDisciplineTitle: '🛡️ साप्ताहिक डिसिप्लिन रिपोर्ट (प्रतिबद्ध 1:{{ratio}})',
+    weeklyDisciplineBodyClean: 'बेहतरीन हफ्ता! डिसिप्लिन स्कोर {{score}}/100 — आपके {{measured}} में से सभी ट्रेड ने प्रतिबद्ध R:R का सम्मान किया।',
+    weeklyDisciplineBody: 'इस हफ्ते {{breaches}} ट्रेड आपके प्रतिबद्ध R:R से नीचे रहे। डिसिप्लिन स्कोर: {{score}}/100।',
+    weeklyDisciplineBodyLoss: 'इस हफ्ते {{breaches}} ट्रेड आपके प्रतिबद्ध R:R से नीचे रहे — ₹{{loss}} का नुकसान। डिसिप्लिन स्कोर: {{score}}/100।',
+    streakRebuildTitle: '🔥 आपकी श्रृंखला फिर बनाने से एक साफ़ ट्रेड दूर',
+    streakRebuildBody: 'आपकी {{weeks}}-सप्ताह की साफ़ श्रृंखला इंतज़ार कर रही है — ऐसा एक ट्रेड जर्नल करें जो आपके प्रतिबद्ध R:R का सम्मान करे और श्रृंखला फिर बन जाएगी।',
 };

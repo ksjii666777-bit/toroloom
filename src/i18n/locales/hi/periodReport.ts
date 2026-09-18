@@ -22,10 +22,10 @@ export default {
   // Tax Section
   taxSummary: 'कर सारांश',
   estimatedTax: 'अनुमानित कर',
-  stcgLabel: 'अल्पकालिक (15%)',
-  ltcgLabel: 'दीर्घकालिक (10%)',
+  stcgLabel: 'अल्पकालिक (20%)',
+  ltcgLabel: 'दीर्घकालिक (12.5%)',
   taxableGains: 'कर योग्य लाभ',
-  taxExemptLimit: '₹1L छूट',
+  taxExemptLimit: '₹1.25L छूट',
   taxHarvestingTip: 'पूंजीगत लाभ को ऑफसेट करने के लिए वर्ष के अंत से पहले अवास्तविक घाटे की कटाई करें।',
 
   // Behavioral / Overtrading
@@ -107,4 +107,19 @@ export default {
   // Empty state
   emptyTitle: 'अभी तक कोई डेटा नहीं',
   emptySubtitle: 'अपनी अवधि रिपोर्ट देखने के लिए ट्रेडिंग शुरू करें',
+
+  // R:R Discipline section
+  disciplineTitle: 'R:R अनुशासन',
+  disciplineCommitment: 'प्रतिबद्ध अनुपात: 1:{{ratio}}',
+  disciplineMeasured: 'मापे गए',
+  disciplineBreaches: 'प्रतिबद्धता से नीचे',
+  disciplineAvgRR: 'औसत वास्तविक',
+  disciplineAllClean: 'हर ट्रेड ने आपकी प्रतिबद्ध R:R का सम्मान किया — अनुशासन बना हुआ है',
+  disciplineBreachAlert: '{{count}} ट्रेड आपकी प्रतिबद्ध R:R से नीचे रहे',
+  disciplineLossNote: 'इस अवधि में प्रतिबद्धता से नीचे के ट्रेडों से ₹{{loss}} की हानि',
+  disciplineFlagDetail: 'वास्तविक 1:{{realized}} बनाम प्रतिबद्ध 1:{{committed}}',
+  disciplineFootnote: 'इन ट्रेडों की एंट्री टाइमिंग और स्टॉप प्लेसमेंट जर्नल में देखें।',
+  disciplineNoCommitment: 'अभी कोई R:R प्रतिबद्धता नहीं — अनुशासन ट्रैकिंग के लिए ब्रोकर कनेक्ट करते समय अनुपात चुनें।',
+  disciplineNoData: 'वास्तविक रिस्क-रिवॉर्ड मापने के लिए जर्नल एंट्री में योजनाबद्ध स्टॉप-लॉस जोड़ें।',
+  pinnedWeek: 'पिन किया गया सप्ताह: {{start}} — {{end}}',
 };

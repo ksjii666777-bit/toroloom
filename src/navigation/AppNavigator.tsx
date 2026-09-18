@@ -1,7 +1,8 @@
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { lazy, Suspense, useRef, useCallback, useEffect } from 'react';
 import { Text, StyleSheet, Alert, Linking } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { NavigationContainer } from '@react-navigation/native';
+import { navigationRef } from './navigationRef';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { RootStackParamList, TabParamList } from '../types';
@@ -29,144 +30,21 @@ import WatchlistScreen from '../screens/tabs/WatchlistScreen';
 import MoreScreen from '../screens/tabs/MoreScreen';
 
 // Detail Screens
-import StockDetailScreen from '../screens/stock/StockDetailScreen';
-import LearnScreen from '../screens/tabs/LearnScreen';
-import CommunityScreen from '../screens/community/CommunityScreen';
-import PostDetailScreen from '../screens/community/PostDetailScreen';
-import AIInsightsScreen from '../screens/ai/AIInsightsScreen';
-import AIChatScreen from '../screens/ai/AIChatScreen';
-import AITradeAssistantScreen from '../screens/ai/AITradeAssistantScreen';
-import EarningsCallScreen from '../screens/ai/EarningsCallScreen';
-import SentimentAnalysisScreen from '../screens/ai/SentimentAnalysisScreen';
-import SentimentAlertScreen from '../screens/ai/SentimentAlertScreen';
-import LiveFeedScreen from '../screens/ai/LiveFeedScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
 
 // New Screens
-import ProfileScreen from '../screens/profile/ProfileScreen';
-import MutualFundsScreen from '../screens/mutual-funds/MutualFundsScreen';
-import RiskSettingsScreen from '../screens/settings/RiskSettingsScreen';
-import CourseDetailScreen from '../screens/education/CourseDetailScreen';
-import LessonViewScreen from '../screens/education/LessonViewScreen';
-import QuizResultScreen from '../screens/quiz/QuizResultScreen';
-import GlossaryScreen from '../screens/education/GlossaryScreen';
-import CertificateScreen from '../screens/education/CertificateScreen';
-import LearningPathsScreen from '../screens/education/LearningPathsScreen';
-import LearningPathDetailScreen from '../screens/education/LearningPathDetailScreen';
-import MyCoursesScreen from '../screens/education/MyCoursesScreen';
-import CreateCourseScreen from '../screens/education/CreateCourseScreen';
-import CommunityCoursesScreen from '../screens/education/CommunityCoursesScreen';
-import TradeHistoryScreen from '../screens/trade/TradeHistoryScreen';
-import PlaceOrderScreen from '../screens/trade/PlaceOrderScreen';
-import OpenOrdersScreen from '../screens/trade/OpenOrdersScreen';
-import ReportsScreen from '../screens/reports/ReportsScreen';
-import PeriodReportScreen from '../screens/reports/PeriodReportScreen';
-import HelpScreen from '../screens/support/HelpScreen';
-import AchievementsScreen from '../screens/achievements/AchievementsScreen';
-import NotificationPreferencesScreen from '../screens/settings/NotificationPreferencesScreen';
-import PortfolioAlertsScreen from '../screens/settings/PortfolioAlertsScreen';
-import SubscriptionScreen from '../screens/settings/SubscriptionScreen';
-import AvailableCouponsScreen from '../screens/settings/AvailableCouponsScreen';
-import CouponHistoryScreen from '../screens/settings/CouponHistoryScreen';
-import AdminCouponManagementScreen from '../screens/settings/AdminCouponManagementScreen';
-import AdminCourseReviewScreen from '../screens/settings/AdminCourseReviewScreen';
-import PaymentHistoryScreen from '../screens/payments/PaymentHistoryScreen';
-import AddFundsScreen from '../screens/funds/AddFundsScreen';
-import WithdrawScreen from '../screens/funds/WithdrawScreen';
-import TransactionHistoryScreen from '../screens/funds/TransactionHistoryScreen';
-import TransferScreen from '../screens/funds/TransferScreen';
-import UPIScreen from '../screens/funds/UPIScreen';
-import FundsDashboardScreen from '../screens/funds/FundsDashboardScreen';
 import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
-import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
-import TenantConfigScreen from '../screens/settings/TenantConfigScreen';
-import VoiceSettingsScreen from '../screens/settings/VoiceSettingsScreen';
-import WidgetSettingsScreen from '../screens/settings/WidgetSettingsScreen';
-import ReferralScreen from '../screens/referral/ReferralScreen';
-import FeatureFlagsScreen from '../screens/settings/FeatureFlagsScreen';
-import ABTestRunnerScreen from '../screens/settings/ABTestRunnerScreen';
-import MonteCarloSimulationScreen from '../screens/analytics/MonteCarloSimulationScreen';
-import CorrelationMatrixScreen from '../screens/analytics/CorrelationMatrixScreen';
-import FactorAnalysisScreen from '../screens/analytics/FactorAnalysisScreen';
-import PortfolioRebalancingScreen from '../screens/analytics/PortfolioRebalancingScreen';
-import SecuritySettingsScreen from '../screens/settings/SecuritySettingsScreen';
-import SecurityAuditLogScreen from '../screens/settings/SecurityAuditLogScreen';
-import ApiKeyManagementScreen from '../screens/settings/ApiKeyManagementScreen';
-import WebhookManagementScreen from '../screens/settings/WebhookManagementScreen';
-import TwoFactorSetupScreen from '../screens/settings/TwoFactorSetupScreen';
-import TelegramConnectScreen from '../screens/settings/TelegramConnectScreen';
-import AISettingsScreen from '../screens/settings/AISettingsScreen';
-import DarkModeSettingsScreen from '../screens/settings/DarkModeSettingsScreen';
-import GDPRScreen from '../screens/settings/GDPRScreen';
-import AccessibilitySettingsScreen from '../screens/settings/AccessibilitySettingsScreen';
-import LandscapeSettingsScreen from '../screens/settings/LandscapeSettingsScreen';
-import CDNOptimizationScreen from '../screens/settings/CDNOptimizationScreen';
-import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
-import USStockDetailScreen from '../screens/stock/USStockDetailScreen';
-import GlobalStockDetailScreen from '../screens/stock/GlobalStockDetailScreen';
-import CompanyFundamentalsScreen from '../screens/stock/CompanyFundamentalsScreen';
-import USMarketsScreen from '../screens/markets/USMarketsScreen';
-import BondDashboardScreen from '../screens/markets/BondDashboardScreen';
-import CurrencyMarketsScreen from '../screens/markets/CurrencyMarketsScreen';
-import TaxHarvestingCalendarScreen from '../screens/analytics/TaxHarvestingCalendarScreen';
-import CommodityMarketsScreen from '../screens/markets/CommodityMarketsScreen';
-import FuturesCurveScreen from '../screens/markets/FuturesCurveScreen';
-import NewsFeedScreen from '../screens/news/NewsFeedScreen';
-import IPOCalendarScreen from '../screens/news/IPOCalendarScreen';
-import IPODashboardScreen from '../screens/ipos/IPODashboardScreen';
-import IPODetailScreen from '../screens/ipos/IPODetailScreen';
-import NFODashboardScreen from '../screens/nfo/NFODashboardScreen';
-import NFODetailScreen from '../screens/nfo/NFODetailScreen';
-import DividendTrackerScreen from '../screens/analytics/DividendTrackerScreen';
-import EconomicCalendarScreen from '../screens/news/EconomicCalendarScreen';
-import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
-import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
-import SocialTradingScreen from '../screens/social/SocialTradingScreen';
-import TraderProfileScreen from '../screens/social/TraderProfileScreen';
-import BehavioralJournalScreen from '../screens/journal/BehavioralJournalScreen';
-import ContractNoteUploadScreen from '../screens/reports/ContractNoteUploadScreen';
-import PollsScreen from '../screens/social/PollsScreen';
-import CreatePollScreen from '../screens/social/CreatePollScreen';
-import RevenueDashboardScreen from '../screens/social/RevenueDashboardScreen';
-import FnOOptionsChainScreen from '../screens/trade/FnOOptionsChainScreen';
-import StrategyBuilderScreen from '../screens/trade/StrategyBuilderScreen';
-import StrategyPerformanceScreen from '../screens/trade/StrategyPerformanceScreen';
-import CryptoTradingScreen from '../screens/trade/CryptoTradingScreen';
-import USStocksTradingScreen from '../screens/trade/USStocksTradingScreen';
-import WealthDashboardScreen from '../screens/wealth/WealthDashboardScreen';
 import { GoalCreateScreen, GoalDetailScreen } from '../screens/wealth/GoalBasedInvestingScreen';
-import RetirementPlannerScreen from '../screens/wealth/RetirementPlannerScreen';
-import CryptoDetailScreen from '../screens/stock/CryptoDetailScreen';
 
 // Advisory Marketplace Screens
-import AdvisorListScreen from '../screens/advisory/AdvisorListScreen';
-import AdvisorDetailScreen from '../screens/advisory/AdvisorDetailScreen';
-import MyConsultationsScreen from '../screens/advisory/MyConsultationsScreen';
-import ConsultationDetailScreen from '../screens/advisory/ConsultationDetailScreen';
-import ReviewFormScreen from '../screens/advisory/ReviewFormScreen';
-import AdminAdvisorScreen from '../screens/advisory/AdminAdvisorScreen';
 
 // Calculator Screens
-import SIPCalculator from '../screens/calculators/SIPCalculator';
-import StepUpSipScreen from '../screens/calculators/StepUpSipScreen';
-import LumpsumCalculator from '../screens/calculators/LumpsumCalculator';
-import EMICalculator from '../screens/calculators/EMICalculator';
-import TaxCalculator from '../screens/calculators/TaxCalculator';
-import CurrencyConverterScreen from '../screens/calculators/CurrencyConverterScreen';
 import AvatarWidget from '../components/AvatarWidget';
 
 // KYC Screens
-import PanVerificationScreen from '../screens/kyc/PanVerificationScreen';
-import AadhaarVerificationScreen from '../screens/kyc/AadhaarVerificationScreen';
-import DigiLockerScreen from '../screens/kyc/DigiLockerScreen';
-import BankLinkingScreen from '../screens/kyc/BankLinkingScreen';
 import IronLockOverlay from '../components/IronLockOverlay';
 import UpgradePromptModal from '../components/UpgradePromptModal';
 
 // SnapTrade Screens
-import SnapTradeConnectScreen from '../screens/snaptrade/SnapTradeConnectScreen';
-import SnapTradePortfolioScreen from '../screens/snaptrade/SnapTradePortfolioScreen';
-import SnapTradeOrderScreen from '../screens/snaptrade/SnapTradeOrderScreen';
 import OfflineBanner from '../components/ui/OfflineBanner';
 import OfflineModal from '../components/ui/OfflineModal';
 import SyncConflictModal from '../components/ui/SyncConflictModal';
@@ -175,6 +53,131 @@ import { startCacheWarming } from '../services/cacheWarmingService';
 import { useCacheInvalidation } from '../hooks/useCacheInvalidation';
 import { offlineCache } from '../services/offlineCache';
 import { startWidgetAutoUpdate } from '../services/widgetService';
+
+const LazyNotificationsScreen = lazy(() => import('../screens/NotificationsScreen'));
+const LazyAchievementsScreen = lazy(() => import('../screens/achievements/AchievementsScreen'));
+const LazyAdminAdvisorScreen = lazy(() => import('../screens/advisory/AdminAdvisorScreen'));
+const LazyAdvisorDetailScreen = lazy(() => import('../screens/advisory/AdvisorDetailScreen'));
+const LazyAdvisorListScreen = lazy(() => import('../screens/advisory/AdvisorListScreen'));
+const LazyConsultationDetailScreen = lazy(() => import('../screens/advisory/ConsultationDetailScreen'));
+const LazyMyConsultationsScreen = lazy(() => import('../screens/advisory/MyConsultationsScreen'));
+const LazyReviewFormScreen = lazy(() => import('../screens/advisory/ReviewFormScreen'));
+const LazyAIChatScreen = lazy(() => import('../screens/ai/AIChatScreen'));
+const LazyAIInsightsScreen = lazy(() => import('../screens/ai/AIInsightsScreen'));
+const LazyAITradeAssistantScreen = lazy(() => import('../screens/ai/AITradeAssistantScreen'));
+const LazyEarningsCallScreen = lazy(() => import('../screens/ai/EarningsCallScreen'));
+const LazyLiveFeedScreen = lazy(() => import('../screens/ai/LiveFeedScreen'));
+const LazySentimentAlertScreen = lazy(() => import('../screens/ai/SentimentAlertScreen'));
+const LazySentimentAnalysisScreen = lazy(() => import('../screens/ai/SentimentAnalysisScreen'));
+const LazyCorrelationMatrixScreen = lazy(() => import('../screens/analytics/CorrelationMatrixScreen'));
+const LazyDividendTrackerScreen = lazy(() => import('../screens/analytics/DividendTrackerScreen'));
+const LazyFactorAnalysisScreen = lazy(() => import('../screens/analytics/FactorAnalysisScreen'));
+const LazyMonteCarloSimulationScreen = lazy(() => import('../screens/analytics/MonteCarloSimulationScreen'));
+const LazyPortfolioRebalancingScreen = lazy(() => import('../screens/analytics/PortfolioRebalancingScreen'));
+const LazyTaxHarvestingCalendarScreen = lazy(() => import('../screens/analytics/TaxHarvestingCalendarScreen'));
+const LazyConnectBrokerView = lazy(() => import('../screens/broker/ConnectBrokerView'));
+const LazyCurrencyConverterScreen = lazy(() => import('../screens/calculators/CurrencyConverterScreen'));
+const LazyEMICalculator = lazy(() => import('../screens/calculators/EMICalculator'));
+const LazyLumpsumCalculator = lazy(() => import('../screens/calculators/LumpsumCalculator'));
+const LazySIPCalculator = lazy(() => import('../screens/calculators/SIPCalculator'));
+const LazyStepUpSipScreen = lazy(() => import('../screens/calculators/StepUpSipScreen'));
+const LazyTaxCalculator = lazy(() => import('../screens/calculators/TaxCalculator'));
+const LazyChatRoomListScreen = lazy(() => import('../screens/chat/ChatRoomListScreen'));
+const LazyChatRoomScreen = lazy(() => import('../screens/chat/ChatRoomScreen'));
+const LazyCommunityScreen = lazy(() => import('../screens/community/CommunityScreen'));
+const LazyPostDetailScreen = lazy(() => import('../screens/community/PostDetailScreen'));
+const LazyCertificateScreen = lazy(() => import('../screens/education/CertificateScreen'));
+const LazyCommunityCoursesScreen = lazy(() => import('../screens/education/CommunityCoursesScreen'));
+const LazyCourseDetailScreen = lazy(() => import('../screens/education/CourseDetailScreen'));
+const LazyCreateCourseScreen = lazy(() => import('../screens/education/CreateCourseScreen'));
+const LazyGlossaryScreen = lazy(() => import('../screens/education/GlossaryScreen'));
+const LazyLearningPathDetailScreen = lazy(() => import('../screens/education/LearningPathDetailScreen'));
+const LazyLearningPathsScreen = lazy(() => import('../screens/education/LearningPathsScreen'));
+const LazyLessonViewScreen = lazy(() => import('../screens/education/LessonViewScreen'));
+const LazyMyCoursesScreen = lazy(() => import('../screens/education/MyCoursesScreen'));
+const LazyAddFundsScreen = lazy(() => import('../screens/funds/AddFundsScreen'));
+const LazyFundsDashboardScreen = lazy(() => import('../screens/funds/FundsDashboardScreen'));
+const LazyTransactionHistoryScreen = lazy(() => import('../screens/funds/TransactionHistoryScreen'));
+const LazyTransferScreen = lazy(() => import('../screens/funds/TransferScreen'));
+const LazyUPIScreen = lazy(() => import('../screens/funds/UPIScreen'));
+const LazyWithdrawScreen = lazy(() => import('../screens/funds/WithdrawScreen'));
+const LazyIPODashboardScreen = lazy(() => import('../screens/ipos/IPODashboardScreen'));
+const LazyIPODetailScreen = lazy(() => import('../screens/ipos/IPODetailScreen'));
+const LazyBehavioralJournalScreen = lazy(() => import('../screens/journal/BehavioralJournalScreen'));
+const LazyAadhaarVerificationScreen = lazy(() => import('../screens/kyc/AadhaarVerificationScreen'));
+const LazyBankLinkingScreen = lazy(() => import('../screens/kyc/BankLinkingScreen'));
+const LazyDigiLockerScreen = lazy(() => import('../screens/kyc/DigiLockerScreen'));
+const LazyPanVerificationScreen = lazy(() => import('../screens/kyc/PanVerificationScreen'));
+const LazyBondDashboardScreen = lazy(() => import('../screens/markets/BondDashboardScreen'));
+const LazyCommodityMarketsScreen = lazy(() => import('../screens/markets/CommodityMarketsScreen'));
+const LazyCurrencyMarketsScreen = lazy(() => import('../screens/markets/CurrencyMarketsScreen'));
+const LazyFuturesCurveScreen = lazy(() => import('../screens/markets/FuturesCurveScreen'));
+const LazyUSMarketsScreen = lazy(() => import('../screens/markets/USMarketsScreen'));
+const LazyMutualFundsScreen = lazy(() => import('../screens/mutual-funds/MutualFundsScreen'));
+const LazyEconomicCalendarScreen = lazy(() => import('../screens/news/EconomicCalendarScreen'));
+const LazyIPOCalendarScreen = lazy(() => import('../screens/news/IPOCalendarScreen'));
+const LazyNewsFeedScreen = lazy(() => import('../screens/news/NewsFeedScreen'));
+const LazyNFODashboardScreen = lazy(() => import('../screens/nfo/NFODashboardScreen'));
+const LazyNFODetailScreen = lazy(() => import('../screens/nfo/NFODetailScreen'));
+const LazyPaymentHistoryScreen = lazy(() => import('../screens/payments/PaymentHistoryScreen'));
+const LazyProfileScreen = lazy(() => import('../screens/profile/ProfileScreen'));
+const LazyQuizResultScreen = lazy(() => import('../screens/quiz/QuizResultScreen'));
+const LazyReferralScreen = lazy(() => import('../screens/referral/ReferralScreen'));
+const LazyContractNoteUploadScreen = lazy(() => import('../screens/reports/ContractNoteUploadScreen'));
+const LazyPeriodReportScreen = lazy(() => import('../screens/reports/PeriodReportScreen'));
+const LazyReportsScreen = lazy(() => import('../screens/reports/ReportsScreen'));
+const LazyABTestRunnerScreen = lazy(() => import('../screens/settings/ABTestRunnerScreen'));
+const LazyAISettingsScreen = lazy(() => import('../screens/settings/AISettingsScreen'));
+const LazyAccessibilitySettingsScreen = lazy(() => import('../screens/settings/AccessibilitySettingsScreen'));
+const LazyAdminCouponManagementScreen = lazy(() => import('../screens/settings/AdminCouponManagementScreen'));
+const LazyAdminCourseReviewScreen = lazy(() => import('../screens/settings/AdminCourseReviewScreen'));
+const LazyApiKeyManagementScreen = lazy(() => import('../screens/settings/ApiKeyManagementScreen'));
+const LazyAvailableCouponsScreen = lazy(() => import('../screens/settings/AvailableCouponsScreen'));
+const LazyCDNOptimizationScreen = lazy(() => import('../screens/settings/CDNOptimizationScreen'));
+const LazyCouponHistoryScreen = lazy(() => import('../screens/settings/CouponHistoryScreen'));
+const LazyDarkModeSettingsScreen = lazy(() => import('../screens/settings/DarkModeSettingsScreen'));
+const LazyFeatureFlagsScreen = lazy(() => import('../screens/settings/FeatureFlagsScreen'));
+const LazyGDPRScreen = lazy(() => import('../screens/settings/GDPRScreen'));
+const LazyLandscapeSettingsScreen = lazy(() => import('../screens/settings/LandscapeSettingsScreen'));
+const LazyNotificationPreferencesScreen = lazy(() => import('../screens/settings/NotificationPreferencesScreen'));
+const LazyPortfolioAlertsScreen = lazy(() => import('../screens/settings/PortfolioAlertsScreen'));
+const LazyRiskSettingsScreen = lazy(() => import('../screens/settings/RiskSettingsScreen'));
+const LazySecurityAuditLogScreen = lazy(() => import('../screens/settings/SecurityAuditLogScreen'));
+const LazySecuritySettingsScreen = lazy(() => import('../screens/settings/SecuritySettingsScreen'));
+const LazySubscriptionScreen = lazy(() => import('../screens/settings/SubscriptionScreen'));
+const LazyTelegramConnectScreen = lazy(() => import('../screens/settings/TelegramConnectScreen'));
+const LazyTenantConfigScreen = lazy(() => import('../screens/settings/TenantConfigScreen'));
+const LazyTwoFactorSetupScreen = lazy(() => import('../screens/settings/TwoFactorSetupScreen'));
+const LazyVoiceSettingsScreen = lazy(() => import('../screens/settings/VoiceSettingsScreen'));
+const LazyWebhookManagementScreen = lazy(() => import('../screens/settings/WebhookManagementScreen'));
+const LazyWidgetSettingsScreen = lazy(() => import('../screens/settings/WidgetSettingsScreen'));
+const LazySnapTradeConnectScreen = lazy(() => import('../screens/snaptrade/SnapTradeConnectScreen'));
+const LazySnapTradeOrderScreen = lazy(() => import('../screens/snaptrade/SnapTradeOrderScreen'));
+const LazySnapTradePortfolioScreen = lazy(() => import('../screens/snaptrade/SnapTradePortfolioScreen'));
+const LazyCreatePollScreen = lazy(() => import('../screens/social/CreatePollScreen'));
+const LazyPollsScreen = lazy(() => import('../screens/social/PollsScreen'));
+const LazyRevenueDashboardScreen = lazy(() => import('../screens/social/RevenueDashboardScreen'));
+const LazySocialTradingScreen = lazy(() => import('../screens/social/SocialTradingScreen'));
+const LazyTraderProfileScreen = lazy(() => import('../screens/social/TraderProfileScreen'));
+const LazyCompanyFundamentalsScreen = lazy(() => import('../screens/stock/CompanyFundamentalsScreen'));
+const LazyCryptoDetailScreen = lazy(() => import('../screens/stock/CryptoDetailScreen'));
+const LazyGlobalStockDetailScreen = lazy(() => import('../screens/stock/GlobalStockDetailScreen'));
+const LazyStockDetailScreen = lazy(() => import('../screens/stock/StockDetailScreen'));
+const LazyStockScreenerScreen = lazy(() => import('../screens/stock/StockScreenerScreen'));
+const LazyUSStockDetailScreen = lazy(() => import('../screens/stock/USStockDetailScreen'));
+const LazyHelpScreen = lazy(() => import('../screens/support/HelpScreen'));
+const LazyLegalScreen = lazy(() => import('../screens/legal/LegalScreen'));
+const LazyLearnScreen = lazy(() => import('../screens/tabs/LearnScreen'));
+const LazyCryptoTradingScreen = lazy(() => import('../screens/trade/CryptoTradingScreen'));
+const LazyFnOOptionsChainScreen = lazy(() => import('../screens/trade/FnOOptionsChainScreen'));
+const LazyOpenOrdersScreen = lazy(() => import('../screens/trade/OpenOrdersScreen'));
+const LazyPlaceOrderScreen = lazy(() => import('../screens/trade/PlaceOrderScreen'));
+const LazyStrategyBuilderScreen = lazy(() => import('../screens/trade/StrategyBuilderScreen'));
+const LazyStrategyPerformanceScreen = lazy(() => import('../screens/trade/StrategyPerformanceScreen'));
+const LazyTradeHistoryScreen = lazy(() => import('../screens/trade/TradeHistoryScreen'));
+const LazyUSStocksTradingScreen = lazy(() => import('../screens/trade/USStocksTradingScreen'));
+const LazyRetirementPlannerScreen = lazy(() => import('../screens/wealth/RetirementPlannerScreen'));
+const LazyWealthDashboardScreen = lazy(() => import('../screens/wealth/WealthDashboardScreen'));
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -512,6 +515,7 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer
+      ref={navigationRef}
       linking={linking}
       onReady={() => {
         // Track the initial screen on first render
@@ -528,6 +532,12 @@ export default function AppNavigator() {
         }
       }}
     >
+      {/* Lazy screens (React.lazy below) suspend on first navigation — the
+          fallback keeps the current screen mounted with the app background
+          instead of throwing "A component suspended while responding to
+          synchronous input". Screens are tiny once Metro splits them, so the
+          fallback never shows in practice. */}
+      <Suspense fallback={null}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -553,135 +563,137 @@ export default function AppNavigator() {
           // Main App Screens
           <>
             <Stack.Screen name="MainTabs" component={MainTabs} />
-            <Stack.Screen name="StockDetail" component={StockDetailScreen} />
-            <Stack.Screen name="StockScreener" component={StockScreenerScreen} />
-            <Stack.Screen name="NewsFeed" component={NewsFeedScreen} />
-            <Stack.Screen name="IPOCalendar" component={IPOCalendarScreen} />
-            <Stack.Screen name="IPODashboard" component={IPODashboardScreen} />
-            <Stack.Screen name="IPODetail" component={IPODetailScreen} />
-            <Stack.Screen name="NFODashboard" component={NFODashboardScreen} />
-            <Stack.Screen name="NFODetail" component={NFODetailScreen} />
-            <Stack.Screen name="EconomicCalendar" component={EconomicCalendarScreen} />
-            <Stack.Screen name="ChatList" component={ChatRoomListScreen} />
-            <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
-            <Stack.Screen name="BehavioralJournal" component={BehavioralJournalScreen} />
-            <Stack.Screen name="ContractNoteParser" component={ContractNoteUploadScreen} />
-            <Stack.Screen name="USMarkets" component={USMarketsScreen} />
-            <Stack.Screen name="BondDashboard" component={BondDashboardScreen} />
-            <Stack.Screen name="CurrencyMarkets" component={CurrencyMarketsScreen} />
-            <Stack.Screen name="TaxHarvesting" component={TaxHarvestingCalendarScreen} />
-            <Stack.Screen name="CommodityMarkets" component={CommodityMarketsScreen} />
-            <Stack.Screen name="FuturesCurve" component={FuturesCurveScreen} />
-            <Stack.Screen name="USStockDetail" component={USStockDetailScreen} />
-            <Stack.Screen name="GlobalStockDetail" component={GlobalStockDetailScreen} />
-            <Stack.Screen name="CompanyFundamentals" component={CompanyFundamentalsScreen} />
-            <Stack.Screen name="Learn" component={LearnScreen} />
-            <Stack.Screen name="Polls" component={PollsScreen} />
-            <Stack.Screen name="CreatePoll" component={CreatePollScreen} />
-            <Stack.Screen name="RevenueDashboard" component={RevenueDashboardScreen} />
-            <Stack.Screen name="SocialTrading" component={SocialTradingScreen} />
-            <Stack.Screen name="TraderProfile" component={TraderProfileScreen} />
-            <Stack.Screen name="Community" component={CommunityScreen} />
-            <Stack.Screen name="CommunityPost" component={PostDetailScreen} />
-            <Stack.Screen name="AIInsights" component={AIInsightsScreen} />
-            <Stack.Screen name="AIChat" component={AIChatScreen} />
-            <Stack.Screen name="AITradeAssistant" component={AITradeAssistantScreen} />
-            <Stack.Screen name="EarningsCall" component={EarningsCallScreen} />
-            <Stack.Screen name="SentimentAnalysis" component={SentimentAnalysisScreen} />
-            <Stack.Screen name="SentimentAlert" component={SentimentAlertScreen} />
-            <Stack.Screen name="LiveFeed" component={LiveFeedScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="MutualFunds" component={MutualFundsScreen} />
-            <Stack.Screen name="SIPs" component={MutualFundsScreen} />
-            <Stack.Screen name="TradeHistory" component={TradeHistoryScreen} />
-            <Stack.Screen name="PlaceOrder" component={PlaceOrderScreen} />
-            <Stack.Screen name="OpenOrders" component={OpenOrdersScreen} />
-            <Stack.Screen name="Reports" component={ReportsScreen} />
-            <Stack.Screen name="PeriodReport" component={PeriodReportScreen} />
-            <Stack.Screen name="Notifications" component={NotificationsScreen} />
-            <Stack.Screen name="Achievements" component={AchievementsScreen} />
-            <Stack.Screen name="Settings" component={RiskSettingsScreen} />
-            <Stack.Screen name="Help" component={HelpScreen} />
-            <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
-            <Stack.Screen name="LessonView" component={LessonViewScreen} />
-            <Stack.Screen name="QuizResult" component={QuizResultScreen} />
-            <Stack.Screen name="Glossary" component={GlossaryScreen} />
-            <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
-            <Stack.Screen name="CreateCourse" component={CreateCourseScreen} />
-            <Stack.Screen name="CommunityCourses" component={CommunityCoursesScreen} />
-            <Stack.Screen name="LearningPaths" component={LearningPathsScreen} />
-            <Stack.Screen name="LearningPathDetail" component={LearningPathDetailScreen} />
-            <Stack.Screen name="Certificate" component={CertificateScreen} />
-            <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
-            <Stack.Screen name="PortfolioAlerts" component={PortfolioAlertsScreen} />
-            <Stack.Screen name="Subscription" component={SubscriptionScreen} />
-            <Stack.Screen name="AvailableCoupons" component={AvailableCouponsScreen} />
-            <Stack.Screen name="CouponHistory" component={CouponHistoryScreen} />
-            <Stack.Screen name="AdminCouponManager" component={AdminCouponManagementScreen} />
-            <Stack.Screen name="AdminCourseReview" component={AdminCourseReviewScreen} />
-            <Stack.Screen name="PaymentHistory" component={PaymentHistoryScreen} />
-            <Stack.Screen name="AddFunds" component={AddFundsScreen} />
-            <Stack.Screen name="Withdraw" component={WithdrawScreen} />
-            <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
-            <Stack.Screen name="Transfer" component={TransferScreen} />
-            <Stack.Screen name="UPI" component={UPIScreen} />
-            <Stack.Screen name="FundsDashboard" component={FundsDashboardScreen} />
-            <Stack.Screen name="BrokerConnect" component={ConnectBrokerView} />
-            <Stack.Screen name="WidgetSettings" component={WidgetSettingsScreen} />
-            <Stack.Screen name="Referral" component={ReferralScreen} />
-            <Stack.Screen name="TenantConfig" component={TenantConfigScreen} />
-            <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
-            <Stack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
-            <Stack.Screen name="SecurityAuditLog" component={SecurityAuditLogScreen} />
-            <Stack.Screen name="ApiKeys" component={ApiKeyManagementScreen} />
-            <Stack.Screen name="Webhooks" component={WebhookManagementScreen} />
-            <Stack.Screen name="TwoFactorSetup" component={TwoFactorSetupScreen} />
-            <Stack.Screen name="FeatureFlags" component={FeatureFlagsScreen} />
-            <Stack.Screen name="ABTestRunner" component={ABTestRunnerScreen} />
-            <Stack.Screen name="MonteCarlo" component={MonteCarloSimulationScreen} />
-            <Stack.Screen name="PortfolioRebalancing" component={PortfolioRebalancingScreen} />
-            <Stack.Screen name="DividendTracker" component={DividendTrackerScreen} />
-            <Stack.Screen name="CorrelationMatrix" component={CorrelationMatrixScreen} />
-            <Stack.Screen name="FactorAnalysis" component={FactorAnalysisScreen} />
-            <Stack.Screen name="TelegramConnect" component={TelegramConnectScreen} />
-            <Stack.Screen name="AISettings" component={AISettingsScreen} />
-            <Stack.Screen name="DarkMode" component={DarkModeSettingsScreen} />
-            <Stack.Screen name="GDPR" component={GDPRScreen} />
-            <Stack.Screen name="Accessibility" component={AccessibilitySettingsScreen} />
-            <Stack.Screen name="LandscapeMode" component={LandscapeSettingsScreen} />
-            <Stack.Screen name="CDNOptimization" component={CDNOptimizationScreen} />
-            <Stack.Screen name="CryptoDetail" component={CryptoDetailScreen} />
-            <Stack.Screen name="WealthDashboard" component={WealthDashboardScreen} />
+            <Stack.Screen name="StockDetail" component={LazyStockDetailScreen} />
+            <Stack.Screen name="StockScreener" component={LazyStockScreenerScreen} />
+            <Stack.Screen name="NewsFeed" component={LazyNewsFeedScreen} />
+            <Stack.Screen name="IPOCalendar" component={LazyIPOCalendarScreen} />
+            <Stack.Screen name="IPODashboard" component={LazyIPODashboardScreen} />
+            <Stack.Screen name="IPODetail" component={LazyIPODetailScreen} />
+            <Stack.Screen name="NFODashboard" component={LazyNFODashboardScreen} />
+            <Stack.Screen name="NFODetail" component={LazyNFODetailScreen} />
+            <Stack.Screen name="EconomicCalendar" component={LazyEconomicCalendarScreen} />
+            <Stack.Screen name="ChatList" component={LazyChatRoomListScreen} />
+            <Stack.Screen name="ChatRoom" component={LazyChatRoomScreen} />
+            <Stack.Screen name="BehavioralJournal" component={LazyBehavioralJournalScreen} />
+            <Stack.Screen name="ContractNoteParser" component={LazyContractNoteUploadScreen} />
+            <Stack.Screen name="USMarkets" component={LazyUSMarketsScreen} />
+            <Stack.Screen name="BondDashboard" component={LazyBondDashboardScreen} />
+            <Stack.Screen name="CurrencyMarkets" component={LazyCurrencyMarketsScreen} />
+            <Stack.Screen name="TaxHarvesting" component={LazyTaxHarvestingCalendarScreen} />
+            <Stack.Screen name="CommodityMarkets" component={LazyCommodityMarketsScreen} />
+            <Stack.Screen name="FuturesCurve" component={LazyFuturesCurveScreen} />
+            <Stack.Screen name="USStockDetail" component={LazyUSStockDetailScreen} />
+            <Stack.Screen name="GlobalStockDetail" component={LazyGlobalStockDetailScreen} />
+            <Stack.Screen name="CompanyFundamentals" component={LazyCompanyFundamentalsScreen} />
+            <Stack.Screen name="Learn" component={LazyLearnScreen} />
+            <Stack.Screen name="Polls" component={LazyPollsScreen} />
+            <Stack.Screen name="CreatePoll" component={LazyCreatePollScreen} />
+            <Stack.Screen name="RevenueDashboard" component={LazyRevenueDashboardScreen} />
+            <Stack.Screen name="SocialTrading" component={LazySocialTradingScreen} />
+            <Stack.Screen name="TraderProfile" component={LazyTraderProfileScreen} />
+            <Stack.Screen name="Community" component={LazyCommunityScreen} />
+            <Stack.Screen name="CommunityPost" component={LazyPostDetailScreen} />
+            <Stack.Screen name="AIInsights" component={LazyAIInsightsScreen} />
+            <Stack.Screen name="AIChat" component={LazyAIChatScreen} />
+            <Stack.Screen name="AITradeAssistant" component={LazyAITradeAssistantScreen} />
+            <Stack.Screen name="EarningsCall" component={LazyEarningsCallScreen} />
+            <Stack.Screen name="SentimentAnalysis" component={LazySentimentAnalysisScreen} />
+            <Stack.Screen name="SentimentAlert" component={LazySentimentAlertScreen} />
+            <Stack.Screen name="LiveFeed" component={LazyLiveFeedScreen} />
+            <Stack.Screen name="Profile" component={LazyProfileScreen} />
+            <Stack.Screen name="MutualFunds" component={LazyMutualFundsScreen} />
+            <Stack.Screen name="SIPs" component={LazyMutualFundsScreen} />
+            <Stack.Screen name="TradeHistory" component={LazyTradeHistoryScreen} />
+            <Stack.Screen name="PlaceOrder" component={LazyPlaceOrderScreen} />
+            <Stack.Screen name="OpenOrders" component={LazyOpenOrdersScreen} />
+            <Stack.Screen name="Reports" component={LazyReportsScreen} />
+            <Stack.Screen name="PeriodReport" component={LazyPeriodReportScreen} />
+            <Stack.Screen name="Notifications" component={LazyNotificationsScreen} />
+            <Stack.Screen name="Achievements" component={LazyAchievementsScreen} />
+            <Stack.Screen name="Settings" component={LazyRiskSettingsScreen} />
+            <Stack.Screen name="Help" component={LazyHelpScreen} />
+            <Stack.Screen name="Legal" component={LazyLegalScreen} />
+            <Stack.Screen name="CourseDetail" component={LazyCourseDetailScreen} />
+            <Stack.Screen name="LessonView" component={LazyLessonViewScreen} />
+            <Stack.Screen name="QuizResult" component={LazyQuizResultScreen} />
+            <Stack.Screen name="Glossary" component={LazyGlossaryScreen} />
+            <Stack.Screen name="MyCourses" component={LazyMyCoursesScreen} />
+            <Stack.Screen name="CreateCourse" component={LazyCreateCourseScreen} />
+            <Stack.Screen name="CommunityCourses" component={LazyCommunityCoursesScreen} />
+            <Stack.Screen name="LearningPaths" component={LazyLearningPathsScreen} />
+            <Stack.Screen name="LearningPathDetail" component={LazyLearningPathDetailScreen} />
+            <Stack.Screen name="Certificate" component={LazyCertificateScreen} />
+            <Stack.Screen name="NotificationPreferences" component={LazyNotificationPreferencesScreen} />
+            <Stack.Screen name="PortfolioAlerts" component={LazyPortfolioAlertsScreen} />
+            <Stack.Screen name="Subscription" component={LazySubscriptionScreen} />
+            <Stack.Screen name="AvailableCoupons" component={LazyAvailableCouponsScreen} />
+            <Stack.Screen name="CouponHistory" component={LazyCouponHistoryScreen} />
+            <Stack.Screen name="AdminCouponManager" component={LazyAdminCouponManagementScreen} />
+            <Stack.Screen name="AdminCourseReview" component={LazyAdminCourseReviewScreen} />
+            <Stack.Screen name="PaymentHistory" component={LazyPaymentHistoryScreen} />
+            <Stack.Screen name="AddFunds" component={LazyAddFundsScreen} />
+            <Stack.Screen name="Withdraw" component={LazyWithdrawScreen} />
+            <Stack.Screen name="TransactionHistory" component={LazyTransactionHistoryScreen} />
+            <Stack.Screen name="Transfer" component={LazyTransferScreen} />
+            <Stack.Screen name="UPI" component={LazyUPIScreen} />
+            <Stack.Screen name="FundsDashboard" component={LazyFundsDashboardScreen} />
+            <Stack.Screen name="BrokerConnect" component={LazyConnectBrokerView} />
+            <Stack.Screen name="WidgetSettings" component={LazyWidgetSettingsScreen} />
+            <Stack.Screen name="Referral" component={LazyReferralScreen} />
+            <Stack.Screen name="TenantConfig" component={LazyTenantConfigScreen} />
+            <Stack.Screen name="VoiceSettings" component={LazyVoiceSettingsScreen} />
+            <Stack.Screen name="SecuritySettings" component={LazySecuritySettingsScreen} />
+            <Stack.Screen name="SecurityAuditLog" component={LazySecurityAuditLogScreen} />
+            <Stack.Screen name="ApiKeys" component={LazyApiKeyManagementScreen} />
+            <Stack.Screen name="Webhooks" component={LazyWebhookManagementScreen} />
+            <Stack.Screen name="TwoFactorSetup" component={LazyTwoFactorSetupScreen} />
+            <Stack.Screen name="FeatureFlags" component={LazyFeatureFlagsScreen} />
+            <Stack.Screen name="ABTestRunner" component={LazyABTestRunnerScreen} />
+            <Stack.Screen name="MonteCarlo" component={LazyMonteCarloSimulationScreen} />
+            <Stack.Screen name="PortfolioRebalancing" component={LazyPortfolioRebalancingScreen} />
+            <Stack.Screen name="DividendTracker" component={LazyDividendTrackerScreen} />
+            <Stack.Screen name="CorrelationMatrix" component={LazyCorrelationMatrixScreen} />
+            <Stack.Screen name="FactorAnalysis" component={LazyFactorAnalysisScreen} />
+            <Stack.Screen name="TelegramConnect" component={LazyTelegramConnectScreen} />
+            <Stack.Screen name="AISettings" component={LazyAISettingsScreen} />
+            <Stack.Screen name="DarkMode" component={LazyDarkModeSettingsScreen} />
+            <Stack.Screen name="GDPR" component={LazyGDPRScreen} />
+            <Stack.Screen name="Accessibility" component={LazyAccessibilitySettingsScreen} />
+            <Stack.Screen name="LandscapeMode" component={LazyLandscapeSettingsScreen} />
+            <Stack.Screen name="CDNOptimization" component={LazyCDNOptimizationScreen} />
+            <Stack.Screen name="CryptoDetail" component={LazyCryptoDetailScreen} />
+            <Stack.Screen name="WealthDashboard" component={LazyWealthDashboardScreen} />
             <Stack.Screen name="GoalCreate" component={GoalCreateScreen} />
             <Stack.Screen name="GoalDetail" component={GoalDetailScreen} />
-            <Stack.Screen name="RetirementPlanner" component={RetirementPlannerScreen} />
-            <Stack.Screen name="USStocksTrading" component={USStocksTradingScreen} />
-            <Stack.Screen name="CryptoTrading" component={CryptoTradingScreen} />
-            <Stack.Screen name="FnOOptionsChain" component={FnOOptionsChainScreen} />
-            <Stack.Screen name="StrategyBuilder" component={StrategyBuilderScreen} />
-            <Stack.Screen name="StrategyPerformance" component={StrategyPerformanceScreen} />
-            <Stack.Screen name="SIPCalculator" component={SIPCalculator} />
-            <Stack.Screen name="StepUpSip" component={StepUpSipScreen} />
-            <Stack.Screen name="LumpsumCalculator" component={LumpsumCalculator} />
-            <Stack.Screen name="EMICalculator" component={EMICalculator} />
-            <Stack.Screen name="TaxCalculator" component={TaxCalculator} />
-            <Stack.Screen name="CurrencyConverter" component={CurrencyConverterScreen} />
-            <Stack.Screen name="SnapTradeConnect" component={SnapTradeConnectScreen} />
-            <Stack.Screen name="SnapTradePortfolio" component={SnapTradePortfolioScreen} />
-            <Stack.Screen name="SnapTradeOrder" component={SnapTradeOrderScreen} />
-            <Stack.Screen name="PanVerification" component={PanVerificationScreen} />
-            <Stack.Screen name="AadhaarVerification" component={AadhaarVerificationScreen} />
-            <Stack.Screen name="DigiLocker" component={DigiLockerScreen} />
-            <Stack.Screen name="BankLinking" component={BankLinkingScreen} />
-            <Stack.Screen name="AdvisorList" component={AdvisorListScreen} />
-            <Stack.Screen name="AdvisorDetail" component={AdvisorDetailScreen} />
-            <Stack.Screen name="MyConsultations" component={MyConsultationsScreen} />
-            <Stack.Screen name="ConsultationDetail" component={ConsultationDetailScreen} />
-            <Stack.Screen name="ReviewForm" component={ReviewFormScreen} />
-            <Stack.Screen name="AdminAdvisor" component={AdminAdvisorScreen} />
+            <Stack.Screen name="RetirementPlanner" component={LazyRetirementPlannerScreen} />
+            <Stack.Screen name="USStocksTrading" component={LazyUSStocksTradingScreen} />
+            <Stack.Screen name="CryptoTrading" component={LazyCryptoTradingScreen} />
+            <Stack.Screen name="FnOOptionsChain" component={LazyFnOOptionsChainScreen} />
+            <Stack.Screen name="StrategyBuilder" component={LazyStrategyBuilderScreen} />
+            <Stack.Screen name="StrategyPerformance" component={LazyStrategyPerformanceScreen} />
+            <Stack.Screen name="SIPCalculator" component={LazySIPCalculator} />
+            <Stack.Screen name="StepUpSip" component={LazyStepUpSipScreen} />
+            <Stack.Screen name="LumpsumCalculator" component={LazyLumpsumCalculator} />
+            <Stack.Screen name="EMICalculator" component={LazyEMICalculator} />
+            <Stack.Screen name="TaxCalculator" component={LazyTaxCalculator} />
+            <Stack.Screen name="CurrencyConverter" component={LazyCurrencyConverterScreen} />
+            <Stack.Screen name="SnapTradeConnect" component={LazySnapTradeConnectScreen} />
+            <Stack.Screen name="SnapTradePortfolio" component={LazySnapTradePortfolioScreen} />
+            <Stack.Screen name="SnapTradeOrder" component={LazySnapTradeOrderScreen} />
+            <Stack.Screen name="PanVerification" component={LazyPanVerificationScreen} />
+            <Stack.Screen name="AadhaarVerification" component={LazyAadhaarVerificationScreen} />
+            <Stack.Screen name="DigiLocker" component={LazyDigiLockerScreen} />
+            <Stack.Screen name="BankLinking" component={LazyBankLinkingScreen} />
+            <Stack.Screen name="AdvisorList" component={LazyAdvisorListScreen} />
+            <Stack.Screen name="AdvisorDetail" component={LazyAdvisorDetailScreen} />
+            <Stack.Screen name="MyConsultations" component={LazyMyConsultationsScreen} />
+            <Stack.Screen name="ConsultationDetail" component={LazyConsultationDetailScreen} />
+            <Stack.Screen name="ReviewForm" component={LazyReviewFormScreen} />
+            <Stack.Screen name="AdminAdvisor" component={LazyAdminAdvisorScreen} />
           </>
         )}
       </Stack.Navigator>
+      </Suspense>
     </NavigationContainer>
   );
 }

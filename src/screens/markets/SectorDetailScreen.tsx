@@ -116,7 +116,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
       header={
         <View style={styles.header}>
           <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
             <View style={{ flex: 1, marginLeft: SPACING.md }}>

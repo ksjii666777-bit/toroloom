@@ -330,6 +330,7 @@ export default function LessonViewScreen({ route, navigation }: NativeStackScree
           <View style={styles.lessonNav}>
             {prevLesson && (
               <Pressable
+                accessibilityLabel={t('app.goBack')}
                 style={styles.lessonNavBtn}
                 onPress={() => {
                   setShowQuiz(false);

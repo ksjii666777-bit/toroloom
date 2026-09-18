@@ -16,6 +16,16 @@ export default {
         rupeeLimit: '₹ सीमा',
         percentLimit: '% सीमा',
         instructions: 'केवल SQUARE OFF ऑर्डर की अनुमति है। लॉकडाउन अवधि समाप्त होने तक अन्य सभी क्रियाएँ अवरुद्ध हैं।',
+        emergencyNote: 'घबराहट की स्थिति? आप हमेशा बाहर निकल सकते हैं:',
+        emergencyButton: 'इमरजेंसी एक्जिट सब',
+        emergencyWorking: 'पोज़िशन बंद हो रही हैं…',
+        emergencyTitle: 'इमरजेंसी एक्जिट',
+        emergencyConfirm: 'इससे आपकी सभी खुली पोज़िशन के लिए मार्केट SELL ऑर्डर लगेंगे। नुकसान बुक हो सकता है। जारी रखें?',
+        emergencyGo: 'सब बंद करें',
+        emergencyCancel: 'रद्द करें',
+        emergencyPartial: 'आंशिक एक्जिट',
+        emergencyFailed: 'एक्जिट विफल',
+        emergencyFailedMsg: 'पोज़िशन बंद करने में समस्या हुई। कृपया फिर से कोशिश करें — आपकी पोज़िशन खुली हैं।',
     },
     // ── UpgradePromptModal ─────────────────────────────────────────────
     upgradePrompt: {

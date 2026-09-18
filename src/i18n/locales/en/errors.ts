@@ -15,4 +15,9 @@ export default {
     fieldRequired: 'This field is required',
     passwordTooShort: 'Password must be at least 6 characters',
     passwordsDoNotMatch: 'Passwords do not match',
+    somethingWentWrong: 'Something went wrong',
+    brokerConnect: {
+        title: 'Broker Connection Problem',
+        message: 'We could not reach your broker account. Check your connection and try again.',
+    },
 };

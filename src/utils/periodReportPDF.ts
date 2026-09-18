@@ -23,6 +23,7 @@
 
 import { formatCurrency, formatPercent } from './formatters';
 import type { Holding } from '../types';
+import type { DisciplineSummary } from './analytics/disciplineAnalytics';
 
 // ──── Sector Color Map ──────────────────────────────────────────────────────
 
@@ -54,6 +55,43 @@ function todayStr(): string {
 }
 
 // ──── HTML Builder ──────────────────────────────────────────────────────────
+
+/**
+ * Render the R:R Discipline section for the PDF.
+ * Returns '' when there is nothing meaningful to show (no commitment,
+ * no measurable trades) so the section disappears from the PDF.
+ */
+export function buildDisciplineHTML(
+  discipline: DisciplineSummary | null,
+  committedRatio: number | null,
+): string {
+  if (!discipline || committedRatio == null || committedRatio <= 0) return '';
+  if (discipline.measured === 0) return '';
+
+  const allClean = discipline.breaches === 0;
+  const flagRows = discipline.flagged.map(f => `
+        <div class="discipline-flag-row">
+          <span style="font-weight:700">${f.symbol}</span>
+          <span>realized 1:${f.realizedRR.toFixed(2)} vs committed 1:${f.committedRatio}</span>
+          <span style="color:${f.pnl < 0 ? '#D32F2F' : '#2E7D32'};font-weight:700">${f.pnl < 0 ? '−' : '+'}₹${Math.abs(f.pnl).toLocaleString('en-IN')}</span>
+        </div>`).join('');
+
+  return `
+  <!-- ── R:R Discipline ── -->
+  <div class="section">
+    <div class="section-title">R:R Discipline (committed 1:${committedRatio})</div>
+    <div style="display:flex;gap:16px;font-size:9px;margin-bottom:6px">
+      <span><strong>${discipline.measured}</strong> measured</span>
+      <span style="color:${allClean ? '#2E7D32' : '#D32F2F'}"><strong>${discipline.breaches}</strong> below commitment</span>
+      <span>avg realized <strong>1:${discipline.avgRealizedRR.toFixed(2)}</strong></span>
+      ${discipline.lossFromBreaches < 0 ? `<span style="color:#D32F2F">₹ lost to breaches: <strong>₹${Math.abs(discipline.lossFromBreaches).toLocaleString('en-IN')}</strong></span>` : ''}
+    </div>
+    ${allClean
+      ? '<div class="alert alert-ok"><strong>✅ Every trade honoured your committed R:R</strong> — discipline holding</div>'
+      : flagRows}
+    ${!allClean ? '<p style="font-size:7px;color:#9A9AB0;margin-top:4px">Trades whose realized risk-reward fell below your committed ratio — review entry timing and stop placement in the journal.</p>' : ''}
+  </div>`;
+}
 
 /**
  * Build a full Period Report HTML document for PDF export.
@@ -92,6 +130,10 @@ export function buildPeriodReportHTML(
   cognitiveSummary: any | null,
   periodLabel: string,
   holdings: Holding[],
+  extras?: {
+    discipline?: DisciplineSummary | null;
+    committedRatio?: number | null;
+  },
 ): string {
   const m = metrics;
   const cg = capitalGains;
@@ -140,6 +182,9 @@ export function buildPeriodReportHTML(
       <td class="red">${p.losers}</td>
     </tr>
   `).join('');
+
+  // ── R:R discipline section ─────────────────────────────
+  const disciplineHTML = buildDisciplineHTML(extras?.discipline ?? null, extras?.committedRatio ?? null);
 
   // ── Alert blocks ───────────────────────────────────────────
   let alertHTML = '';
@@ -195,6 +240,7 @@ export function buildPeriodReportHTML(
     .two-col { display: flex; gap: 10px; }
     .two-col > div { flex: 1; }
     .alert { padding: 6px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 9px; border-left: 3px solid; }
+    .discipline-flag-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 0.5px solid #E0E0F0; font-size: 8px; }
     .alert-danger { background: #FF174408; border-color: #FF1744; }
     .alert-warning { background: #FF980008; border-color: #FF9800; }
     .alert-info { background: #6C63FF08; border-color: #6C63FF; }
@@ -310,6 +356,8 @@ export function buildPeriodReportHTML(
     <div class="section-title">Behavioral Insights</div>
     ${alertHTML}
   </div>` : ''}
+
+  ${disciplineHTML}
 
   ${periods.length > 0 ? `
   <!-- ── Period Breakdown ── -->

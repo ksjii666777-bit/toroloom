@@ -366,7 +366,11 @@ vi.mock('../services/api/market', () => ({
   marketApi: {
     getIndices: vi.fn(),
     getStocks: vi.fn(),
+    getQuote: vi.fn(),
+    getBulkQuotes: vi.fn(),
+    getOHLC: vi.fn(() => Promise.resolve([])),
     search: vi.fn(() => Promise.resolve([])),
+    getFundamentals: vi.fn(),
   },
 }));
 
@@ -653,14 +657,36 @@ vi.mock('react-native-webview', () => ({
 // ==================== Mock react-native-keychain ====================
 // The package ships TypeScript source in lib/commonjs/ which vitest cannot
 // parse. Mock it to prevent SyntaxError on import.
-vi.mock('react-native-keychain', () => ({
-  setGenericPassword: vi.fn(() => Promise.resolve()),
+// Includes the ACCESS_CONTROL / ACCESSIBLE constant maps used by
+// services/gateway/sessionStorage.ts (biometric access control options).
+const keychainAccessControlMap = {
+  BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
+  BIOMETRY_CURRENT_SET: 'BIOMETRY_CURRENT_SET',
+  BIOMETRY_ANY: 'BIOMETRY_ANY',
+  DEVICE_PASSCODE: 'DEVICE_PASSCODE',
+  USER_PRESENCE: 'USER_PRESENCE',
+  APPLICATION_PASSWORD: 'APPLICATION_PASSWORD',
+} as const;
+const keychainAccessibleMap = {
+  WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+  WHEN_UNLOCKED: 'WHEN_UNLOCKED',
+  ALWAYS: 'ALWAYS',
+  WHEN_PASSCODE_SET_THIS_DEVICE_ONLY: 'WHEN_PASSCODE_SET_THIS_DEVICE_ONLY',
+} as const;
+
+const keychainMockImpl = () => ({
+  setGenericPassword: vi.fn(() => Promise.resolve('mock_keychain_result')),
   getGenericPassword: vi.fn(() => Promise.resolve({ service: '', username: '', password: '' })),
-  resetGenericPassword: vi.fn(() => Promise.resolve()),
-  default: {
-    setGenericPassword: vi.fn(() => Promise.resolve()),
-    getGenericPassword: vi.fn(() => Promise.resolve({ service: '', username: '', password: '' })),
-    resetGenericPassword: vi.fn(() => Promise.resolve()),
-  },
+  resetGenericPassword: vi.fn(() => Promise.resolve(true)),
+  ACCESS_CONTROL: keychainAccessControlMap,
+  ACCESSIBLE: keychainAccessibleMap,
+  SECURITY_LEVEL: { SECURE_HARDWARE: 'SECURE_HARDWARE', SOFTWARE: 'SOFTWARE', ANY: 'ANY' },
+});
+
+const keychainMock = keychainMockImpl();
+
+vi.mock('react-native-keychain', () => ({
+  ...keychainMock,
+  default: keychainMock,
 }));
 

@@ -99,7 +99,7 @@ export default function EMICalculator() {
       >
   {/* Header */}
         <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-          <Pressable onPress={() => navigation.goBack()} style={({ pressed: _pressed }) => [styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <Pressable onPress={() => navigation.goBack()} style={({ pressed: _pressed }) => [styles.backBtn, { backgroundColor: colors.bgCard }]} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={20} color={colors.text} />
           </Pressable>
           <View style={styles.headerCenter}>

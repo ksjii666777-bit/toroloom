@@ -628,7 +628,7 @@ export default function BankLinkingScreen({ navigation }: NativeStackScreenProps
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} testID="back-button">
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} testID="back-button" accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
             <View style={styles.headerInfo}>

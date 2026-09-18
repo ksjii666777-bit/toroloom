@@ -139,4 +139,5 @@ export default {
     accessibility: 'Accessibility',
     apiKeys: 'API Keys',
     webhooks: 'Webhooks',
+    asOfToday: 'As of today',
 };

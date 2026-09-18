@@ -64,8 +64,8 @@ const positiveMetrics = {
 
 /** Empty capital gains */
 const emptyCG = {
-  shortTerm: { gains: 0, count: 0, taxRate: 15, estimatedTax: 0 },
-  longTerm: { gains: 0, count: 0, taxRate: 10, estimatedTax: 0 },
+  shortTerm: { gains: 0, count: 0, taxRate: 20, estimatedTax: 0 },
+  longTerm: { gains: 0, count: 0, taxRate: 12.5, estimatedTax: 0 },
   totalEstimatedTax: 0,
   sttPaid: 0,
   totalBrokerage: 0,
@@ -73,8 +73,8 @@ const emptyCG = {
 
 /** Capital gains with positive tax liability */
 const profitCG = {
-  shortTerm: { gains: 50000, count: 20, taxRate: 15, estimatedTax: 7500 },
-  longTerm: { gains: 150000, count: 5, taxRate: 10, estimatedTax: 5000 },
+  shortTerm: { gains: 50000, count: 20, taxRate: 20, estimatedTax: 10000 },
+  longTerm: { gains: 150000, count: 5, taxRate: 12.5, estimatedTax: 3125 },
   totalEstimatedTax: 12500,
   sttPaid: 3200,
   totalBrokerage: 1850,
@@ -354,8 +354,8 @@ describe('buildPeriodReportHTML', () => {
       [energyHolding, techHolding, bankHolding, profitHolding],
     );
     // Check for the tax breakdown by looking for tax rate numbers
-    expect(html).toContain('15%'); // STCG rate
-    expect(html).toContain('10%'); // LTCG rate
+    expect(html).toContain('20%'); // STCG rate
+    expect(html).toContain('12.5%'); // LTCG rate
     expect(html).toContain('20'); // STCG trade count
     expect(html).toContain('5'); // LTCG trade count
   });

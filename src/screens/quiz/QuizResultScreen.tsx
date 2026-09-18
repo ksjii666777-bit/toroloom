@@ -315,6 +315,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
               </AnimatedPressable>
             )}
             <AnimatedPressable
+              accessibilityLabel={t('app.goBack')}
               onPress={() => navigation.goBack()}
               scaleTo={0.97}
               haptic="light"

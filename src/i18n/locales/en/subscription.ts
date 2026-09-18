@@ -72,4 +72,13 @@ export default {
     rupeeOff: '₹ off',
     accessDenied: 'Access Denied',
     accessDeniedMsg: 'Only administrators can access Subscription Analytics.',
+    premium: 'Premium',
+    yourTrialEnds: 'Your trial ends',
+    monthly: 'Monthly',
+    yearly: 'Yearly',
+    confirmPayment: 'Confirm Payment',
+    securePaymentDesc: 'Your payment is secured with 256-bit encryption. We never store your card details.',
+    plan: 'Plan',
+    total: 'Total',
+    payNow: 'Pay Now',
 };

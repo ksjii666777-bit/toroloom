@@ -43,6 +43,7 @@ function KYCUserCard({
   onReject: (u: AdminUser) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const kycColor =
     user.kycStatus === 'verified' ? colors.marketUp :
     user.kycStatus === 'pending' ? colors.warning :
@@ -84,10 +85,10 @@ function KYCUserCard({
           <View style={styles.actionCol}>
             <AnimatedPressable onPress={() => onApprove(user)} haptic="medium" scaleTo={0.9}>
               <View style={[styles.actionBtn, { backgroundColor: colors.marketUp + '20' }]}>
-                <Ionicons name="checkmark" size={18} color={colors.marketUp} />
+                <Ionicons name="checkmark" size={18} color={colors.marketUp} accessibilityLabel={t('app.a11y.approve')} />
               </View>
             </AnimatedPressable>
-            <AnimatedPressable onPress={() => onReject(user)} haptic="warning" scaleTo={0.9}>
+            <AnimatedPressable onPress={() => onReject(user)} haptic="warning" scaleTo={0.9} accessibilityLabel={t('app.a11y.reject')}>
               <View style={[styles.actionBtn, { backgroundColor: colors.danger + '20' }]}>
                 <Ionicons name="close" size={18} color={colors.danger} />
               </View>
@@ -165,7 +166,7 @@ export default function AdminKYCScreen({ navigation }: any) {
       header={
         <>
           <View style={styles.header}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9} accessibilityLabel={t('app.goBack')}>
               <View style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <Ionicons name="chevron-back" size={24} color={colors.text} />
               </View>

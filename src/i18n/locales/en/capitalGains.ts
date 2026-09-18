@@ -19,9 +19,9 @@ export default {
     stclOffset: 'STCL Offset',
     ltclOffset: 'LTCL Offset',
     loadingTaxData: 'Loading tax data...',
-    stcgShort: 'STCG (15%)',
-    ltcgShort: 'LTCG (10%)',
-    stcgTaxLabel: 'STCG Tax (15%)',
+    stcgShort: 'STCG (20%)',
+    ltcgShort: 'LTCG (12.5%)',
+    stcgTaxLabel: 'STCG Tax (20%)',
     stcgEquity: 'STCG (Equity)',
     ltcgEquity: 'LTCG (Equity)',
 };

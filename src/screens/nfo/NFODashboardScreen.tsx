@@ -477,6 +477,7 @@ export default function NFODashboardScreen({ navigation }: NativeStackScreenProp
             </View>
           </View>
           <TouchableOpacity
+            accessibilityLabel={t('app.goBack')}
             style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
             onPress={() => navigation.goBack()}
           >

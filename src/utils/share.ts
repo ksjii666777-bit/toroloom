@@ -4,8 +4,7 @@
 // =============================================================================
 
 import { Share, Alert} from 'react-native';
-let Clipboard: typeof import('expo-clipboard') | null = null;
-try { Clipboard = require('expo-clipboard'); } catch { /* Expo Go fallback */ }
+import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { Linking } from 'react-native';
 import { useShareAnalyticsStore, type SharePlatform, type ShareContentType } from '../store/shareAnalyticsStore';
@@ -61,7 +60,7 @@ export async function shareCopyLink(content: ShareContent): Promise<boolean> {
       ? `${content.message}\n\n${content.url}`
       : content.message;
 
-    await Clipboard?.setStringAsync(text);
+    await Clipboard.setStringAsync(text);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert('Copied!', 'Link copied to clipboard.');
     trackShareEvent('copy', content);

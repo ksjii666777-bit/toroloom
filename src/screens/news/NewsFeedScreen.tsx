@@ -156,6 +156,7 @@ function NewsCard({
   index: number;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(index * 60)).current;
 
@@ -199,7 +200,7 @@ function NewsCard({
                   <Text style={[newsCardStyles.symbolText, { color: colors.warning }]}>{article.symbol}</Text>
                 </View>
               )}
-              <TouchableOpacity onPress={onBookmark} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <TouchableOpacity onPress={onBookmark} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityLabel={t('app.a11y.bookmark')}>
                 <Ionicons
                   name={article.bookmarked ? 'bookmark' : 'bookmark-outline'}
                   size={18}
@@ -355,7 +356,7 @@ function ArticleDetailModal({
         >
           <View style={detailStyles.headerRow}>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close" size={24} color={colors.text} />
+              <Ionicons name="close" size={24} color={colors.text} accessibilityLabel={t('app.a11y.close')} />
             </TouchableOpacity>
             <View style={detailStyles.headerActions}>
               <TouchableOpacity onPress={onBookmark} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -733,7 +734,7 @@ export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<Ro
               autoCorrect={false}
             />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityLabel={t('app.a11y.clearSearch')}>
                 <Ionicons name="close-circle" size={16} color={colors.textMuted} />
               </TouchableOpacity>
             )}

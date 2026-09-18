@@ -15,4 +15,9 @@ export default {
     fieldRequired: 'यह फ़ील्ड आवश्यक है',
     passwordTooShort: 'पासवर्ड कम से कम 6 अक्षर का होना चाहिए',
     passwordsDoNotMatch: 'पासवर्ड मेल नहीं खाते',
+    somethingWentWrong: 'कुछ गलत हो गया',
+    brokerConnect: {
+        title: 'ब्रोकर कनेक्शन समस्या',
+        message: 'हम आपके ब्रोकर खाते से नहीं जुड़ सके। कृपया अपना कनेक्शन जांचें और फिर से प्रयास करें।',
+    },
 };

@@ -252,7 +252,7 @@ export default function CompanyFundamentalsScreen({ route, navigation }: NativeS
   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <View style={styles.header}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92} accessibilityLabel={t('app.goBack')}>
               <View style={[styles.backIcon, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <Ionicons name="arrow-back" size={22} color={colors.text} />
               </View>

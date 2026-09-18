@@ -57,6 +57,7 @@ import ipos from './ipos';
 import journal from './journal';
 import kyc from './kyc';
 import learn from './learn';
+import legal from './legal';
 import sentiment from './sentiment';
 import sentimentAlerts from './sentimentAlerts';
 import landscapeSettings from './landscapeSettings';
@@ -75,6 +76,7 @@ import portfolioRebalancing from './portfolioRebalancing';
 import polls from './polls';
 import performanceChart from './performanceChart';
 import portfolio from './portfolio';
+import position from './position';
 import portfolioAlerts from './portfolioAlerts';
 import profile from './profile';
 import referral from './referral';
@@ -170,6 +172,7 @@ const hi = {
   journal,
   kyc,
   learn,
+  legal,
   sentiment,
   sentimentAlerts,
   landscapeSettings,
@@ -189,6 +192,7 @@ const hi = {
   performanceChart,
   portfolio,
   portfolioAlerts,
+  position,
   profile,
   referral,
   reports,

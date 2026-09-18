@@ -73,6 +73,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
     <AppScreen scroll={false} padded={false} header={
       <View style={[styles.header, { paddingTop: SPACING.lg }]}>
         <TouchableOpacity
+          accessibilityLabel={t('app.goBack')}
           style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
           onPress={() => navigation.goBack()}
         >

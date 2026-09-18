@@ -85,6 +85,10 @@ export interface AnalyticsEvents {
     warmingRuns: number;
     namespacesWarmed: number;
   };
+  legal_consent_accepted: {
+    method: 'signup' | 'reacceptance';
+    version: string;
+  };
   background_sync_complete: {
     synced: number;
     failed: number;

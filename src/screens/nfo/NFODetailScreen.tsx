@@ -273,6 +273,7 @@ export default function NFODetailScreen({ route, navigation }: NativeStackScreen
             {/* Back button */}
             <View style={styles.heroTop}>
               <TouchableOpacity
+                accessibilityLabel={t('app.goBack')}
                 style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
                 onPress={() => navigation.goBack()}
               >

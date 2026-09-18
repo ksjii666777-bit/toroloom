@@ -227,6 +227,9 @@ vi.mock('@react-navigation/native', () => ({
   NavigationContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useNavigation: () => ({ navigate: vi.fn(), goBack: vi.fn() }),
   useFocusEffect: (cb: any) => cb(),
+  // Used by src/navigation/navigationRef.ts for imperative navigation
+  // from outside the container (e.g. LegalReacceptanceOverlay).
+  createNavigationContainerRef: () => ({ navigate: vi.fn(), dispatch: vi.fn() }),
 }));
 
 vi.mock('@react-navigation/native-stack', () => ({
@@ -393,10 +396,15 @@ import AppNavigator from '../navigation/AppNavigator';
  * Uses root.root (ReactTestInstance) instead of root.toJSON() to avoid
  * circular reference issues in React 19 when JSON.stringify is called
  * on the serialized element tree (via _owner → FiberNode).
+ *
+ * Async: secondary screens load via React.lazy (startup perf), so the
+ * first render suspends inside the navigator's Suspense boundary. The
+ * async act() below flushes the pending dynamic imports before we read
+ * the tree.
  */
-function getRenderedText(): string {
+async function getRenderedText(): Promise<string> {
   let root: TestRenderer.ReactTestRenderer;
-  TestRenderer.act(() => {
+  await TestRenderer.act(async () => {
     root = TestRenderer.create(<AppNavigator />);
   });
 
@@ -410,7 +418,22 @@ function getRenderedText(): string {
       }
     });
   }
-  collect(root!.root);
+
+  // React.lazy screens resolve through real dynamic imports (Vite in vitest).
+  // The first render suspends; keep flushing act until the modules land and
+  // the navigator re-renders with content. The FIRST logged-in test must
+  // cold-transform ~120 lazy screen modules, so this poll is time-budgeted
+  // (up to ~15s) rather than a fixed iteration count.
+  const deadline = Date.now() + 15_000;
+  for (let i = 0; i < 750; i++) {
+    texts.length = 0;
+    collect(root!.root);
+    if (texts.join(' ').trim().length > 0) break;
+    if (Date.now() > deadline) break;
+    await TestRenderer.act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    });
+  }
   return texts.join(' ');
 }
 
@@ -431,20 +454,20 @@ describe('AppNavigator — Auth Gating', () => {
     });
   });
 
-  it('renders Auth screens when user is not logged in', () => {
+  it('renders Auth screens when user is not logged in', async () => {
     mockAuthStore.useAuthStore.mockImplementation((sel?: (s: any) => any) => {
       const state = { isLoggedIn: false };
       return sel ? sel(state) : state;
     });
 
-    const text = getRenderedText();
+    const text = await getRenderedText();
 
     expect(text).toContain('Login');
     expect(text).toContain('Signup');
     expect(text).not.toContain('MainTabs');
   });
 
-  it('renders MainTabs when user is logged in', () => {
+  it('renders MainTabs when user is logged in', async () => {
     mockAuthStore.useAuthStore.mockImplementation((sel?: (s: any) => any) => {
       const state = { isLoggedIn: true };
       return sel ? sel(state) : state;
@@ -454,14 +477,14 @@ describe('AppNavigator — Auth Gating', () => {
       return sel ? sel(state) : state;
     });
 
-    const text = getRenderedText();
+    const text = await getRenderedText();
 
     expect(text).not.toContain('Login');
     expect(text).not.toContain('Signup');
     expect(text).toContain('MainTabs');
   });
 
-  it('registers all five tab screens', () => {
+  it('registers all five tab screens', async () => {
     mockAuthStore.useAuthStore.mockImplementation((sel?: (s: any) => any) => {
       const state = { isLoggedIn: true };
       return sel ? sel(state) : state;
@@ -471,7 +494,7 @@ describe('AppNavigator — Auth Gating', () => {
       return sel ? sel(state) : state;
     });
 
-    const text = getRenderedText();
+    const text = await getRenderedText();
 
     expect(text).toContain('More');
     expect(text).toContain('Home');
@@ -480,7 +503,7 @@ describe('AppNavigator — Auth Gating', () => {
     expect(text).toContain('Watchlist');
   });
 
-  it('registers all detail screens in the stack', () => {
+  it('registers all detail screens in the stack', async () => {
     mockAuthStore.useAuthStore.mockImplementation((sel?: (s: any) => any) => {
       const state = { isLoggedIn: true };
       return sel ? sel(state) : state;
@@ -490,7 +513,7 @@ describe('AppNavigator — Auth Gating', () => {
       return sel ? sel(state) : state;
     });
 
-    const text = getRenderedText();
+    const text = await getRenderedText();
 
     expect(text).toContain('StockDetail');
     expect(text).toContain('Learn');
@@ -531,23 +554,23 @@ describe('AppNavigator — Risk / Lockdown Badge', () => {
     });
   });
 
-  it('renders without crash when wsLockdownCount > 0', () => {
+  it('renders without crash when wsLockdownCount > 0', async () => {
     mockRiskStore.useRiskStore.mockImplementation((sel?: (s: any) => any) => {
       const state = { wsLockdownCount: 3, clearLockdownAlert: vi.fn(), lockdown: { status: 'none' as const } };
       return sel ? sel(state) : state;
     });
 
-    const text = getRenderedText();
+    const text = await getRenderedText();
     expect(text).toContain('MainTabs');
   });
 
-  it('renders without crash when wsLockdownCount is 0', () => {
+  it('renders without crash when wsLockdownCount is 0', async () => {
     mockRiskStore.useRiskStore.mockImplementation((sel?: (s: any) => any) => {
       const state = { wsLockdownCount: 0, clearLockdownAlert: vi.fn(), lockdown: { status: 'none' as const } };
       return sel ? sel(state) : state;
     });
 
-    const text = getRenderedText();
+    const text = await getRenderedText();
     expect(text).toContain('MainTabs');
   });
 

@@ -16,6 +16,16 @@ export default {
         rupeeLimit: '₹ Limit',
         percentLimit: '% Limit',
         instructions: 'Only SQUARE OFF orders are permitted. All other actions are blocked until the lockdown period ends.',
+        emergencyNote: 'Panic situation? You can always get out:',
+        emergencyButton: 'EMERGENCY EXIT ALL',
+        emergencyWorking: 'EXITING POSITIONS…',
+        emergencyTitle: 'Emergency Exit',
+        emergencyConfirm: 'This will place MARKET SELL orders for ALL open positions at the best available price. Losses may be locked in. Continue?',
+        emergencyGo: 'Exit Everything',
+        emergencyCancel: 'Cancel',
+        emergencyPartial: 'Partial Exit',
+        emergencyFailed: 'Exit Failed',
+        emergencyFailedMsg: 'Something went wrong while exiting positions. Please retry — your positions remain open.',
     },
     // ── UpgradePromptModal ─────────────────────────────────────────────
     upgradePrompt: {

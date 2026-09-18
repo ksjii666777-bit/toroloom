@@ -11,27 +11,47 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Mock } from 'vitest';
 import type { SessionPayload, BrokerSession } from '../types';
 
 // ── Mock react-native-keychain ──────────────────────────────
-const mockSetGenericPassword = vi.fn();
-const mockGetGenericPassword = vi.fn();
-const mockResetGenericPassword = vi.fn();
+// sessionStorage.ts reads Keychain.ACCESS_CONTROL / Keychain.ACCESSIBLE,
+// so the mock must provide these constant maps. The factory is fully
+// self-contained (no top-level variable references) because vi.mock is
+// hoisted above the mockXxx declarations.
+vi.mock('react-native-keychain', () => {
+  const accessControl = {
+    BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
+    BIOMETRY_CURRENT_SET: 'BIOMETRY_CURRENT_SET',
+    BIOMETRY_ANY: 'BIOMETRY_ANY',
+    DEVICE_PASSCODE: 'DEVICE_PASSCODE',
+    USER_PRESENCE: 'USER_PRESENCE',
+    APPLICATION_PASSWORD: 'APPLICATION_PASSWORD',
+  };
+  const accessible = {
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+    WHEN_UNLOCKED: 'WHEN_UNLOCKED',
+    ALWAYS: 'ALWAYS',
+    WHEN_PASSCODE_SET_THIS_DEVICE_ONLY: 'WHEN_PASSCODE_SET_THIS_DEVICE_ONLY',
+  };
+  const mockObject = {
+    setGenericPassword: vi.fn(() => Promise.resolve(true)),
+    getGenericPassword: vi.fn(() => Promise.resolve({ service: '', username: '', password: '' })),
+    resetGenericPassword: vi.fn(() => Promise.resolve(true)),
+    ACCESS_CONTROL: accessControl,
+    ACCESSIBLE: accessible,
+  };
+  return { ...mockObject, default: mockObject };
+});
 
-vi.mock('react-native-keychain', () => ({
-  default: {
-    setGenericPassword: (...args: any[]) => mockSetGenericPassword(...args),
-    getGenericPassword: (...args: any[]) => mockGetGenericPassword(...args),
-    resetGenericPassword: (...args: any[]) => mockResetGenericPassword(...args),
-    ACCESS_CONTROL: { BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'biometry' },
-    ACCESSIBLE: { WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'when_unlocked' },
-  },
-  setGenericPassword: (...args: any[]) => mockSetGenericPassword(...args),
-  getGenericPassword: (...args: any[]) => mockGetGenericPassword(...args),
-  resetGenericPassword: (...args: any[]) => mockResetGenericPassword(...args),
-  ACCESS_CONTROL: { BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'biometry' },
-  ACCESSIBLE: { WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'when_unlocked' },
-}));
+import Keychain from 'react-native-keychain';
+
+// Loosely typed Mocks: tests simulate edge-case values (null, false, partial
+// credentials) that the strict keychain types reject but the runtime defensive
+// checks must handle gracefully.
+const mockSetGenericPassword = Keychain.setGenericPassword as unknown as Mock;
+const mockGetGenericPassword = Keychain.getGenericPassword as unknown as Mock;
+const mockResetGenericPassword = Keychain.resetGenericPassword as unknown as Mock;
 
 import {
   parseSessionPayload,
@@ -175,7 +195,7 @@ describe('storeBrokerSession', () => {
       JSON.stringify(mockZerodhaSession),
       expect.objectContaining({
         service: 'toroloom_secure_auth_vault',
-        accessControl: 'biometry',
+        accessControl: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
       }),
     );
   });

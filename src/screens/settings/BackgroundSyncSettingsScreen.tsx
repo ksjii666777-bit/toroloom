@@ -190,7 +190,7 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
       contentStyle={styles.scrollContent}
       header={
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
           <Text style={styles.headerTitle}>{t('syncSettings.title')}</Text>

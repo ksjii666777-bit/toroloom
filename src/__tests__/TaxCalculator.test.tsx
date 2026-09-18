@@ -48,7 +48,7 @@ import TaxCalculator from '../screens/calculators/TaxCalculator';
 
 // ==================== Constants ====================
 
-const LTCG_EXEMPTION = 100000;
+const LTCG_EXEMPTION = 125000;
 
 // ==================== Helpers ====================
 
@@ -164,20 +164,20 @@ describe('TaxCalculator — Holding Period Toggle', () => {
 });
 
 describe('TaxCalculator — LTCG Tax Calculation', () => {
-  it('applies ₹1L exemption on LTCG', () => {
+  it('applies ₹1.25L exemption on LTCG', () => {
     const { getByText } = render(<TaxCalculator />);
     expect(getByText('LTCG Exemption')).toBeDefined();
     expect(getByText(`-${fmtCurrency(LTCG_EXEMPTION)}`)).toBeDefined();
   });
 
-  it('calculates zero tax for gains under ₹1L (LTCG)', () => {
-    // ₹1000→₹1500, 50 shares = ₹25,000 gain (under ₹1L exemption)
+  it('calculates zero tax for gains under ₹1.25L (LTCG)', () => {
+    // ₹1000→₹1500, 50 shares = ₹25,000 gain (under ₹1.25L exemption)
     const { getByPlaceholderText, getByText } = render(<TaxCalculator />);
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. 1500'), '1000'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. 1850'), '1500'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. 100'), '50'); });
 
-    // With ₹25,000 gain (under ₹1L LTCG exemption), taxable gains = 0, total tax = 0
+    // With ₹25,000 gain (under ₹1.25L LTCG exemption), taxable gains = 0, total tax = 0
     expect(getByText(fmtCurrency(0))).toBeDefined();
   });
 });

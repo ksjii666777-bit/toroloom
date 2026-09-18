@@ -19,9 +19,9 @@ export default {
     stclOffset: 'STCL ऑफ़सेट',
     ltclOffset: 'LTCL ऑफ़सेट',
     loadingTaxData: 'टैक्स डेटा लोड हो रहा है...',
-    stcgShort: 'STCG (15%)',
-    ltcgShort: 'LTCG (10%)',
-    stcgTaxLabel: 'STCG टैक्स (15%)',
+    stcgShort: 'STCG (20%)',
+    ltcgShort: 'LTCG (12.5%)',
+    stcgTaxLabel: 'STCG टैक्स (20%)',
     stcgEquity: 'STCG (इक्विटी)',
     ltcgEquity: 'LTCG (इक्विटी)',
 };

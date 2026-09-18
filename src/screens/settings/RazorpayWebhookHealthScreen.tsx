@@ -485,7 +485,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                         {retrying === entry.id ? (
                           <ActivityIndicator size="small" color={colors.primary} />
                         ) : (
-                          <Ionicons name="refresh" size={16} color={colors.primary} />
+                          <Ionicons name="refresh" size={16} color={colors.primary} accessibilityLabel={t('app.a11y.retry')} />
                         )}
                       </View>
                     </AnimatedPressable>
@@ -585,7 +585,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                         {retrying === entry.id ? (
                           <ActivityIndicator size="small" color={colors.danger} />
                         ) : (
-                          <Ionicons name="refresh" size={16} color={colors.danger} />
+                          <Ionicons name="refresh" size={16} color={colors.danger} accessibilityLabel={t('app.a11y.retry')} />
                         )}
                       </View>
                     </AnimatedPressable>

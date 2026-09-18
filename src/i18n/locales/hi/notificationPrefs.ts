@@ -29,6 +29,8 @@ export default {
     learningRemindersDesc: 'कोर्स, लेसन और क्विज़ सूचनाएँ',
     systemUpdates: 'सिस्टम अपडेट',
     systemUpdatesDesc: 'KYC, खाता और ऐप संस्करण अपडेट',
+    weeklyDisciplineReport: 'साप्ताहिक डिसिप्लिन रिपोर्ट',
+    weeklyDisciplineReportDesc: 'R:R उल्लंघन, स्कोर और ₹ नुकसान — हफ्ते में एक बार',
     soundLabel: 'ध्वनि',
     soundDesc: 'नई सूचनाओं के लिए ध्वनि बजाएं',
     vibrationLabel: 'कंपन',

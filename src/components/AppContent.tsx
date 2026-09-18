@@ -4,7 +4,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../context/ThemeContext';
 import AppNavigator from '../navigation/AppNavigator';
 import BiometricUnlockOverlay from './BiometricUnlockOverlay';
+import LegalReacceptanceOverlay from './LegalReacceptanceOverlay';
 import { useAuthStore } from '../store/authStore';
+import { useLegalConsentStore } from '../store/legalConsentStore';
 import { useRiskStore } from '../store/riskStore';
 import { useSubscriptionStore } from '../store/subscriptionStore';
 import { useOnboardingStore } from '../store/onboardingStore';
@@ -24,6 +26,7 @@ function AppContent() {
   const loadSubscription = useSubscriptionStore(s => s.loadSubscription);
   const loadOnboarding = useOnboardingStore(s => s.loadOnboardingState);
   const isLoggedIn = useAuthStore(s => s.isLoggedIn);
+  const loadConsent = useLegalConsentStore(s => s.loadConsent);
 
   useEffect(() => {
     // Load persisted auth session on mount
@@ -32,7 +35,23 @@ function AppContent() {
     loadSubscription();
     // Restore onboarding state from AsyncStorage
     loadOnboarding();
-  }, [loadStoredAuth, loadSubscription, loadOnboarding]);
+    // Restore the accepted ToS/Privacy version (re-acceptance prompt state)
+    loadConsent();
+  }, [loadStoredAuth, loadSubscription, loadOnboarding, loadConsent]);
+
+  // ── ToS re-acceptance gate ───────────────────────────────────────────────
+  // When the stored acceptance predates LEGAL_DOCUMENT_VERSION, prompt the
+  // user once they're in the app. Dev-restore/new users have no stored
+  // acceptance and are handled by the signup checkbox instead.
+  const consentLoaded = useLegalConsentStore(s => s.isConsentLoaded);
+  const needsReacceptance = useLegalConsentStore(s => s.needsReacceptance);
+  const showReacceptance = useLegalConsentStore(s => s.showReacceptance);
+
+  useEffect(() => {
+    if (isLoggedIn && consentLoaded && needsReacceptance) {
+      showReacceptance();
+    }
+  }, [isLoggedIn, consentLoaded, needsReacceptance, showReacceptance]);
 
   // Load cached data once auth is restored
   useEffect(() => {
@@ -55,7 +74,14 @@ function AppContent() {
   //   1. One fresh fetch shortly after launch (cache still shows instantly)
   //   2. A 60s polling interval keeps lists in sync with the live backend
   //      (the per-stock WebSocket tick feed is unaffected by this)
+  // Startup-cost gate: polling only runs for logged-in users. On the
+  // Login/Signup screens it was pure wasted work (network chatter, JSON
+  // parsing, store fan-out) during the most jank-sensitive launch window.
+  // The Markets tab refreshes itself on mount, so data freshness there is
+  // unaffected.
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     // Initial fresh fetch — small delay lets the first render use cache first
     const initialTimer = setTimeout(() => {
       useMarketStore.getState().refreshMarket();
@@ -70,7 +96,7 @@ function AppContent() {
       clearTimeout(initialTimer);
       clearInterval(interval);
     };
-  }, []);
+  }, [isLoggedIn]);
 
   // Wire up the risk store to the WebSocket risk bridge
   useEffect(() => {
@@ -121,6 +147,7 @@ function AppContent() {
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <AppNavigator />
       <BiometricUnlockOverlay />
+      <LegalReacceptanceOverlay />
     </>
   );
 }

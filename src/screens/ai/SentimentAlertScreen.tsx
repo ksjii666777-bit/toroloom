@@ -641,7 +641,7 @@ export default function SentimentAlertScreen({ navigation }: NativeStackScreenPr
   {/* Header */}
         <View style={[styles.header]}>
           <View style={styles.headerRow}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
             <View style={{ flex: 1 }}>

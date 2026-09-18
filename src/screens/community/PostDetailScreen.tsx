@@ -259,6 +259,7 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
               This post may have been deleted or doesn't exist.
             </Text>
             <Pressable
+              accessibilityLabel={t('app.goBack')}
               style={[styles.goBackBtn, { backgroundColor: colors.primary }]}
               onPress={() => navigation.goBack()}
             >
@@ -284,7 +285,7 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
     >
       <AppScreen scroll={false} padded={false} header={
         <View style={[styles.header, { borderBottomColor: colors.divider }]}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <Text style={styles.headerTitle}>{t('community.post')}</Text>
@@ -351,7 +352,7 @@ export default function PostDetailScreen({ navigation, route }: NativeStackScree
                 actionBtnStyle={styles.actionBtn}
                 actionTextStyle={styles.actionText}
               />
-              <Pressable style={styles.actionBtn} onPress={handleBookmark}>
+              <Pressable style={styles.actionBtn} onPress={handleBookmark} accessibilityLabel={t('app.a11y.bookmark')}>
                 <Ionicons
                   name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
                   size={20}

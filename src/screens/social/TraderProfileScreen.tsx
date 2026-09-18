@@ -362,7 +362,7 @@ export default function TraderProfileScreen({ navigation, route }: NativeStackSc
       >
   {/* Sticky Header */}
         <View style={styles.stickyHeader}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.goBack')}>
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>{trader.name}</Text>

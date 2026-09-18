@@ -139,4 +139,5 @@ export default {
     accessibility: 'एक्सेसिबिलिटी',
     apiKeys: 'API कुंजियाँ',
     webhooks: 'वेबहुक',
+    asOfToday: 'आज तक',
 };

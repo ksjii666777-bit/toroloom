@@ -125,7 +125,7 @@ describe('fetchLiveRates', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const url = fetchMock.mock.calls[0][0] as string;
     expect(url).toContain('api.frankfurter.dev/v2/latest');
-    expect(url).toContain('base=EUR');
+    expect(url).toContain('from=EUR');
     // Should include all tracked currencies except EUR
     expect(url).toContain('INR');
     expect(url).toContain('USD');

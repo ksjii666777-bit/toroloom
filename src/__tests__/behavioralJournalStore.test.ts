@@ -300,6 +300,63 @@ describe('Behavioral Journal Store', () => {
     });
   });
 
+  // ────────────────────────────────────────────────────────────────────────
+  // GDPR Erasure — resetJournal
+  // ────────────────────────────────────────────────────────────────────────
+
+  describe('GDPR Erasure — resetJournal', () => {
+    it('drops all entries and reports, resets metrics to empty', () => {
+      expect(useBehaviorJournalStore.getState().entries.length).toBeGreaterThan(0);
+
+      useBehaviorJournalStore.getState().resetJournal();
+
+      const state = useBehaviorJournalStore.getState();
+      expect(state.entries).toHaveLength(0);
+      expect(state.reports).toHaveLength(0);
+      expect(state.allMetrics.totalTrades).toBe(0);
+    });
+
+    it('clears transient UI state (modal, prefill intent, editing entry)', () => {
+      useBehaviorJournalStore.getState().setShowEntryModal(true);
+      useBehaviorJournalStore.getState().openEntryModalWithPrefill();
+      useBehaviorJournalStore.getState().setEditingEntry(
+        useBehaviorJournalStore.getState().entries[0],
+      );
+
+      useBehaviorJournalStore.getState().resetJournal();
+
+      const state = useBehaviorJournalStore.getState();
+      expect(state.showEntryModal).toBe(false);
+      expect(state.pendingOneTapPrefill).toBe(false);
+      expect(state.editingEntry).toBeNull();
+    });
+
+    it('keeps working normally after a reset (fresh-session semantics)', () => {
+      useBehaviorJournalStore.getState().resetJournal();
+
+      useBehaviorJournalStore.getState().addEntry({
+        date: new Date().toISOString(),
+        symbol: 'RELIANCE',
+        direction: 'long',
+        entryPrice: 100,
+        exitPrice: 103,
+        quantity: 10,
+        pnl: 30,
+        pnlPercent: 3.0,
+        holdingPeriod: '1h',
+        emotionalState: 'calm',
+        mistakes: [],
+        planCompliance: 100,
+        notes: 'Rebuild trade',
+        setupType: 'pullback',
+        exitReason: 'target',
+        tags: ['rebuild'],
+      });
+
+      expect(useBehaviorJournalStore.getState().entries).toHaveLength(1);
+    });
+  });
+
   // ─────────────────────────────────────────────────────────────────────────
   // Exported Constants
   // ─────────────────────────────────────────────────────────────────────────

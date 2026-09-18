@@ -227,7 +227,7 @@ describe('SignupScreen — Referral from Deep Link', () => {
   });
 
   it('passes route.params.ref to signup when provided via deep link', () => {
-    const { getByText, getByPlaceholderText } = render(
+    const { getByText, getByPlaceholderText, getByTestId } = render(
       <SignupScreen
         navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
         route={{ params: { ref: 'friend123' } } as any}
@@ -242,6 +242,9 @@ describe('SignupScreen — Referral from Deep Link', () => {
     act(() => { fireEvent.changeText(getByPlaceholderText('Create a strong password'), 'password123'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('Re-enter your password'), 'password123'); });
 
+    // Accept the ToS/Privacy checkbox so the terms gate passes
+    act(() => { fireEvent.press(getByTestId('signup-terms-checkbox')); });
+
     // Submit the form
     act(() => { fireEvent.press(getByText('Create Account')); });
 
@@ -252,7 +255,7 @@ describe('SignupScreen — Referral from Deep Link', () => {
   });
 
   it('passes undefined referralSource when route.params.ref is not provided', () => {
-    const { getByText, getByPlaceholderText } = render(
+    const { getByText, getByPlaceholderText, getByTestId } = render(
       <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     advanceAndRender(500);
@@ -262,6 +265,8 @@ describe('SignupScreen — Referral from Deep Link', () => {
     act(() => { fireEvent.changeText(getByPlaceholderText('Enter your phone number'), '9876543210'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('Create a strong password'), 'secure123'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('Re-enter your password'), 'secure123'); });
+
+    act(() => { fireEvent.press(getByTestId('signup-terms-checkbox')); });
 
     act(() => { fireEvent.press(getByText('Create Account')); });
 

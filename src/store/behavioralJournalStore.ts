@@ -206,6 +206,13 @@ interface BehaviorJournalState {
   reports: WeeklyReport[];
   allMetrics: BehaviorMetrics;
   showEntryModal: boolean;
+  /**
+   * One-tap intent: when true, the entry modal auto-prefills from the
+   * user's MOST RECENT closed trade (any symbol) as it opens. Set by
+   * one-tap flows like the streak-rebuild banner title link; consumed
+   * and cleared by the modal so a plain manual open is never affected.
+   */
+  pendingOneTapPrefill: boolean;
   editingEntry: JournalEntry | null;
 
   addEntry: (entry: Omit<JournalEntry, 'id'>) => void;
@@ -213,8 +220,14 @@ interface BehaviorJournalState {
   getReports: () => WeeklyReport[];
   recompute: () => void;
   setShowEntryModal: (show: boolean) => void;
+  /** One-tap open: flag the next open to auto-prefill from the last closed trade. */
+  openEntryModalWithPrefill: () => void;
+  /** Clear the one-tap prefill intent (called once the modal has applied it). */
+  consumeOneTapPrefill: () => void;
   setEditingEntry: (entry: JournalEntry | null) => void;
   getFilteredEntries: (period: 'all' | 'week' | 'month') => JournalEntry[];
+  /** GDPR erasure: drop the session's journal entries + UI state (fresh-launch state) */
+  resetJournal: () => void;
 }
 
 export const useBehaviorJournalStore = create<BehaviorJournalState>((set, get) => {
@@ -226,6 +239,7 @@ export const useBehaviorJournalStore = create<BehaviorJournalState>((set, get) =
     reports: initialReports,
     allMetrics: initialMetrics,
     showEntryModal: false,
+    pendingOneTapPrefill: false,
     editingEntry: null,
 
     addEntry: (entryData) => {
@@ -264,6 +278,9 @@ export const useBehaviorJournalStore = create<BehaviorJournalState>((set, get) =
     },
 
     setShowEntryModal: (show) => set({ showEntryModal: show }),
+    openEntryModalWithPrefill: () =>
+      set({ pendingOneTapPrefill: true, showEntryModal: true }),
+    consumeOneTapPrefill: () => set({ pendingOneTapPrefill: false }),
     setEditingEntry: (entry) => set({ editingEntry: entry }),
 
     getFilteredEntries: (period) => {
@@ -282,6 +299,16 @@ export const useBehaviorJournalStore = create<BehaviorJournalState>((set, get) =
         return true;
       });
     },
+
+    resetJournal: () =>
+      set({
+        entries: [],
+        reports: [],
+        allMetrics: computeMetrics([]),
+        showEntryModal: false,
+        pendingOneTapPrefill: false,
+        editingEntry: null,
+      }),
   };
 });
 
