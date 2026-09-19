@@ -99,6 +99,11 @@ import { setWSS, getFailureCount, SEND_FAILURE_THRESHOLD } from './services/sync
 const app = express();
 const server = http.createServer(app);
 
+// ── Trust the reverse proxy (Railway/Render/Nginx) for X-Forwarded-For so
+// express-rate-limit keys on the REAL client IP. Without this, every
+// attacker shares one bucket and every user shares the attacker's penalties.
+app.set('trust proxy', 1);
+
 // ============ Middleware ============
 
 // ── Security Headers (Helmet) — guards against XSS, clickjacking, MIME sniffing, etc.

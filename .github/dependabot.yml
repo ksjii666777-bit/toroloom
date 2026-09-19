@@ -1,0 +1,68 @@
+# ============================================================================
+# Dependabot — automated dependency updates
+# ============================================================================
+#
+# Weekly grouped update PRs so dependency CVEs get fix PRs automatically
+# instead of waiting for manual bumps. Complements the dependency-audit CI
+# gate (scripts/audit-gate.mjs): the gate BLOCKS new high/critical CVEs,
+# Dependabot delivers the update PRs that fix them.
+#
+# Grouping strategy:
+#   - minor + patch updates batch into ONE reviewable PR per ecosystem
+#   - major updates always come as individual PRs (breaking-change review)
+#   - GitHub Actions are updated monthly (low-risk, still security-relevant)
+#
+# Security alerts (CVE-driven PRs) additionally require the repo toggle:
+#   Settings → Code security → Dependabot security updates → Enable
+# ============================================================================
+
+version: 2
+
+updates:
+  # ── Root workspace: Expo / React Native app ───────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+
+  # ── Backend API (Express) ─────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+
+  # ── GitHub Actions used by workflows ──────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      all-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"

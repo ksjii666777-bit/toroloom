@@ -77,8 +77,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies (scripts disabled — supply-chain hardening)
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs --only=backend
 
       # Run the public API integration test suite.
       # Uses in-memory storage — no DB services required.

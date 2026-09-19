@@ -62,6 +62,10 @@ A full-stack trading platform built with **React Native (Expo)** and **Node.js**
 
 The coverage badges above are updated automatically by CI. They reflect the **lines** coverage percentage from the latest `master` build.
 
+## Security
+
+Found a security vulnerability? **Do not open a public issue.** Report it privately via the [Security Advisories](https://github.com/ksjii666777-bit/toroloom/security/advisories/new) page — see [`SECURITY.md`](SECURITY.md) for the full disclosure policy, response timelines, and scope.
+
 > **Note:** GitHub Actions status badges reflect the entire workflow run — per-job
 > filtering (`?job=`) is not supported. The *Backend Integration (PG + Mongo)* badge
 > therefore tracks the main `ci.yml` workflow, which includes the `backend-integration`

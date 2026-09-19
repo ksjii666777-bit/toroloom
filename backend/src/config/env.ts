@@ -57,7 +57,9 @@ export const env = {
   // ──── Safe operational defaults (not credentials) ────────────────────────
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  // SECURITY: short-lived access tokens. A stolen token window is capped at
+  // 12h — refresh-token flow is the roadmap item for seamless re-auth.
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '12h',
 
   dataSource: (process.env.DATA_SOURCE || 'mock') as 'mock' | 'live',
   broker: (process.env.BROKER || 'mock') as 'mock' | 'zerodha' | 'angel' | 'groww',

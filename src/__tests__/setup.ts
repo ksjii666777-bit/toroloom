@@ -28,6 +28,26 @@ vi.mock('react-native-safe-area-context', () => ({
   initialWindowMetrics: { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, bottom: 0, left: 0, right: 0 } },
 }));
 
+// ==================== Mock expo-secure-store ====================
+// Backed by the same in-memory map as AsyncStorage so tests can seed either.
+const secureStoreMap = new Map<string, string>();
+vi.mock('expo-secure-store', () => {
+  const mock = {
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY: 1,
+    WHEN_UNLOCKED: 0,
+    setItemAsync: vi.fn((key: string, value: string) => {
+      secureStoreMap.set(key, value);
+      return Promise.resolve();
+    }),
+    getItemAsync: vi.fn((key: string) => Promise.resolve(secureStoreMap.get(key) ?? null)),
+    deleteItemAsync: vi.fn((key: string) => {
+      secureStoreMap.delete(key);
+      return Promise.resolve();
+    }),
+  };
+  return { ...mock, default: mock };
+});
+
 // ==================== Mock AsyncStorage ====================
 const mockStorage: Record<string, string> = {};
 

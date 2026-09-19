@@ -17,6 +17,7 @@ import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
+import AnimatedNumber from '../../components/ui/AnimatedNumber';
 import { openExitOrder } from '../../utils/orderExit';
 import { SkeletonBlock, SkeletonCard, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -144,7 +145,13 @@ export default function PortfolioScreen({ navigation }: CompositeScreenProps<Bot
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel} testID="portfolio-current-value">{t('portfolio.currentValue')}</Text>
-                <Text style={styles.summaryValue}>{formatCurrency(displayPortfolio, true)}</Text>
+                <AnimatedNumber
+                  value={portfolioValue}
+                  format={(v) => formatCurrency(v, true)}
+                  skipInitialAnimation
+                  style={styles.summaryValue}
+                  testID="portfolio-animated-value"
+                />
               </View>
             </View>
 

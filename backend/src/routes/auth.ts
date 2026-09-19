@@ -11,6 +11,7 @@ import {
   DEMO_EMAIL,
   DEMO_PASSWORD,
 } from '../data/userStore';
+import { isTwoFactorEnabled } from '../services/twoFactor';
 
 const router = Router();
 
@@ -36,7 +37,7 @@ function _isValidEmail(email: string): boolean {
 }
 
 // POST /api/auth/login
-router.post('/login', validate(loginSchema), (req: Request, res: Response) => {
+router.post('/login', validate(loginSchema), async (req: Request, res: Response) => {
   let { email, password } = req.body;
   const { role } = req.body;
 
@@ -53,8 +54,9 @@ router.post('/login', validate(loginSchema), (req: Request, res: Response) => {
   }
 
   // Authenticate against the user store (scrypt password hash).
-  // role can be 'admin' for dev/testing — only works in mock mode and ONLY
-  // when the credentials themselves are valid.
+  // SECURITY: the role ALWAYS comes from the persisted user record — the
+  // client can never escalate to admin by sending { role: 'admin' }.
+  void role; // accepted for API compatibility, never trusted
   const user = authenticateUser(email, password);
   if (!user) {
     // Don't reveal whether the email or the password was wrong.
@@ -62,11 +64,21 @@ router.post('/login', validate(loginSchema), (req: Request, res: Response) => {
     return;
   }
 
-  const effectiveRole = (role === 'admin' ? 'admin' : user.role) as 'user' | 'admin';
-  const token = generateToken({ userId: user.id, email: user.email, role: effectiveRole });
+  // SECURITY: 2FA gate — when enabled, NO token is issued until a valid
+  // TOTP/backup code is presented (POST /api/auth/2fa/login).
+  const twoFactorRequired = await isTwoFactorEnabled(user.id);
+  if (twoFactorRequired) {
+    res.status(202).json({
+      twoFactorRequired: true,
+      message: 'Two-factor authentication code required.',
+    });
+    return;
+  }
+
+  const token = generateToken({ userId: user.id, email: user.email, role: user.role });
   res.json({
     token,
-    user: { ...toPublicUser(user), role: effectiveRole },
+    user: { ...toPublicUser(user), role: user.role },
   });
 });
 

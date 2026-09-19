@@ -218,6 +218,23 @@ describe('POST /api/auth', () => {
     expect(body.error).toContain('password');
   });
 
+  it('NEVER grants admin role from the client (privilege-escalation guard)', async () => {
+    const { status, body } = await post('/api/auth/login', {
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+      role: 'admin', // attacker-controlled field — must be ignored
+    });
+
+    expect(status).toBe(200);
+    expect(body.token).toBeDefined();
+    // The issued token must NOT carry the admin role
+    const payload = JSON.parse(
+      Buffer.from(body.token.split('.')[1], 'base64').toString('utf8'),
+    );
+    expect(payload.role).not.toBe('admin');
+    expect(body.user.role).not.toBe('admin');
+  });
+
   // ── POST /api/auth/signup ───────────────────────────────────────────
 
   it('should signup with valid details', async () => {

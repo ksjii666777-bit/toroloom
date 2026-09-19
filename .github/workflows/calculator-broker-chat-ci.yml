@@ -68,8 +68,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies (scripts disabled — supply-chain hardening)
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node scripts/install-scripts-allowlist.mjs --only=root
 
       # Run only the 6 calculator/chat/broker test files for fast feedback.
       # The full frontend suite (including coverage) still runs in the main CI.

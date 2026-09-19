@@ -88,3 +88,4 @@ store/keystore-backup/
 # CI artifacts
 gh_jobs*.json
 tsc_out.txt
+audit-report.json

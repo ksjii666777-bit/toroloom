@@ -5,6 +5,14 @@ import { mockUser } from '../constants/mockData';
 import { authApi } from '../services/api/auth';
 import { analytics } from '../services/analytics';
 import { useOnboardingStore } from './onboardingStore';
+import {
+  saveToken,
+  loadToken,
+  deleteToken,
+  saveUserProfile,
+  loadUserProfile,
+  deleteUserProfile,
+} from '../services/secureTokenStorage';
 
 interface AuthState {
   user: User | null;
@@ -29,9 +37,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loadStoredAuth: async () => {
     try {
-      const storedToken = await AsyncStorage.getItem('toroloom_token');
-      const storedUser = await AsyncStorage.getItem('toroloom_user');
-      const storedAdmin = await AsyncStorage.getItem('toroloom_isAdmin');
+      const [storedToken, storedUser, storedAdmin] = await Promise.all([
+        loadToken(),
+        loadUserProfile(),
+        AsyncStorage.getItem('toroloom_isAdmin'),
+      ]);
       if (storedToken && storedUser) {
         const user = JSON.parse(storedUser);
         set({ user, token: storedToken, isLoggedIn: true, isAdmin: storedAdmin === 'true' });
@@ -39,7 +49,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         // Silently refresh profile from backend
         authApi.getProfile().then(profile => {
           set({ user: profile });
-          AsyncStorage.setItem('toroloom_user', JSON.stringify(profile));
+          void saveUserProfile(profile);
         }).catch(() => {
           // Backend unavailable – use cached data
         });
@@ -61,8 +71,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       const res = await authApi.login(email, password);
-      await AsyncStorage.setItem('toroloom_token', res.token);
-      await AsyncStorage.setItem('toroloom_user', JSON.stringify(res.user));
+      await saveToken(res.token);
+      await saveUserProfile(res.user);
       set({ user: res.user, token: res.token, isLoggedIn: true, isLoading: false });
       analytics.logEvent('login', { method: 'email' });
       analytics.setUserId(res.user.id);
@@ -91,8 +101,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       const res = await authApi.signup(name, email, phone, password);
-      await AsyncStorage.setItem('toroloom_token', res.token);
-      await AsyncStorage.setItem('toroloom_user', JSON.stringify(res.user));
+      await saveToken(res.token);
+      await saveUserProfile(res.user);
       set({ user: res.user, token: res.token, isLoggedIn: true, isLoading: false });
       analytics.logEvent('signup', { method: 'email' });
       analytics.setUserId(res.user.id);
@@ -127,7 +137,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    await AsyncStorage.multiRemove(['toroloom_token', 'toroloom_user']);
+    await Promise.all([deleteToken(), deleteUserProfile()]);
     // Clear offline cache so next user doesn't see stale portfolio/watchlist data
     try {
       const { usePortfolioStore } = await import('./portfolioStore');

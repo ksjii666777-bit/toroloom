@@ -199,6 +199,16 @@ function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: 
     scaleAnim.value = withSpring(focused ? 1 : 0.85, { stiffness: 120, damping: 12 });
   }, [focused, scaleAnim]);
 
+  // Accent pill: springs to full width when focused, shrinks away otherwise
+  const pillWidth = useSharedValue(focused ? 18 : 0);
+  React.useEffect(() => {
+    pillWidth.value = withSpring(focused ? 18 : 0, { stiffness: 220, damping: 20 });
+  }, [focused, pillWidth]);
+  const pillStyle = useAnimatedStyle(() => ({
+    width: pillWidth.value,
+    opacity: pillWidth.value > 2 ? 1 : 0,
+  }));
+
   // Pulse badge when count increases
   React.useEffect(() => {
     if (badgeCount !== undefined && prevBadgeCount.current !== undefined && badgeCount > prevBadgeCount.current) {
@@ -211,6 +221,11 @@ function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: 
   return (
     <Animated.View style={[tabStyles.iconContainer, iconStyle]}>
       <Ionicons name={name as keyof typeof Ionicons.glyphMap} size={24} color={color} />
+      {/* Animated accent pill under the active tab */}
+      <Animated.View
+        style={[tabStyles.pill, { backgroundColor: color }, pillStyle]}
+        testID={`tab-pill-${name}`}
+      />
       {badgeCount !== undefined && badgeCount > 0 && (
         <Animated.View style={[tabStyles.badgeOverlay, badgeStyle]}>
           <Text style={tabStyles.badgeText}>
@@ -228,6 +243,12 @@ const tabStyles = StyleSheet.create({
     height: 32,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  pill: {
+    position: 'absolute',
+    bottom: -7,
+    height: 3,
+    borderRadius: 2,
   },
   badgeOverlay: {
     position: 'absolute',

@@ -60,7 +60,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
 
       - name: Restore TypeScript build cache
@@ -229,7 +232,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
 
       - name: Validate import paths (vi.mock paths must resolve to real files)
@@ -300,7 +306,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
       # Shards each run with coverage enabled so v8 results are embedded in
       # the blob report; frontend-test-merge combines all four and enforces
@@ -344,7 +353,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
       - name: Download all shard blob reports
         uses: actions/download-artifact@v4
@@ -509,7 +521,12 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      # bundle-size runs `expo export` with the Sentry plugin → the real
+      # sentry-cli binary is required, so its allowlisted postinstall runs here.
+      - name: Run allowlisted install scripts (sentry-cli needed for export)
+        run: node scripts/install-scripts-allowlist.mjs --rebuild --only=root
 
       - name: Check bundle size vs baseline (max +5%)
         id: bundle-size
@@ -625,7 +642,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
 
       - name: Run cross-file isolation test (singleFork = same process)
@@ -699,7 +719,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
 
       # Integration tests share databases (MongoDB/PostgreSQL) and
@@ -749,7 +772,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
 
       - name: Run WebSocket PnL bridge stress test
@@ -818,7 +844,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
 
       - name: Install Maestro CLI
@@ -947,7 +976,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.nm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Verify install-script allowlist (supply-chain)
+        run: node ../scripts/install-scripts-allowlist.mjs
 
 
       - name: Install Maestro CLI
@@ -1070,3 +1102,126 @@ jobs:
           keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
+
+  # ── Dependency vulnerability gate ─────────────────────────────────────────
+  # Fails the build when a NEW high/critical CVE appears in the production
+  # dependencies of either workspace (root Expo app / backend API). Packages
+  # that are build-time-only tooling (Metro bundler chain) are explicitly
+  # allowlisted with reasons in scripts/audit-gate.mjs — new runtime deps are
+  # never allowlisted silently. The full tree (dev deps included) fails on
+  # critical. Runs from package-lock.json alone — no installs, ~30s.
+  # Mark this job as a required status check in branch protection so no PR
+  # can merge with a fresh vulnerability.
+  dependency-audit:
+    name: Dependency Audit Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Verify lockfile integrity (registry-only, sha512)
+        run: npm run verify:lockfile
+
+      - name: Run dependency audit gate
+        id: audit-gate
+        env:
+          AUDIT_REPORT_PATH: audit-report.json
+        run: npm run audit:gate
+
+      # PR comment: exactly which CVEs appeared, so reviewers see the security
+      # impact before merging. Sticky comment (hidden nonce marker) — repeat
+      # runs EDIT the same comment instead of spamming one per push. Runs with
+      # always() so a FAILING gate still gets its comment posted; the verdict
+      # itself is carried by the gate step above and is never masked here.
+      - name: Post dependency audit PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let report = null;
+            try {
+              report = JSON.parse(fs.readFileSync('audit-report.json', 'utf8'));
+            } catch {
+              // Gate crashed before writing a report (exit 2 = fail-closed).
+              // The job is already red from the gate step — say so plainly.
+              report = null;
+            }
+            const verdict = report ? report.verdict : 'fail';
+            const icon = verdict === 'pass' ? '🟢' : '🔴';
+            const marker = '<!-- toroloom-dependency-audit -->';
+            const lines = [marker, `## ${icon} Dependency audit — ${verdict === 'pass' ? 'no blocking CVEs' : 'blocking CVEs found'}`, ''];
+            if (report) {
+              for (const ws of report.workspaces) {
+                const total = ws.blocking.length;
+                const status = total === 0 ? '✅' : '❌';
+                lines.push(`### ${status} ${ws.label}`);
+                lines.push('');
+                lines.push('| Severity | Package | Range | Advisory |');
+                lines.push('|---|---|---|---|');
+                if (total === 0) {
+                  lines.push('| — | no blocking vulnerabilities | — | — |');
+                } else {
+                  for (const b of ws.blocking) {
+                    lines.push(`| ${b.severity.toUpperCase()} | \`${b.name}\` | \`${b.range}\` | ${b.via} |`);
+                  }
+                }
+                lines.push('');
+                if (ws.allowlisted.length) {
+                  lines.push(`<details><summary>${ws.allowlisted.length} build-time-only packages allowlisted (never in runtime)</summary>`);
+                  lines.push('');
+                  lines.push(ws.allowlisted.map((n) => `- \`${n}\``).join('\n'));
+                  lines.push('</details>');
+                  lines.push('');
+                }
+                if (ws.errors.length) {
+                  lines.push(`⚠️ audit errors: ${ws.errors.join('; ')}`);
+                  lines.push('');
+                }
+              }
+              const blockingTotal = report.workspaces.reduce((n, w) => n + w.blocking.length, 0);
+              if (blockingTotal > 0) {
+                lines.push('**To unblock:** fix with `npm audit fix` / `package.json` overrides, or — only for build-time-only tooling — add to `ALLOW_HIGH` in `scripts/audit-gate.mjs` with a reason.');
+                lines.push('');
+              }
+            } else {
+              lines.push('⚠️ The audit gate crashed before producing a report (fail-closed). Check the job log for the underlying audit error.');
+              lines.push('');
+            }
+            // Sticky comment: find the previous run's comment and EDIT it.
+            try {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                per_page: 100,
+              });
+              const existing = comments.find((c) => c.body && c.body.includes(marker));
+              const body = lines.join('\n');
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+                console.log('Updated existing audit comment #' + existing.id);
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+                console.log('Created new audit comment');
+              }
+            } catch (error) {
+              // Fork PRs get a read-only token — commenting is impossible there.
+              // The gate already ran, so never mask its verdict with this error.
+              console.warn('Could not post PR comment (likely fork PR / read-only token): ' + error.message);
+            }

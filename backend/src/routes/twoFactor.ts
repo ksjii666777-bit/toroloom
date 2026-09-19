@@ -13,13 +13,18 @@
  *   GET    /api/auth/2fa/status           — Get current 2FA status
  *   POST   /api/auth/2fa/backup-codes     — Regenerate backup codes
  *   GET    /api/auth/2fa/backup-codes     — Get remaining backup codes
+ *   POST   /api/auth/2fa/login            — Complete login when 2FA is enabled
+ *                                           (email + password + code → full token)
  *
- * Auth: Required (authMiddleware except for login-verify)
+ * Auth: Required (authMiddleware) except /login — that one re-authenticates
+ * with credentials to avoid handing a token to an unauthenticated caller.
  * ============================================================================
  */
 
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, generateToken } from '../middleware/auth';
+import { authenticateUser, toPublicUser } from '../data/userStore';
+import { sanitizeInput, InputValidationError } from '../middleware/inputSanitizer';
 import {
   generateSetup,
   verifyToken,
@@ -28,9 +33,92 @@ import {
   getStatus,
   regenerateBackupCodes,
   getBackupCodes,
+  isTwoFactorEnabled,
 } from '../services/twoFactor';
 
+
+
 const router = Router();
+
+/**
+ * POST /api/auth/2fa/login
+ *
+ * Second leg of the login flow when 2FA is enabled. The first leg
+ * (POST /api/auth/login) returns 202 { twoFactorRequired: true } WITHOUT a
+ * token; this endpoint issues the full token only after BOTH the password
+ * AND a valid TOTP/backup code verify.
+ *
+ * Body: { email, password, token }
+ */
+router.post('/login', async (req: Request, res: Response) => {
+  try {
+    const { token } = req.body as { email?: string; password?: string; token?: string };
+    let { email, password } = req.body as { email?: string; password?: string };
+
+    try {
+      email = sanitizeInput(String(email ?? ''), 'email');
+      password = sanitizeInput(String(password ?? ''), 'password');
+    } catch (err) {
+      if (err instanceof InputValidationError) {
+        res.status(400).json({ error: err.message, code: err.code });
+        return;
+      }
+      res.status(400).json({ error: 'Invalid input' });
+      return;
+    }
+
+    if (!token || !/^\d{6,8}$/.test(String(token))) {
+      res.status(400).json({ error: 'A valid authentication code is required.' });
+      return;
+    }
+
+    // Re-authenticate credentials — never trust an unauthenticated caller.
+    const user = authenticateUser(email, password);
+    if (!user) {
+      res.status(401).json({ error: 'Invalid email or password' });
+      return;
+    }
+
+    if (!(await isTwoFactorEnabled(user.id))) {
+      // 2FA not enabled — normal login path should have been used.
+      res.status(400).json({ error: 'Two-factor authentication is not enabled for this account.' });
+      return;
+    }
+
+    // Attempt-limiter: 5 failed codes per user per 10 minutes (in-memory).
+    const key = user.id;
+    const now = Date.now();
+    const attempts = twoFactorLoginAttempts.get(key) ?? { count: 0, resetAt: now + 10 * 60 * 1000 };
+    if (now > attempts.resetAt) {
+      attempts.count = 0;
+      attempts.resetAt = now + 10 * 60 * 1000;
+    }
+    if (attempts.count >= 5) {
+      res.status(429).json({ error: 'Too many failed attempts. Try again in a few minutes.' });
+      return;
+    }
+
+    const isValid = await verifyToken(user.id, String(token));
+    if (!isValid) {
+      attempts.count += 1;
+      twoFactorLoginAttempts.set(key, attempts);
+      res.status(401).json({ error: 'Invalid code. Please try again.' });
+      return;
+    }
+    twoFactorLoginAttempts.delete(key);
+
+    const tokenIssued = generateToken({ userId: user.id, email: user.email, role: user.role });
+    res.json({
+      token: tokenIssued,
+      user: toPublicUser(user),
+    });
+  } catch (_err: unknown) {
+    res.status(500).json({ error: 'Two-factor login failed' });
+  }
+});
+
+/** In-memory attempt tracker for the 2FA login leg. */
+const twoFactorLoginAttempts = new Map<string, { count: number; resetAt: number }>();
 
 /**
  * POST /api/auth/2fa/setup
