@@ -42,6 +42,10 @@ jobs:
       contents: read
       issues: write # open/close incident tracking issues
     steps:
+      # The alert steps use a LOCAL composite action (./.github/actions/…) —
+      # local actions are only resolvable after actions/checkout.
+      - uses: actions/checkout@v4
+
       - name: Probe endpoints (2 consecutive failures = down)
         id: probe
         run: |
