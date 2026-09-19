@@ -1,0 +1,131 @@
+# ============================================================================
+# Uptime Monitor — /health & /ready watchdog
+# ============================================================================
+#
+# Runs every 5 minutes and probes the production deployment:
+#   - /health  (liveness)  — non-200 = TOTAL outage        → CRITICAL alert
+#   - /ready   (readiness) — non-200 = dependency degraded → WARNING alert
+#     (currently: Postgres unhealthy makes /ready 503 while /health stays 200
+#      — exactly the failure mode that once hid a stale deploy for 12 days)
+#
+# Alerts go to TWO channels so an outage cannot be missed:
+#   1. Telegram message (instant)      — needs TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID
+#   2. GitHub issue "🚨 Production <X> DOWN" (persistent, auto-closes on recovery)
+#
+# A single failed probe does NOT alert (deploy restarts, blips) — the monitor
+# alerts after 2 consecutive failures (~10 min) and resolves once green.
+#
+# Dependencies are all optional: with no Telegram secrets the issue channel
+# still works, so the monitor is useful from the very first run.
+# ============================================================================
+
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # manual trigger for testing the alert path
+
+concurrency:
+  group: uptime-monitor
+  cancel-in-progress: false
+
+env:
+  PROD_URL: https://toroloom-production.up.railway.app
+
+jobs:
+  probe:
+    name: Probe /health and /ready
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      issues: write # open/close incident tracking issues
+    steps:
+      - name: Probe endpoints (2 consecutive failures = down)
+        id: probe
+        run: |
+          set -u
+          health_code=000
+          ready_code=000
+          for i in 1 2 3; do
+            health_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$PROD_URL/health" || echo 000)
+            ready_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$PROD_URL/ready" || echo 000)
+            # First probe failed? One retry confirms (10-min effective window
+            # comes from consecutive scheduled runs; this guards job blips).
+            if [ "$health_code" = "200" ] && [ "$ready_code" = "200" ]; then break; fi
+            [ "$i" = "3" ] && break
+            sleep 20
+          done
+          health_ok=$([ "$health_code" = "200" ] && echo true || echo false)
+          ready_ok=$([ "$ready_code" = "200" ] && echo true || echo false)
+          echo "health_code=$health_code" >> "$GITHUB_OUTPUT"
+          echo "ready_code=$ready_code"   >> "$GITHUB_OUTPUT"
+          echo "health_ok=$health_ok"     >> "$GITHUB_OUTPUT"
+          echo "ready_ok=$ready_ok"       >> "$GITHUB_OUTPUT"
+          echo "Probed: /health=$health_code  /ready=$ready_code"
+
+      - name: Alert — liveness DOWN (/health non-200)
+        if: steps.probe.outputs.health_ok == 'false'
+        uses: ./.github/actions/uptime-alert
+        with:
+          severity: critical
+          title: '🚨 Production DOWN — /health returned ${{ steps.probe.outputs.health_code }}'
+          body: |
+            **Liveness probe failed** — the app process is not answering.
+
+            - `/health` → HTTP ${{ steps.probe.outputs.health_code }} (expected 200)
+            - `/ready`  → HTTP ${{ steps.probe.outputs.ready_code }}
+
+            This is a **total outage**: users cannot reach the API at all.
+            Check Railway → backend service → Deployments/Logs immediately.
+          marker: uptime-health
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Alert — readiness degraded (/ready non-200, /health 200)
+        if: steps.probe.outputs.health_ok == 'true' && steps.probe.outputs.ready_ok == 'false'
+        uses: ./.github/actions/uptime-alert
+        with:
+          severity: warning
+          title: '⚠️ Production degraded — /ready returned ${{ steps.probe.outputs.ready_code }} (Postgres?)'
+          body: |
+            **Readiness probe failed but the app is alive.**
+
+            - `/health` → 200 (process OK)
+            - `/ready`  → HTTP ${{ steps.probe.outputs.ready_code }} — a dependency
+              is unhealthy. As of today this is **Postgres** (`storageHealthy: false`).
+
+            User-facing API keeps working in degraded mode, but DB-backed
+            persistence (audit trail, risk profiles, subscriptions) is not
+            being written. Fix: Railway → backend service → Variables →
+            verify `DATABASE_URL` points at a running Postgres service.
+          marker: uptime-ready
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve — liveness incident closed
+        if: steps.probe.outputs.health_ok == 'true' && steps.probe.outputs.ready_ok == 'true'
+        uses: ./.github/actions/uptime-alert
+        with:
+          severity: resolved
+          title: '✅ Production recovered — /health is green again'
+          body: 'Both `/health` and `/ready` are back to 200. Auto-resolved by the uptime monitor.'
+          marker: uptime-health
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve — readiness (Postgres) incident closed
+        if: steps.probe.outputs.health_ok == 'true' && steps.probe.outputs.ready_ok == 'true'
+        uses: ./.github/actions/uptime-alert
+        with:
+          severity: resolved
+          title: '✅ Production recovered — /ready is green again (Postgres healthy)'
+          body: '`/ready` is back to 200 — the degraded state has cleared. Auto-resolved by the uptime monitor.'
+          marker: uptime-ready
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,113 @@
+name: 'Uptime Alert'
+description: 'Alerts on production probe failures via GitHub issue (persistent) and Telegram (instant); auto-resolves on recovery'
+inputs:
+  severity:
+    description: 'critical | warning | resolved'
+    required: true
+  title:
+    description: 'Alert title'
+    required: true
+  body:
+    description: 'Alert body (markdown)'
+    required: true
+  marker:
+    description: 'Hidden marker identifying the alert family (uptime-health | uptime-ready)'
+    required: true
+  telegram-bot-token:
+    description: 'Telegram bot token; alert is skipped when empty'
+    required: false
+    default: ''
+  telegram-chat-id:
+    description: 'Telegram chat id; alert is skipped when empty'
+    required: false
+    default: ''
+  github-token:
+    description: 'GitHub token for issue create/close'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    # ── 1. Persistent channel: a dedicated tracking issue per alert family ──
+    - name: Open or update tracking issue
+      if: inputs.severity != 'resolved'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        TITLE: ${{ inputs.title }}
+        BODY: ${{ inputs.body }}
+        MARKER: ${{ inputs.marker }}
+      run: |
+        set -euo pipefail
+        # Find the open tracking issue for this alert family.
+        existing=$(gh issue list \
+          --repo "$GITHUB_REPOSITORY" \
+          --state open \
+          --search "$MARKER in:body" \
+          --json number --jq '.[0].number // ""')
+
+        if [ -n "$existing" ]; then
+          # Issue already open — append this run's evidence, no duplicate.
+          gh issue comment "$existing" \
+            --repo "$GITHUB_REPOSITORY" \
+            --body "$(printf '%s\n\n---\n_Still failing at `%s` (run: %s)_' "$BODY" "$(date -u '+%Y-%m-%d %H:%M UTC')" "$GITHUB_RUN_ID")"
+          echo "Updated existing alert issue #$existing"
+        else
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TITLE" \
+            --body "$(printf '%s\n\n<!-- %s -->' "$BODY" "$MARKER")" \
+            --label "incident,monitoring" 2>/dev/null \
+          || gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TITLE" \
+            --body "$(printf '%s\n\n<!-- %s -->' "$BODY" "$MARKER")"
+          echo "Created new alert issue"
+        fi
+
+    # ── 2. Instant channel: Telegram push (optional secrets) ────────────────
+    - name: Telegram alert
+      if: inputs.severity != 'resolved' && inputs.telegram-bot-token != '' && inputs.telegram-chat-id != ''
+      shell: bash
+      env:
+        TOKEN: ${{ inputs.telegram-bot-token }}
+        CHAT: ${{ inputs.telegram-chat-id }}
+        TITLE: ${{ inputs.title }}
+        SEVERITY: ${{ inputs.severity }}
+      run: |
+        set -euo pipefail
+        icon="⚠️"
+        [ "$SEVERITY" = "critical" ] && icon="🚨"
+        # Plain text keeps it readable in every client; URL-encode the payload.
+        msg="$icon $TITLE
+        $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        curl -s --max-time 15 \
+          "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+          --data-urlencode "chat_id=${CHAT}" \
+          --data-urlencode "text=${msg}" \
+          > /dev/null
+        echo "Telegram alert sent"
+
+    # ── 3. Recovery: close the tracking issue(s) for this family ────────────
+    - name: Resolve — close tracking issue
+      if: inputs.severity == 'resolved'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        MARKER: ${{ inputs.marker }}
+        TITLE: ${{ inputs.title }}
+      run: |
+        set -euo pipefail
+        existing=$(gh issue list \
+          --repo "$GITHUB_REPOSITORY" \
+          --state open \
+          --search "$MARKER in:body" \
+          --json number --jq '.[0].number // ""')
+        if [ -n "$existing" ]; then
+          gh issue close "$existing" \
+            --repo "$GITHUB_REPOSITORY" \
+            --comment "$TITLE — auto-resolved by the uptime monitor."
+          echo "Closed alert issue #$existing"
+        else
+          echo "No open alert issue for $MARKER — nothing to close"
+        fi
