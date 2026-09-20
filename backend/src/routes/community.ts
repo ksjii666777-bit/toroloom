@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware, optionalAuth } from '../middleware/auth';
 import { validate } from '../middleware/validate';
-import { getPostsQuerySchema, getPostByIdSchema, createPostSchema, likePostSchema } from '../schemas/community';
+import { getPostByIdSchema, createPostSchema, likePostSchema } from '../schemas/community';
 import { getPosts, getPost, createPost, likePost } from '../services/community';
 
 const router = Router();

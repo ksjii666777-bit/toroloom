@@ -20,7 +20,7 @@
 
 import https from 'https';
 import http from 'http';
-import { marketCache, CACHE_TTL } from './cache';
+import { marketCache } from './cache';
 
 const TIMEOUT_MS = 15_000;
 const CACHE_TTL_EARNINGS = 60 * 60 * 1000; // 1 hour

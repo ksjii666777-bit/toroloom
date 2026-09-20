@@ -244,7 +244,7 @@ router.post('/verify', validate(verifyPaymentSchema), async (req: Request, res: 
 
       // ── Validate payment amount against consultation + Razorpay order ──
       try {
-        const { getConsultation, getAdvisor } = await import('../services/advisors');
+        const { getConsultation } = await import('../services/advisors');
         const consultation = await getConsultation(req.user!.userId, consultationId);
 
         if (!consultation) {
@@ -417,7 +417,7 @@ router.post('/create-subscription', validate(createSubscriptionSchema), async (r
 
 router.post('/create-mandate', validate(createMandateSchema), async (req: Request, res: Response) => {
   try {
-    const { planId, billingPeriod, customerName, customerEmail, customerContact, tenantId } = req.body;
+    const { planId, billingPeriod, tenantId } = req.body;
 
     const planAmounts = PLAN_AMOUNTS[planId];
     if (!planAmounts) {

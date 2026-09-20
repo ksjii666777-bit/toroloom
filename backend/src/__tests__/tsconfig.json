@@ -1,0 +1,4 @@
+{
+  "//": "Empty nearest-tsconfig for vitest/vite: the backend tsconfig excludes src/__tests__, so without this file vite walks up to the ROOT tsconfig (extends expo/tsconfig.base) and fails to transform tests on machines/CI jobs where the frontend expo package is not installed. An empty config here grounds vite's tsconfig discovery locally.",
+  "compilerOptions": {}
+}

@@ -235,7 +235,7 @@ router.get('/stock/:symbol', async (req: Request, res: Response) => {
       // Real user — redirect to deep link
       res.redirect(302, deepLink);
     }
-  } catch (error) {
+  } catch (_error) {
     // Fallback: serve generic OG tags even if broker is down
     const fallbackTitle = `${symbolUpper} — Stock Details`;
     const fallbackDesc = `View live price, charts, and analysis for ${symbolUpper} on ${APP_NAME}`;
@@ -294,7 +294,7 @@ router.get('/post/:postId', async (req: Request, res: Response) => {
     } else {
       res.redirect(302, deepLink);
     }
-  } catch (error) {
+  } catch (_error) {
     const fallbackTitle = `Community Post — ${APP_NAME}`;
     const fallbackDesc = `View this post on ${APP_NAME} Community`;
 

@@ -63,7 +63,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
 
       - name: Restore TypeScript build cache
@@ -235,7 +235,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
 
       - name: Validate import paths (vi.mock paths must resolve to real files)
@@ -309,7 +309,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
       # Shards each run with coverage enabled so v8 results are embedded in
       # the blob report; frontend-test-merge combines all four and enforces
@@ -356,7 +356,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
       - name: Download all shard blob reports
         uses: actions/download-artifact@v4
@@ -645,7 +645,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
 
       - name: Run cross-file isolation test (singleFork = same process)
@@ -722,7 +722,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
 
       # Integration tests share databases (MongoDB/PostgreSQL) and
@@ -775,7 +775,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
 
       - name: Run WebSocket PnL bridge stress test
@@ -847,7 +847,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
 
       - name: Install Maestro CLI
@@ -979,7 +979,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Verify install-script allowlist (supply-chain)
-        run: node ../scripts/install-scripts-allowlist.mjs
+        run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
 
       - name: Install Maestro CLI

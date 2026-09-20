@@ -91,7 +91,11 @@ export const STRIPE_LOOKUP_KEYS: Record<string, Record<string, Record<string, st
   },
 };
 
-const REGION_CURRENCY: Record<string, string> = { us: 'usd', eu: 'eur' };
+// Currency lives on the Stripe Price itself (looked up by lookup_key), so no
+// client-side currency map is needed — keeping one here would drift from the
+// dashboard configuration.
+const REGION_CURRENCY_UNUSED: Record<string, string> = { us: 'usd', eu: 'eur' };
+void REGION_CURRENCY_UNUSED;
 
 // ──── Authed routes ──────────────────────────────────────────────────────────
 
@@ -311,7 +315,7 @@ function periodEndDate(subscription: { current_period_end?: number | null }, fal
 
 /** checkout.session.completed — provision the tier from session metadata. */
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<boolean> {
-  const { userId, planId, billingPeriod } = readMetadata(session);
+  const { userId, planId } = readMetadata(session);
   if (!userId || !planId || !PLANS[planId]) {
     console.warn('[Stripe Webhook] checkout.session.completed without usable metadata — skipped');
     return false;

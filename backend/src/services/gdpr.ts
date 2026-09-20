@@ -301,13 +301,6 @@ export async function deleteUserData(
     // Note: Holdings are broker-managed in this architecture
 
     // 3. Anonymize trades (keep for compliance, remove PII)
-    let trades: any[] = [];
-    try {
-      const broker = await getBroker();
-      trades = await broker.getTradeHistory();
-    } catch {
-      // Broker unavailable
-    }
     // Trades are retained for SEBI compliance — just log the deletion request
 
     // 4. Delete watchlists
@@ -372,7 +365,7 @@ export async function deleteUserData(
  * Check if user has any data that would be retained after deletion.
  * Useful for informing users before they proceed.
  */
-export async function checkRetainedData(userId: string): Promise<{
+export async function checkRetainedData(_userId: string): Promise<{
   hasRetainedData: boolean;
   retainedCategories: string[];
   estimatedRetainedRecords: number;
