@@ -140,6 +140,11 @@ export const env = {
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+  /** Stripe (US/EU checkout) — absent keys disable the stripe endpoints gracefully */
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+  /** Base URL for post-checkout deep links (e.g. toroloom://) */
+  appDeepLinkBase: process.env.APP_DEEP_LINK_BASE || 'toroloom://',
 
   // ──── External API Keys ──────────────────────────────────────────────
   /** Telegram Bot Token for sending trading alerts to users */

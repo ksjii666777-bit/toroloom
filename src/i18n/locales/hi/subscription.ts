@@ -1,6 +1,7 @@
 // Auto-generated from hi.ts — subscription namespace
 export default {
     title: 'प्रीमियम लें',
+    viewGlobalPricing: 'ग्लोबल प्राइसिंग देखें',
     free: 'फ्री',
     pro: 'प्रो',
     elite: 'एलीट',

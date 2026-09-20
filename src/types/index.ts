@@ -2994,6 +2994,7 @@ export type RootStackParamList = {
   ChatList: undefined;
   ChatRoom: { roomId?: string };
   BehavioralJournal: undefined;
+  PropChallenge: undefined;
   Community: undefined;
   CommunityPost: { postId: string };
   SocialTrading: undefined;
@@ -3022,6 +3023,7 @@ export type RootStackParamList = {
   BrokerConnect: undefined;
   PaymentHistory: undefined;
   Subscription: undefined;
+  GlobalPricing: undefined;
   AvailableCoupons: undefined;
   CouponHistory: undefined;
   Referral: undefined;

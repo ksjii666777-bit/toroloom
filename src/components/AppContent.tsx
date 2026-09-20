@@ -19,6 +19,7 @@ import { log } from '../utils/logger';
 import { useCommunityStore } from '../store/communityStore';
 import { useAIStore } from '../store/aiStore';
 import { seedAllBrokerSessions, seedE2EBrokerSession } from '../services/gateway/seedE2ESession';
+import { registerStripeDeepLinkHandler } from '../services/stripeDeepLink';
 
 function AppContent() {
   const { isDark } = useTheme();
@@ -108,6 +109,13 @@ function AppContent() {
       useRiskStore.getState().stopListeningToWS();
     };
   }, [isLoggedIn]);
+
+  // Stripe checkout deep links (toroloom://subscription/success|cancelled)
+  // — refreshes the subscription after the browser-based US/EU payment.
+  useEffect(() => {
+    const unsub = registerStripeDeepLinkHandler();
+    return unsub;
+  }, []);
 
   // E2E Deep Link Handler (dev-only)
   useEffect(() => {

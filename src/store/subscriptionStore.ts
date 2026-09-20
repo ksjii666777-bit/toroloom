@@ -302,6 +302,9 @@ interface SubscriptionState {
 
   // ──── Actions ────────────────────────────────────────────
   loadSubscription: () => Promise<void>;
+  /** Re-pull the authoritative subscription from the backend (post-checkout,
+   *  post-portal, or on app foreground after a payment journey) */
+  syncFromServer: () => Promise<boolean>;
   /** Configure the active tenant (called at app init) */
   configureTenant: (config: TenantConfig) => Promise<void>;
   getTenantConfig: () => TenantConfig | null;
@@ -485,6 +488,21 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       set(updates);
     } catch {
       set({ initialized: true });
+    }
+  },
+
+  syncFromServer: async () => {
+    try {
+      const remote = await subscriptionsApi.getCurrent();
+      if (!remote?.planId) return false;
+
+      // Persist so the tier survives cold starts without another round-trip
+      await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(remote));
+      set({ subscription: remote, initialized: true });
+      return true;
+    } catch {
+      // Offline / not-configured backend — local state stays authoritative
+      return false;
     }
   },
 

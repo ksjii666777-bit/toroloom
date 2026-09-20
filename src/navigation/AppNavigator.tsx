@@ -104,6 +104,7 @@ const LazyWithdrawScreen = lazy(() => import('../screens/funds/WithdrawScreen'))
 const LazyIPODashboardScreen = lazy(() => import('../screens/ipos/IPODashboardScreen'));
 const LazyIPODetailScreen = lazy(() => import('../screens/ipos/IPODetailScreen'));
 const LazyBehavioralJournalScreen = lazy(() => import('../screens/journal/BehavioralJournalScreen'));
+const LazyPropChallengeScreen = lazy(() => import('../screens/journal/PropChallengeScreen'));
 const LazyAadhaarVerificationScreen = lazy(() => import('../screens/kyc/AadhaarVerificationScreen'));
 const LazyBankLinkingScreen = lazy(() => import('../screens/kyc/BankLinkingScreen'));
 const LazyDigiLockerScreen = lazy(() => import('../screens/kyc/DigiLockerScreen'));
@@ -145,6 +146,7 @@ const LazyRiskSettingsScreen = lazy(() => import('../screens/settings/RiskSettin
 const LazySecurityAuditLogScreen = lazy(() => import('../screens/settings/SecurityAuditLogScreen'));
 const LazySecuritySettingsScreen = lazy(() => import('../screens/settings/SecuritySettingsScreen'));
 const LazySubscriptionScreen = lazy(() => import('../screens/settings/SubscriptionScreen'));
+const LazyGlobalPricingScreen = lazy(() => import('../screens/settings/GlobalPricingScreen'));
 const LazyTelegramConnectScreen = lazy(() => import('../screens/settings/TelegramConnectScreen'));
 const LazyTenantConfigScreen = lazy(() => import('../screens/settings/TenantConfigScreen'));
 const LazyTwoFactorSetupScreen = lazy(() => import('../screens/settings/TwoFactorSetupScreen'));
@@ -596,6 +598,7 @@ export default function AppNavigator() {
             <Stack.Screen name="ChatList" component={LazyChatRoomListScreen} />
             <Stack.Screen name="ChatRoom" component={LazyChatRoomScreen} />
             <Stack.Screen name="BehavioralJournal" component={LazyBehavioralJournalScreen} />
+            <Stack.Screen name="PropChallenge" component={LazyPropChallengeScreen} />
             <Stack.Screen name="ContractNoteParser" component={LazyContractNoteUploadScreen} />
             <Stack.Screen name="USMarkets" component={LazyUSMarketsScreen} />
             <Stack.Screen name="BondDashboard" component={LazyBondDashboardScreen} />
@@ -647,6 +650,7 @@ export default function AppNavigator() {
             <Stack.Screen name="NotificationPreferences" component={LazyNotificationPreferencesScreen} />
             <Stack.Screen name="PortfolioAlerts" component={LazyPortfolioAlertsScreen} />
             <Stack.Screen name="Subscription" component={LazySubscriptionScreen} />
+            <Stack.Screen name="GlobalPricing" component={LazyGlobalPricingScreen} />
             <Stack.Screen name="AvailableCoupons" component={LazyAvailableCouponsScreen} />
             <Stack.Screen name="CouponHistory" component={LazyCouponHistoryScreen} />
             <Stack.Screen name="AdminCouponManager" component={LazyAdminCouponManagementScreen} />

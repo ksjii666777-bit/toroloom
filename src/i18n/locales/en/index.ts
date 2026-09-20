@@ -48,6 +48,7 @@ import funds from './funds';
 import fundamentals from './fundamentals';
 import futuresCurve from './futuresCurve';
 import gamification from './gamification';
+import globalPricing from './globalPricing';
 import gdpr from './gdpr';
 import quizResult from './quizResult';
 import stepUpSip from './stepUpSip';
@@ -79,6 +80,7 @@ import portfolio from './portfolio';
 import position from './position';
 import portfolioAlerts from './portfolioAlerts';
 import profile from './profile';
+import propFirm from './propFirm';
 import referral from './referral';
 import reports from './reports';
 import retirement from './retirement';
@@ -163,6 +165,7 @@ const en = {
   fundamentals,
   futuresCurve,
   gamification,
+  globalPricing,
   gdpr,
   quizResult,
   stepUpSip,
@@ -194,6 +197,7 @@ const en = {
   portfolioAlerts,
   position,
   profile,
+  propFirm,
   referral,
   reports,
   retirement,

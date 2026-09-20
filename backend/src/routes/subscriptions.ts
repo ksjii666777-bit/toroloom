@@ -44,6 +44,16 @@ const webhookRouter = Router();
 const router = Router();
 router.use(authMiddleware);
 
+// ──── Shared exports (consumed by stripePayments.ts) ─────────────────────
+
+export { PLANS, isDuplicateEvent, markEventProcessed };
+
+/** Accessor for the configured persistence backend — shared with Stripe so
+ *  both payment rails write the SAME subscription records. */
+export function getSubscriptionPersistence() {
+  return _subscriptionStore;
+}
+
 // ──── Shared tier ranking ──────────────────────────────────────────────────
 
 export const TIER_RANK: Record<string, number> = {

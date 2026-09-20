@@ -108,6 +108,14 @@ export interface UserSubscriptionData {
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   razorpaySubscriptionId?: string;
+
+  // ── Stripe (US/EU checkout) ────────────────────────────────────
+  /** Stripe customer — portal access and future checkouts link to it */
+  stripeCustomerId?: string;
+  /** Stripe subscription ID (mode: 'subscription' checkout) */
+  stripeSubscriptionId?: string;
+  /** Price that is currently billed (lookup_key → price resolution audit) */
+  stripePriceId?: string;
   lastPaymentDate?: string;
   tenantId?: string;
 

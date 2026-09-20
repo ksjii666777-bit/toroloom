@@ -327,7 +327,12 @@ export const fireEvent = {
       handler = findByProp(root, 'onChangeText')?.props?.onChangeText;
     }
     if (typeof handler === 'function') {
-      handler(text);
+      // act()-wrapped like press() — otherwise the queued state update only
+      // flushes during the NEXT act() (e.g. a later press), so a press can
+      // observe the PRE-change value and state "time-travels" across steps.
+      act(() => {
+        handler(text);
+      });
     }
   },
 

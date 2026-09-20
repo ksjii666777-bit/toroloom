@@ -59,6 +59,7 @@ import wsStatusRoutes from './routes/wsStatus';
 import ironLockRoutes from './routes/ironLock';
 import metricsRoutes from './routes/metrics';
 import paymentsRoutes from './routes/payments';
+import stripePaymentsRoutes, { stripeWebhookRouter } from './routes/stripePayments';
 import subscriptionRoutes, { webhookRouter, configureSubscriptionPersistence, setWebhookSecret } from './routes/subscriptions';
 import subscriptionAnalyticsRoutes, { configureSubscriptionAnalyticsStore } from './routes/subscriptionAnalytics';
 import webhookHealthRoutes from './routes/webhookHealth';
@@ -131,6 +132,11 @@ app.use(bodySizeLimiter(100_000));
 // Mounted BEFORE express.json() to prevent body consumption by JSON parser.
 // Razorpay sends application/json with HMAC-SHA256 over the raw body bytes.
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }), webhookRouter);
+
+// ── Stripe webhook uses the same raw-body pattern ────────────────────────
+// Mounted BEFORE express.json() so req.body stays a Buffer for the SDK's
+// signature verification (constructEvent needs the raw bytes).
+app.use('/api/payments/webhook/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
 
 app.use(express.json({ limit: '100kb' }));
 
@@ -300,6 +306,7 @@ app.use('/api/broker-link', writeLimiter, authMiddleware, requireSubscription('p
 app.use('/api/snaptrade', writeLimiter, replayProtection, authMiddleware, snapTradeRoutes);
 app.use('/api/iron-lock', writeLimiter, authMiddleware, requireSubscription('elite'), ironLockRoutes);
 app.use('/api/payments', writeLimiter, paymentsRoutes);
+app.use('/api/payments/stripe', writeLimiter, stripePaymentsRoutes);
 // Protected subscription routes (authMiddleware applied inside router)
 app.use('/api/subscriptions', writeLimiter, subscriptionRoutes);
 

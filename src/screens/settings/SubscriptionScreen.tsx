@@ -246,7 +246,16 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
             </View>
           </AnimatedPressable>
           <Text style={styles.title}>{t('subscription.title')}</Text>
-          <View style={{ width: 40 }} />
+          <AnimatedPressable
+            onPress={() => navigation.navigate('GlobalPricing')}
+            haptic="light"
+            scaleTo={0.9}
+            accessibilityLabel={t('subscription.viewGlobalPricing')}
+          >
+            <View style={styles.backBtn}>
+              <Ionicons name="globe-outline" size={20} color={colors.text} />
+            </View>
+          </AnimatedPressable>
         </View>
 
         <ScrollView

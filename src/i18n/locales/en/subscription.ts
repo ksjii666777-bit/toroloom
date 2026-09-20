@@ -1,6 +1,7 @@
 // Auto-generated from en.ts — subscription namespace
 export default {
     title: 'Go Premium',
+    viewGlobalPricing: 'View global pricing',
     free: 'Free',
     pro: 'Pro',
     elite: 'Elite',

@@ -17,6 +17,21 @@ const planIdEnum = z.enum(['plan_pro', 'plan_elite']);
 const billingPeriodEnum = z.enum(['monthly', 'yearly']);
 const currencyEnum = z.enum(['INR', 'USD', 'EUR', 'GBP']);
 
+// ──── Stripe (US/EU checkout) ───────────────────────────────────────────────
+
+/** 'in' is deliberately NOT in the enum — India rides the Razorpay rail. */
+const stripeRegionEnum = z.enum(['us', 'eu']);
+
+export const stripeCheckoutSessionSchema = z.object({
+  planId: planIdEnum,
+  billingPeriod: billingPeriodEnum.default('monthly'),
+  region: stripeRegionEnum,
+});
+
+export type StripeCheckoutSessionInput = z.infer<typeof stripeCheckoutSessionSchema>;
+
+export const stripePortalSessionSchema = z.object({});
+
 // ──── POST /api/payments/create-order ──────────────────────────────────────
 
 export const createOrderSchema = z.object({

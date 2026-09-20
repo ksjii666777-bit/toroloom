@@ -75,6 +75,7 @@ const menuItems: MenuSection[] = [
       { icon: 'logo-bitcoin', label: 'Crypto Trading', labelKey: 'profile.cryptoTrading', color: '#F7931A', screen: 'CryptoTrading' },
       { icon: 'pulse', label: 'Futures Curve', labelKey: 'profile.futuresCurve', color: '#6C63FF', screen: 'FuturesCurve' },
       { icon: 'journal', label: 'Trading Journal', labelKey: 'profile.tradingJournal', color: '#8B5CF6', screen: 'BehavioralJournal' },
+      { icon: 'shield-checkmark', label: 'Prop Challenge', labelKey: 'propFirm.title', color: '#F97316', screen: 'PropChallenge' },
       { icon: 'lock-closed', label: 'Iron Lock Trade', labelKey: 'profile.ironLockTrade', color: '#EF4444', screen: 'FnOOptionsChain', testID: 'menu-iron-lock' },
     ],
   },

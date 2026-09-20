@@ -34,7 +34,42 @@ export interface VerifyPaymentResponse {
   message: string;
 }
 
+export interface StripeCheckoutSessionResponse {
+  /** Hosted Stripe Checkout URL — open via Linking.openURL */
+  url: string;
+}
+
+export interface StripePortalSessionResponse {
+  /** Stripe Billing Portal URL — open via Linking.openURL */
+  url: string;
+}
+
 export const paymentsApi = {
+  /**
+   * Creates a Stripe Checkout Session for US/EU regions.
+   * Returns a hosted URL to open in the system browser; the resulting
+   * subscription is provisioned by the stripe webhook (no client verify step).
+   */
+  createStripeCheckoutSession: async (
+    planId: string,
+    billingPeriod: 'monthly' | 'yearly',
+    region: 'us' | 'eu',
+  ): Promise<StripeCheckoutSessionResponse> => {
+    return api.post<StripeCheckoutSessionResponse>('/payments/stripe/checkout-session', {
+      planId,
+      billingPeriod,
+      region,
+    });
+  },
+
+  /**
+   * Creates a Stripe Billing Portal session for managing an existing
+   * Stripe-backed subscription (cancel / card update / invoices).
+   */
+  createStripePortalSession: async (): Promise<StripePortalSessionResponse> => {
+    return api.post<StripePortalSessionResponse>('/payments/stripe/portal-session', {});
+  },
+
   /**
    * Creates a Razorpay order for the given plan and billing period.
    * Optionally pass a tenantId to route payment through the tenant's Razorpay account.
