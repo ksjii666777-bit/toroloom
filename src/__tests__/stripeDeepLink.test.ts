@@ -55,7 +55,7 @@ describe('stripeDeepLink — checkout return flow', () => {
   beforeEach(async () => {
     resetStripeDeepLinkState();
     await AsyncStorage.clear();
-    useSubscriptionStore.setState({ subscription: null, initialized: true });
+    useSubscriptionStore.setState({ subscription: undefined, initialized: true });
     vi.clearAllMocks();
     // Re-attach the implementation cleared by clearAllMocks
     (subscriptionsApi.getCurrent as ReturnType<typeof vi.fn>).mockImplementation(async () => ({
@@ -96,7 +96,7 @@ describe('stripeDeepLink — checkout return flow', () => {
     await handleStripeDeepLink(CANCELLED_URL);
 
     expect(subscriptionsApi.getCurrent).not.toHaveBeenCalled();
-    expect(useSubscriptionStore.getState().subscription).toBeNull();
+    expect(useSubscriptionStore.getState().subscription).toBeUndefined();
   });
 
   it('unrelated deep links (SnapTrade, E2E) are ignored', async () => {
@@ -111,6 +111,6 @@ describe('stripeDeepLink — checkout return flow', () => {
     (subscriptionsApi.getCurrent as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('offline'));
 
     await expect(handleStripeDeepLink(SUCCESS_URL)).resolves.toBeUndefined();
-    expect(useSubscriptionStore.getState().subscription).toBeNull();
+    expect(useSubscriptionStore.getState().subscription).toBeUndefined();
   });
 });

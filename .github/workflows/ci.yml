@@ -325,6 +325,9 @@ jobs:
           path: .vitest-reports/
           retention-days: 3
           if-no-files-found: error
+          # .vitest-reports is a hidden directory — without this flag the
+          # uploader silently matches zero files and the step fails.
+          include-hidden-files: true
 
   # ── Frontend test merge: combines shards, enforces coverage gates ───────
   frontend-test-merge:
