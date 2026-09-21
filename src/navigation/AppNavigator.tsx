@@ -169,6 +169,7 @@ const LazyStockScreenerScreen = lazy(() => import('../screens/stock/StockScreene
 const LazyUSStockDetailScreen = lazy(() => import('../screens/stock/USStockDetailScreen'));
 const LazyHelpScreen = lazy(() => import('../screens/support/HelpScreen'));
 const LazyLegalScreen = lazy(() => import('../screens/legal/LegalScreen'));
+const LazyGlobalTaxEducationScreen = lazy(() => import('../screens/education/GlobalTaxEducationScreen'));
 const LazyLearnScreen = lazy(() => import('../screens/tabs/LearnScreen'));
 const LazyCryptoTradingScreen = lazy(() => import('../screens/trade/CryptoTradingScreen'));
 const LazyFnOOptionsChainScreen = lazy(() => import('../screens/trade/FnOOptionsChainScreen'));
@@ -637,6 +638,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Settings" component={LazyRiskSettingsScreen} />
             <Stack.Screen name="Help" component={LazyHelpScreen} />
             <Stack.Screen name="Legal" component={LazyLegalScreen} />
+            <Stack.Screen name="GlobalTaxEducation" component={LazyGlobalTaxEducationScreen} />
             <Stack.Screen name="CourseDetail" component={LazyCourseDetailScreen} />
             <Stack.Screen name="LessonView" component={LazyLessonViewScreen} />
             <Stack.Screen name="QuizResult" component={LazyQuizResultScreen} />

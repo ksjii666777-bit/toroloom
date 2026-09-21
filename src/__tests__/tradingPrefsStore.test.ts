@@ -22,7 +22,12 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
   },
 }));
 
-import { useTradingPrefsStore, REWARD_RISK_OPTIONS } from '../store/tradingPrefsStore';
+import {
+  useTradingPrefsStore,
+  REWARD_RISK_OPTIONS,
+  SLAB_RATE_OPTIONS,
+  LTCG_RATE,
+} from '../store/tradingPrefsStore';
 
 const STORAGE_KEY = 'toroloom_trading_prefs';
 
@@ -31,7 +36,7 @@ const STORAGE_KEY = 'toroloom_trading_prefs';
 describe('TradingPrefsStore — Initial State', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useTradingPrefsStore.setState({ rewardRiskRatio: null, initialized: false });
+    useTradingPrefsStore.setState({ rewardRiskRatio: null, taxMode: 'ltcg', slabRate: 0.3, initialized: false });
   });
 
   it('starts with no R:R chosen and uninitialized', () => {
@@ -50,7 +55,7 @@ describe('TradingPrefsStore — Initial State', () => {
 describe('TradingPrefsStore — loadPrefs', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useTradingPrefsStore.setState({ rewardRiskRatio: null, initialized: false });
+    useTradingPrefsStore.setState({ rewardRiskRatio: null, taxMode: 'ltcg', slabRate: 0.3, initialized: false });
   });
 
   it('restores a persisted ratio and marks initialized', async () => {
@@ -109,7 +114,7 @@ describe('TradingPrefsStore — setRewardRiskRatio', () => {
     expect(useTradingPrefsStore.getState().rewardRiskRatio).toBe(5);
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       STORAGE_KEY,
-      JSON.stringify({ rewardRiskRatio: 5 }),
+      JSON.stringify({ rewardRiskRatio: 5, taxMode: 'ltcg', slabRate: 0.3 }),
     );
   });
 
@@ -153,5 +158,79 @@ describe('TradingPrefsStore — clearPrefs (GDPR erasure)', () => {
 
     // Non-fatal: the commitment is gone from the session regardless
     expect(useTradingPrefsStore.getState().rewardRiskRatio).toBeNull();
+  });
+});
+
+// ==================== Tax mode (education card) ====================
+
+describe('TradingPrefsStore — tax mode', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useTradingPrefsStore.setState({ rewardRiskRatio: 3, taxMode: 'ltcg', slabRate: 0.3, initialized: true });
+  });
+
+  it('resolves the LTCG rate by default', () => {
+    expect(useTradingPrefsStore.getState().resolvedTaxRate()).toBe(LTCG_RATE);
+  });
+
+  it('setTaxMode(slab) switches the resolved rate to the slab rate and persists', async () => {
+    await useTradingPrefsStore.getState().setTaxMode('slab');
+
+    expect(useTradingPrefsStore.getState().taxMode).toBe('slab');
+    expect(useTradingPrefsStore.getState().resolvedTaxRate()).toBe(0.3);
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      STORAGE_KEY,
+      JSON.stringify({ rewardRiskRatio: 3, taxMode: 'slab', slabRate: 0.3 }),
+    );
+  });
+
+  it('setSlabRate only accepts decimals strictly between 0 and 1', async () => {
+    await useTradingPrefsStore.getState().setSlabRate(0.2);
+    expect(useTradingPrefsStore.getState().slabRate).toBe(0.2);
+
+    await useTradingPrefsStore.getState().setSlabRate(30);      // percent by mistake
+    await useTradingPrefsStore.getState().setSlabRate(0);       // zero
+    await useTradingPrefsStore.getState().setSlabRate(1);       // boundary
+    expect(useTradingPrefsStore.getState().slabRate).toBe(0.2);
+  });
+
+  it('restores persisted tax mode and slab rate via loadPrefs', async () => {
+    vi.mocked(AsyncStorage.getItem).mockResolvedValueOnce(
+      JSON.stringify({ rewardRiskRatio: 2, taxMode: 'slab', slabRate: 0.2 }),
+    );
+
+    await useTradingPrefsStore.getState().loadPrefs();
+
+    expect(useTradingPrefsStore.getState().taxMode).toBe('slab');
+    expect(useTradingPrefsStore.getState().slabRate).toBe(0.2);
+    expect(useTradingPrefsStore.getState().resolvedTaxRate()).toBe(0.2);
+  });
+
+  it('keeps legacy payloads working (no tax fields persisted)', async () => {
+    vi.mocked(AsyncStorage.getItem).mockResolvedValueOnce(
+      JSON.stringify({ rewardRiskRatio: 3 }),
+    );
+
+    await useTradingPrefsStore.getState().loadPrefs();
+
+    expect(useTradingPrefsStore.getState().rewardRiskRatio).toBe(3);
+    expect(useTradingPrefsStore.getState().taxMode).toBe('ltcg');
+    expect(useTradingPrefsStore.getState().resolvedTaxRate()).toBe(LTCG_RATE);
+  });
+
+  it('clearPrefs resets tax mode to defaults (GDPR erasure)', async () => {
+    await useTradingPrefsStore.getState().setTaxMode('slab');
+    await useTradingPrefsStore.getState().setSlabRate(0.2);
+
+    await useTradingPrefsStore.getState().clearPrefs();
+
+    const s = useTradingPrefsStore.getState();
+    expect(s.taxMode).toBe('ltcg');
+    expect(s.slabRate).toBe(0.3);
+    expect(s.resolvedTaxRate()).toBe(LTCG_RATE);
+  });
+
+  it('exposes slab options 5/20/30 percent as decimals', () => {
+    expect([...SLAB_RATE_OPTIONS]).toEqual([0.05, 0.2, 0.3]);
   });
 });

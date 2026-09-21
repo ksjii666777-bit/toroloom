@@ -30,6 +30,7 @@ export default {
     noCryptoMatch: 'No cryptocurrencies match your search',
     cryptoWarning: 'Crypto prices are volatile. Prices shown are indicative and may differ from actual exchange rates. DYOR.',
     lastUpdated: 'Last updated',
+    taxEducationLink: 'Global investing taxes & charges — learn what it really costs',
     more: 'more',
     brokerConnected: 'Broker Connected',
     viewOnly: 'View Only',

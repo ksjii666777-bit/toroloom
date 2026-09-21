@@ -244,7 +244,7 @@ describe('ConnectBrokerView — Risk-Reward picker integration', () => {
     // Persisted via setItem to the trading-prefs key
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       'toroloom_trading_prefs',
-      JSON.stringify({ rewardRiskRatio: 3 }),
+      JSON.stringify({ rewardRiskRatio: 3, taxMode: 'ltcg', slabRate: 0.3 }),
     );
     const stored = JSON.parse(await AsyncStorage.getItem('toroloom_trading_prefs') ?? '{}');
     expect(stored.rewardRiskRatio).toBe(3);

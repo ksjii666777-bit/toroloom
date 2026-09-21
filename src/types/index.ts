@@ -3088,6 +3088,7 @@ export type RootStackParamList = {
   Settings: undefined;
   Help: undefined;
   Legal: { section?: 'terms' | 'privacy' | 'sebi' };
+  GlobalTaxEducation: { section?: 'lrs' | 'tcs' | 'gains' | 'dividend' | 'charges' | 'fa' };
   WidgetSettings: undefined;
   TenantConfig: undefined;
   VoiceSettings: undefined;

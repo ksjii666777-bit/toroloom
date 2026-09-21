@@ -59,6 +59,7 @@ import journal from './journal';
 import kyc from './kyc';
 import learn from './learn';
 import legal from './legal';
+import taxEducation from './taxEducation';
 import sentiment from './sentiment';
 import sentimentAlerts from './sentimentAlerts';
 import landscapeSettings from './landscapeSettings';
@@ -176,6 +177,7 @@ const en = {
   kyc,
   learn,
   legal,
+  taxEducation,
   sentiment,
   sentimentAlerts,
   landscapeSettings,

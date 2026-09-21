@@ -785,6 +785,7 @@ export default function USMarketsScreen() {
               return (
                 <Pressable
                   key={tab.key}
+                  testID={`market-tab-${tab.key}`}
                   onPress={() => setActiveTab(tab.key)}
                   style={[
                     styles.tabBtn,
@@ -1258,6 +1259,18 @@ export default function USMarketsScreen() {
             </Text>
           </View>
         )}
+
+        {/* Tax & charges education entry — the real cost of global investing */}
+        <Pressable
+          style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border, marginTop: SPACING.sm }]}
+          onPress={() => navigation.navigate('GlobalTaxEducation', {})}
+          accessibilityRole="button"
+          accessibilityLabel={t('usMarkets.taxEducationLink')}
+        >
+          <Ionicons name="school-outline" size={18} color="#FFAB40" />
+          <Text style={[styles.infoText, { color: colors.text, flex: 1 }]}>{t('usMarkets.taxEducationLink')}</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+        </Pressable>
     </AppScreen>
   );
 }

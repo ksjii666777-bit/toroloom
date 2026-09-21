@@ -72,7 +72,6 @@ vi.mock('../context/ThemeContext', () => ({
 vi.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate }),
 }));
-
 // ==================== Imports ====================
 
 import USMarketsScreen from '../screens/markets/USMarketsScreen';
@@ -324,9 +323,8 @@ describe('USMarketsScreen — Country Picker (Global tab)', () => {
     const utils = render(<USMarketsScreen />);
     await advanceAndFlush();
     await act(async () => {
-      const globalTab = utils.getByText('Global');
-      const pressable = globalTab.parent?.parent;
-      if (pressable) fireEvent.press(pressable);
+      const globalTab = utils.getByTestId('market-tab-global');
+      fireEvent.press(globalTab);
     });
     await advanceAndFlush();
     return utils;
@@ -424,9 +422,8 @@ describe('USMarketsScreen — Market open/closed badges', () => {
 
   async function openGlobal(u: ReturnType<typeof render>) {
     await act(async () => {
-      const globalTab = u.getByText('Global');
-      const pressable = globalTab.parent?.parent;
-      if (pressable) fireEvent.press(pressable);
+      const globalTab = u.getByTestId('market-tab-global');
+      fireEvent.press(globalTab);
     });
     await advanceAndFlush();
   }
@@ -462,9 +459,8 @@ describe('USMarketsScreen — Market open/closed badges', () => {
     const utils = render(<USMarketsScreen />);
     await advanceAndFlush();
     await act(async () => {
-      const globalTab = utils.getByText('Global');
-      const pressable = globalTab.parent?.parent;
-      if (pressable) fireEvent.press(pressable);
+      const globalTab = utils.getByTestId('market-tab-global');
+      fireEvent.press(globalTab);
     });
     await advanceAndFlush();
     await act(async () => {
@@ -491,9 +487,8 @@ describe('USMarketsScreen — Holiday badge', () => {
     const utils = render(<USMarketsScreen />);
     await advanceAndFlush();
     await act(async () => {
-      const globalTab = utils.getByText('Global');
-      const pressable = globalTab.parent?.parent;
-      if (pressable) fireEvent.press(pressable);
+      const globalTab = utils.getByTestId('market-tab-global');
+      fireEvent.press(globalTab);
     });
     await advanceAndFlush();
     await act(async () => {
@@ -516,9 +511,8 @@ describe('USMarketsScreen — Index sparklines (country view)', () => {
   async function openIndiaView(utils: ReturnType<typeof render>) {
     await advanceAndFlush();
     await act(async () => {
-      const globalTab = utils.getByText('Global');
-      const pressable = globalTab.parent?.parent;
-      if (pressable) fireEvent.press(pressable);
+      const globalTab = utils.getByTestId('market-tab-global');
+      fireEvent.press(globalTab);
     });
     await advanceAndFlush();
     await act(async () => {
@@ -573,9 +567,8 @@ describe('USMarketsScreen — New countries (Global tab)', () => {
   async function openCountry(utils: ReturnType<typeof render>, key: string) {
     await advanceAndFlush();
     await act(async () => {
-      const globalTab = utils.getByText('Global');
-      const pressable = globalTab.parent?.parent;
-      if (pressable) fireEvent.press(pressable);
+      const globalTab = utils.getByTestId('market-tab-global');
+      fireEvent.press(globalTab);
     });
     await advanceAndFlush();
     await act(async () => {
@@ -644,9 +637,8 @@ describe('USMarketsScreen — World clock strip', () => {
   async function openGlobalTab(utils: ReturnType<typeof render>) {
     await advanceAndFlush();
     await act(async () => {
-      const globalTab = utils.getByText('Global');
-      const pressable = globalTab.parent?.parent;
-      if (pressable) fireEvent.press(pressable);
+      const globalTab = utils.getByTestId('market-tab-global');
+      fireEvent.press(globalTab);
     });
     await advanceAndFlush();
   }
