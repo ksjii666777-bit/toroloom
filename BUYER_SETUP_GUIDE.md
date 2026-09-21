@@ -4,6 +4,28 @@
 
 ---
 
+## 📸 Handover Snapshot (seller deployment ka aakhri audit)
+
+**Seller ke deployment par jo SET tha (buyer ko apne accounts se REPLACE karna hai):**
+
+| Category | Status |
+|---|---|
+| Storage | ✅ Railway **native Postgres** (postgres-ssl:18) — `DATABASE_URL` reference-pattern se wired, migrations applied |
+| Broker | ✅ SnapTrade — Client ID + Consumer Key + Encryption Key teenon set (dev tier) |
+| AI | ✅ OpenRouter key set |
+| News/Macro | ✅ FRED, GNews, NewsData, MarketStack, Commodity API keys set |
+| Email | ✅ Resend API key + sender email set |
+| Payments | ⚠️ Razorpay — KEY_SECRET + webhook secret the, **KEY_ID missing** (checkout live kabhi hua hi nahi) |
+| US/EU payments | ❌ Stripe keys set hi nahi thi (backend code fully ready) |
+| Alerts | ✅ Telegram bot token set (uptime monitor) |
+| Monitoring | ✅ Sentry DSN set |
+
+**Buyer ko upar se 100% fresh start karna chahiye** — apne merchant/broker/AI accounts,
+apni keys, apna Railway project. Seller apni saari keys transfer ke baad rotate/revoke karega
+(`ENTERPRISE_TRANSFER.md` §6), isliye in par depend mat karo.
+
+---
+
 ## 📋 Railway Setup Checklist
 
 ### Prerequisites
@@ -31,12 +53,40 @@ Service → Settings → Root Directory → Change from "/" to "/backend"
 → Railway auto-deploy trigger karega
 ```
 
-## Step 3: PostgreSQL Database Add Karo
+## Step 3: PostgreSQL Database Add Karo (NATIVE — important!)
 
 ```
 + New → Database → PostgreSQL
-→ Railway automatically DATABASE_URL inject karega backend service mein
+→ Railway ka native postgres-ssl:18 template deploy hoga (volume ke saath — data persistent)
 ```
+
+### ⚠️ DATABASE_URL reference pattern (zaroori — auto-inject NAHI hota)
+
+Railway ke Postgres template mein backend ke liye `DATABASE_URL` **auto-inject nahi hota** —
+backend service par **khud reference set karna padta hai**. Backend service → Variables:
+
+```
+DATABASE_URL = postgresql://${{Postgres.PGUSER}}:${{Postgres.PGPASSWORD}}@${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}
+```
+
+Ye **live reference** hai — Postgres service ke vars se compose hota hai, hardcoded URL nahi.
+Service rename/redeploy par bhi sahi rehta hai.
+
+### 🚨 Lesson (12-day production outage — is galti se bacho)
+
+Kabhi bhi **Postgres service ke apne `DATABASE_URL` / `DATABASE_PUBLIC_URL` ko kisi third-party
+URL (Neon, Supabase, RDS...) se manual override mat karo** — backend chupchaap us dead endpoint
+ko hit karta rahega, `/ready` 503 dega, aur Railway ke saare future deploys block ho jayenge
+(healthcheck catch-22). Toroloom mein yeh exactly hua tha — Sep 9 se Sep 21 tak.
+
+Guards jo already lage hain:
+- `/ready` sirf tab 200 deta hai jab storage genuinely healthy ho (fail-fast)
+- Uptime monitor har 5 min probe karta hai; 2 consecutive failures par GitHub issue auto-open,
+  recovery par auto-close (`uptime-monitor.yml`)
+
+> Tip: Railway native Postgres idle par **sleep** ho sakta hai; backend boot ke waqt DB uth raha
+> ho toh pehla deploy `storageHealthy: false` dikh sakta hai — 1-2 min baad `/ready` dobara probe
+> karo, self-recover ho jaata hai.
 
 ---
 
@@ -55,6 +105,28 @@ Backend service → **Variables** tab mein yeh sab add karo:
 | `STORAGE_BACKEND` | `postgres` | Hardcode karo |
 | `CLUSTER_MODE` | `0` | **Zaroori!** Single-container Railway ke liye |
 | `SUBSCRIPTION_GATING_ENABLED` | `true` | Hardcode karo |
+| `DATABASE_URL` | `${{Postgres.PGUSER}}:...` reference (upar Step 3 dekho) | Railway native Postgres |
+| `CORS_ORIGIN` | Apna frontend/app domain | Apna domain (comma-separated multiple allowed) |
+
+### 💳 Stripe (US/EU Payments — code live hai, keys buyer ko daalni hain)
+
+Global pricing screen US/EU users ko Stripe checkout par bhejta hai. Backend endpoints ready:
+`/api/payments/stripe/checkout-session` + `/api/payments/stripe/portal` + webhook.
+
+| Variable | Value | Kahan Se Milega |
+|----------|-------|-----------------|
+| `STRIPE_SECRET_KEY` | `sk_live_xxxxxxxx` | [Stripe Dashboard](https://dashboard.stripe.com) → Developers → API keys |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_xxxxxxxx` | Stripe → Developers → Webhooks → endpoint sign secret |
+
+Stripe Dashboard → Webhooks → Add endpoint:
+
+| Field | Value |
+|-------|-------|
+| **URL** | `https://your-service.up.railway.app/api/payments/stripe/webhook` |
+| **Events** | `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted` |
+
+> Deep links already wired: `toroloom://subscription/success` app ko wapas laata hai aur
+> subscription sync trigger karta hai.
 
 ### 🔌 SnapTrade (Broker OAuth — Unified Broker Connection)
 
@@ -76,6 +148,11 @@ Backend service → **Variables** tab mein yeh sab add karo:
 | `RAZORPAY_KEY_ID` | `rzp_live_xxxxxxxx` | Razorpay Dashboard → Settings → API Keys |
 | `RAZORPAY_KEY_SECRET` | `xxxxxxxx` | Razorpay Dashboard → Settings → API Keys |
 | `RAZORPAY_WEBHOOK_SECRET` | *(random string)* | Terminal: `openssl rand -hex 32` |
+
+> ⚠️ **Seller ke current deployment ka status:** `RAZORPAY_KEY_SECRET` + webhook secret set the
+> par `RAZORPAY_KEY_ID` **missing** tha — checkout order-create isliye kabhi live nahi hua.
+> Apne account se **teeno** values set karo, aur webhook URL bhi Razorpay dashboard mein
+> register karo (Step 5).
 
 ### 🤖 AI (Kam se kam ek provider set karo)
 
@@ -101,13 +178,25 @@ Railway Redis plugin add karo: `+ New → Database → Redis`
 |----------|-------|-----------------|
 | `REDIS_URL` | *(auto-injected)* | Railway Redis plugin se automatic |
 
+### 📰 Market Data & News (abhi production mein jo chal rahe hain)
+
+| Variable | Kya Hota Hai | Kahan Se Milega |
+|----------|-------------|-----------------|
+| `MARKETSTACK_KEY` | Real-time stock market data | [marketstack.com](https://marketstack.com) — Free tier available |
+| `FRED_API_KEY` | US macro data (Fed economic series) | [fred.stlouisfed.org](https://fred.stlouisfed.org/docs/api/api_key.html) — Free |
+| `GNEWS_API_KEY` | Financial news articles | [gnews.io](https://gnews.io) — Free tier |
+| `NEWSDATA_API_KEY` | News aggregation (second source) | [newsdata.io](https://newsdata.io) — Free tier |
+| `COMMODITY_API_KEY` | Gold/silver/commodity prices | [commodity-api.com](https://www.commodity-api.com) |
+| `RESEND_API_KEY` | Transactional email (OTP, receipts) | [resend.com](https://resend.com) — Free 3k/mo |
+| `RESEND_SENDER_EMAIL` | Verified sender address | Resend → Domains (apna domain verify karo) |
+
 ### 🛠️ Other Optional Keys
 
 | Variable | Kya Hota Hai | Kahan Se Milega |
 |----------|-------------|-----------------|
-| `TELEGRAM_BOT_TOKEN` | Trading alerts via Telegram bot | [@BotFather](https://t.me/BotFather) on Telegram |
-| `MARKETSTACK_KEY` | Real-time stock market data | [marketstack.com](https://marketstack.com) — Free tier available |
-| `NEWSAPI_KEY` | Financial news articles | [newsapi.org](https://newsapi.org) — Free tier |
+| `TELEGRAM_BOT_TOKEN` | Trading alerts + uptime-monitor Telegram notifications | [@BotFather](https://t.me/BotFather) on Telegram |
+| `SENTRY_DSN` | Backend error tracking | [sentry.io](https://sentry.io) |
+| `REDIS_URL` | Cache + pub/sub (Railway Redis plugin auto-inject karta hai) | `+ New → Database → Redis` |
 
 ---
 
@@ -123,10 +212,14 @@ Razorpay Dashboard → **Settings → Webhooks**:
 
 ---
 
-## ✅ Step 6: Verify Health
+## ✅ Step 6: Verify Health (dono endpoints)
 
 ```bash
+# Liveness — process up hai
 curl https://your-service.up.railway.app/health
+
+# Readiness — storage GENUINELY healthy hai (Railway healthcheck yahi hit karta hai)
+curl https://your-service.up.railway.app/ready
 ```
 
 ### Expected Output (All Good):
@@ -145,10 +238,13 @@ curl https://your-service.up.railway.app/health
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `storageHealthy: false` | PostgreSQL connected nahi | Railway PG plugin add karo |
-| `status: degraded` | Storage unhealthy | `STORAGE_BACKEND=postgres` check karo |
-| Backend crash (exit 137) | Memory full | Railway paid plan upgrade karo |
+| `/ready` 503, `storageHealthy: false` | DB down/unreachable | PG service logs dekho; `DATABASE_URL` reference pattern verify karo (Step 3) |
+| `status: degraded` on `/health` | Storage unhealthy (liveness still OK) | `/ready` body padho — `storageBackend` + `storageHealthy` batayega kahan atka |
+| Connection fails: "exceeded the quota" | `DATABASE_URL` kisi third-party (Neon/Supabase) par point kar raha hai | Override hatao, native reference pattern lagao (Step 3) |
+| Backend boot par PG timeout | Native PG sleep se uth raha hai | 1-2 min wait, `/ready` dobara probe — self-recover |
+| Backend crash (exit 137) | Memory full | Railway plan upgrade karo |
 | `401 Unauthorized` | JWT mismatch | Frontend mein bhi same backend URL daalo |
+| Deploy stuck "Waiting for healthcheck" | `/ready` 503 (catch-22) | Pehle DB fix karo — deploy tabhi aage badhega |
 
 ---
 
@@ -291,15 +387,21 @@ curl https://your-service.up.railway.app/health
 | 9 | `RAZORPAY_KEY_ID` | ✅ (payments) | Razorpay Dashboard |
 | 10 | `RAZORPAY_KEY_SECRET` | ✅ (payments) | Razorpay Dashboard |
 | 11 | `RAZORPAY_WEBHOOK_SECRET` | ✅ (payments) | Generate: `openssl rand -hex 32` |
-| 12 | `OPENROUTER_API_KEY` | ⬜ Optional | OpenRouter Dashboard |
-| 13 | `GOOGLE_GEMINI_API_KEY` | ⬜ Optional | Google AI Studio |
-| 14 | `SENTRY_DSN` | ⬜ Optional | Sentry Dashboard |
-| 15 | `REDIS_URL` | ⬜ Optional | Railway Redis plugin |
-| 16 | `TELEGRAM_BOT_TOKEN` | ⬜ Optional | Telegram @BotFather |
-| 17 | `MARKETSTACK_KEY` | ⬜ Optional | MarketStack |
-| 18 | `NEWSAPI_KEY` | ⬜ Optional | NewsAPI |
-| 19 | `CHOREO_CLAUDE_API_KEY` | ⬜ Optional | Choreo API Gateway |
-| 20 | `DATABASE_URL` | ✅ | **Auto-injected by Railway PostgreSQL** |
+| 12 | `STRIPE_SECRET_KEY` | ⬜ (US/EU payments) | Stripe Dashboard |
+| 13 | `STRIPE_WEBHOOK_SECRET` | ⬜ (US/EU payments) | Stripe → Webhooks |
+| 14 | `OPENROUTER_API_KEY` | ⬜ (AI) | OpenRouter Dashboard |
+| 15 | `GOOGLE_GEMINI_API_KEY` | ⬜ (AI) | Google AI Studio |
+| 16 | `MARKETSTACK_KEY` | ⬜ (market data) | MarketStack |
+| 17 | `FRED_API_KEY` | ⬜ (macro data) | FRED |
+| 18 | `GNEWS_API_KEY` | ⬜ (news) | GNews |
+| 19 | `NEWSDATA_API_KEY` | ⬜ (news #2) | NewsData |
+| 20 | `COMMODITY_API_KEY` | ⬜ (commodities) | Commodity API |
+| 21 | `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` | ⬜ (email/OTP) | Resend |
+| 22 | `SENTRY_DSN` | ⬜ Optional | Sentry Dashboard |
+| 23 | `REDIS_URL` | ⬜ Optional | Railway Redis plugin (auto) |
+| 24 | `TELEGRAM_BOT_TOKEN` | ⬜ Optional (alerts) | Telegram @BotFather |
+| 25 | `CORS_ORIGIN` | ✅ | Apna app/frontend domain |
+| 26 | `DATABASE_URL` | ✅ | **Reference pattern** — `postgresql://${{Postgres.PGUSER}}:...` (Step 3) — auto-inject NAHI hota |
 
 ---
 
@@ -307,6 +409,8 @@ curl https://your-service.up.railway.app/health
 
 | ❌ Mistake | ✅ Correct |
 |-----------|-----------|
+| Postgres service ke `DATABASE_URL` ko Neon/Supabase URL se override karna | **Kabhi mat karna** — 12-day outage ka root cause yehi tha; native reference pattern use karo |
+| Sochna ki `DATABASE_URL` auto-inject hota hai | Backend service par khud `${{Postgres.PGUSER}}:...` reference set karo |
 | `CLUSTER_MODE=1` rakhna | `CLUSTER_MODE=0` rakho — Railway single-container hai |
 | `STORAGE_BACKEND=memory` rakhna | `STORAGE_BACKEND=postgres` karo — nahi to data restart pe gayab |
 | PostgreSQL plugin add karna bhoolna | `+ New → Database → PostgreSQL` karna mat bhoolo |
@@ -323,10 +427,10 @@ curl https://your-service.up.railway.app/health
 
 | Tier | Cost | Users | What You Get |
 |------|:----:|:-----:|-------------|
-| **Free (Railway)** | $0 | 10-15 | 1 container, 512MB RAM, in-memory DB |
-| **Starter** | ~$5-10/mo | 100-500 | Railway Pro + PostgreSQL plugin |
-| **Growth** | ~$25-50/mo | 1K-5K | Railway Scale + PostgreSQL + Redis |
-| **Scale** | ~$100-200/mo | 10K+ | Multiple containers + RDS + ElastiCache |
+| **Trial/Hobby** | ~$5/mo | 10-50 | 1 container + native Postgres (8GB volume) + Redis |
+| **Starter** | ~$10-20/mo | 100-500 | Railway Hobby/Pro + Postgres + Redis, thoda headroom |
+| **Growth** | ~$25-50/mo | 1K-5K | Railway Scale + bada Postgres + Redis |
+| **Scale** | ~$100-200/mo | 10K+ | Multiple containers + managed RDS + ElastiCache |
 
 **Additional costs:**
 - **SnapTrade**: Free tier (500 users) → Paid plans as you scale
