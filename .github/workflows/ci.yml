@@ -825,7 +825,11 @@ jobs:
     # Override via repo variable, e.g. [self-hosted, linux, kvm] for stable
     # hardware KVM. Falls back to the GitHub-hosted runner when unset.
     runs-on: ${{ vars.E2E_RUNNER_LABELS || 'ubuntu-latest' }}
-    timeout-minutes: 60
+    # 90 min: the release gradle build took 33 min cold on CI (vs ~4 min
+    # locally) and boot + smoke gate + 31 flows need ~35 more. A 60-min cap
+    # cancelled the run mid-retry (both attempts of 059d3d5 died at exactly
+    # the job timeout, long after the app itself was proven healthy).
+    timeout-minutes: 90
     continue-on-error: true
     env:
       MAESTRO_CLOUD_API_KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY || '' }}
@@ -900,6 +904,20 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
           ls -l /dev/kvm
+
+      # Gradle caches: dependency downloads + compiled intermediates. The
+      # cold release build measured 33 min on CI; a warm cache cuts it to a
+      # fraction, which is what leaves room for boot + flows under the cap.
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/app/build/intermediates
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'gradle.properties', 'package-lock.json') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
 
       # Wrapped in Wandalen/wretry.action so if the emulator boot times out,
       # it is retried once automatically before failing the step.
@@ -983,7 +1001,7 @@ jobs:
   # ── E2E — Maestro (Android) PR Critical Flows ───────────────────────────
   # Fast PR-level E2E: runs 5 key flows to catch critical regressions before
   # merge. Blocks the build on failure (continue-on-error: false).
-  # Timeout 30 min vs the full suite (60 min) since only essential flows run.
+  # Timeout 30 min vs the full suite (90 min) since only essential flows run.
   #
   # Flows executed (in order):
   #   1. smoke/smokeTest.yaml          — Login → Home → Learn → Markets → More → Portfolio → Logout

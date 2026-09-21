@@ -214,6 +214,29 @@ fi
 # appId is read from each flow file (com.toroloom.app); the --app-id CLI flag
 # was removed in modern Maestro versions.
 echo "Running Maestro E2E flows: $*"
+
+# ── 7a. Smoke gate: can the app actually log in and reach Home? ─────────────
+# Release builds talk to the production API. When the backend is degraded
+# (e.g. Postgres down -> /ready 503 -> login fails), EVERY flow fails with
+# element-not-found after ~40s each — 31 flows = 21 minutes of noise that
+# buries the real signal (observed on run 35579155268). One smoke flow
+# decides: backend healthy -> run the full suite; backend broken -> exit
+# immediately with the diagnosis instead of failing 31 times.
+echo "── Smoke gate: login -> Home (backend health check) ──"
+if maestro test .maestro/flows/smoke/smokeTest.yaml \
+    --env "TEST_EMAIL=${TEST_EMAIL}" \
+    --env "TEST_PASSWORD=${TEST_PASSWORD}"; then
+  echo "Smoke gate passed - running the full suite."
+else
+  echo "::error::Smoke gate FAILED: login -> Home did not complete."
+  echo "::error::The release build talks to the production API. Check /ready on"
+  echo "::error::the backend first: a 503 there (Postgres down) makes login fail,"
+  echo "::error::so every flow would die with element-not-found. Other suspects:"
+  echo "::error::app-store/EULA gate blocking login, or a broken home-tab testID."
+  exit 1
+fi
+
+# ── 7b. Full suite ──────────────────────────────────────────────────────────
 maestro test "$@" \
   --env "TEST_EMAIL=${TEST_EMAIL}" \
   --env "TEST_PASSWORD=${TEST_PASSWORD}"
