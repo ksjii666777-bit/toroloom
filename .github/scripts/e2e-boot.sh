@@ -165,6 +165,9 @@ dump_boot_diagnostics() {
   adb shell cat /sdcard/ui.xml 2>/dev/null | head -c 2000 || true
   echo ""
   echo "---- CRASH buffer (logcat -b crash, last 80) — the actual stack ----"
+  # The Abort message contains the JS error string (e.g. the TypeError above);
+  # print it plus context before the raw tombstone tail.
+  adb logcat -b crash -d 2>/dev/null | grep -m1 -A25 "Abort message" || true
   adb logcat -b crash -d 2>/dev/null | tail -80 || true
   echo "---- main buffer RN/AndroidRuntime (last 40) ----"
   adb logcat -d -t 300 2>/dev/null \
@@ -185,11 +188,13 @@ while [ "$ATTEMPT" -lt "$MAX_LAUNCH_ATTEMPTS" ]; do
       break
     fi
     # Process died? Bail out of this poll immediately — polling a dead
-    # process is pure timeout. Print the crash stack inline so the failure
-    # reason sits in the log where you are already looking.
+    # process is pure timeout. Print the JS error FIRST (the Abort message is
+    # the actual reason — "TypeError: undefined is not a function" — while the
+    # tombstone below is just native frames), then the crash stack.
     if [ -z "$(adb shell pidof "$APP_ID" 2>/dev/null | tr -d '\r\n ')" ]; then
-      echo "  attempt ${ATTEMPT}: app process DIED - crash buffer tail:"
-      adb logcat -b crash -d 2>/dev/null | tail -40 || true
+      echo "  attempt ${ATTEMPT}: app process DIED - JS error + crash buffer:"
+      adb logcat -b crash -d 2>/dev/null | grep -m1 -A25 "Abort message" || true
+      adb logcat -b crash -d 2>/dev/null | tail -30 || true
       break
     fi
     sleep 5

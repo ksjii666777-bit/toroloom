@@ -1,12 +1,22 @@
 # E2E Full-Suite Stabilization — Runbook
 
-> **Problem this solves:** The master-only `E2E — Full Suite` job failed twice in a
-> row on `da46054` with "Login screen never appeared" (release APK installed fine;
-> the app died at cold start on the GitHub-hosted emulator). The same failure
-> existed on the previous green commit — the local-emulator boot is the flake, not
-> the code. It is `continue-on-error` (non-blocking), but a soft-fail that is
-> *invisible* is worse than none, so the job now (a) has two escape hatches to
-> real hardware and (b) surfaces its real outcome in the run summary.
+> **Problem this solves:** The master-only `E2E — Full Suite` job failed on every
+> run since the workflow existed with "Login screen never appeared" — the release
+> APK installed fine, then the app died at cold start.
+>
+> **ROOT CAUSE (fixed):** NOT emulator flake — a deterministic JS crash. The
+> metro resolver stub for Sentry's browser-only packages
+> (`metro/sentry-browser-stub.js`) did not export `buildFeedbackIntegration`,
+> which `@sentry/browser`'s feedbackAsync/feedbackSync modules CALL at module
+> init. Result: `TypeError: undefined is not a function` during module
+> evaluation → runtime killed before first paint → no login screen, every
+> launch, every device. Diagnosed via the hardened boot script's crash-buffer
+> capture + `metro-symbolicate`; fixed by exporting an inert integration from
+> the stub, with a regression guard in `src/__tests__/sentryBrowserStub.test.ts`.
+>
+> The levers below remain valuable: the boot hardening is what made the
+> diagnosis possible, and Maestro Cloud / a KVM runner still removes the
+> shared-emulator variability from the equation.
 
 ---
 
@@ -17,7 +27,7 @@
 | **1. Runner escape hatch** | `runs-on: ${{ vars.E2E_RUNNER_LABELS || 'ubuntu-latest' }}` | GitHub-hosted ubuntu |
 | **2. Maestro Cloud path** | Secret `MAESTRO_CLOUD_API_KEY` set → local emulator step **skipped entirely**; release APK built with plain gradle (no device needed) and flows run on Maestro Cloud | inactive (secret unset) |
 | **3. Visible soft-fail** | `if: always()` step appends the *real* outcome to the GitHub run summary table + `::warning::` annotation on failure | always on |
-| **4. Hardened local boot** | `.github/scripts/e2e-boot.sh`: up to 6 launch attempts, per-attempt UI polling (90s), process-death detection, `logcat -b crash` stack capture, `pm clear` between attempts | always on (emulator mode) |
+| **4. Hardened local boot** | `.github/scripts/e2e-boot.sh`: up to 6 launch attempts, per-attempt UI polling (90s), process-death detection, `logcat -b crash` stack capture **including the JS Abort message**, `pm clear` between attempts | always on (emulator mode) |
 
 The same summary row was added to `e2e-pr` (the PR blocking job), so its merge
 gate is auditable at a glance.
