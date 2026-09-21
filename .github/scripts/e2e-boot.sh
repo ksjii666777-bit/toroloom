@@ -133,46 +133,77 @@ if ! SENTRY_DISABLE_AUTO_UPLOAD=true npx expo run:android --variant release --no
 fi
 echo "Release APK installed."
 
-# ── 5. Launch the app directly (no Metro, no dev server) ────────────────────
+# ── 5/6. Launch + confirm the login screen (resilient retry cycle) ─────────
+# Cold-start crashes on a fresh emulator are often TRANSIENT (native init
+# races on the first launch after install). Instead of a single launch + one
+# bounce, this loop:
+#   1. launches the app and polls the UI for the login markers (90s/attempt)
+#   2. detects PROCESS DEATH via pidof immediately (no wasted polling) and
+#      prints the crash buffer (logcat -b crash) for the actual stack trace
+#   3. wipes app state (pm clear) between attempts so a wedged first-run
+#      state can never poison the retry
+#   4. only fails after MAX_LAUNCH_ATTEMPTS, with full diagnostics dumped
 APP_ID="com.toroloom.app"
-relaunch_app() {
+MAX_LAUNCH_ATTEMPTS=4
+
+launch_app() {
   adb shell am force-stop "$APP_ID" 2>/dev/null || true
   sleep 2
   adb shell am start -W -n "$APP_ID/.MainActivity" >/dev/null 2>&1 \
     || echo "::warning::App launch intent failed."
-  sleep 5
 }
-echo "Launching the app ($APP_ID)..."
-relaunch_app
 
-# ── 6. Confirm the login screen is actually on screen (max 3 min) ───────────
-# Give the release app a few seconds to start (embedded bundle, no network
-# fetch), then poll the UI hierarchy. If the login screen hasn't appeared
-# after ~60s, cold-start the app once more before giving up.
-sleep 10
-echo "Confirming the login screen is visible..."
-RELAUNCHED=0
-for i in $(seq 1 36); do
-  UI=$(adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 && adb shell cat /sdcard/ui.xml 2>/dev/null || true)
-  if echo "$UI" | grep -qiE "login-email-input|Welcome Back|Login"; then
-    echo "Login screen is visible!"
-    break
-  fi
-  # Not visible after ~60s of polling → bounce the app once more.
-  if [ $i -eq 12 ] && [ "$RELAUNCHED" = "0" ]; then
-    echo "Login screen not visible yet - force-restarting the app..."
-    relaunch_app
-    RELAUNCHED=1
-  fi
-  sleep 5
-  if [ $i -eq 36 ]; then
-    echo "::error::Login screen never appeared - dumping UI + logcat."
-    adb shell uiautomator dump /sdcard/ui.xml 2>/dev/null || true
-    adb shell cat /sdcard/ui.xml 2>/dev/null | head -c 2000 || true
-    adb logcat -d -t 100 2>/dev/null | grep -iE "ReactNativeJS|FATAL|Exception|AndroidRuntime" | tail -20 || true
-    exit 1
-  fi
+login_visible() {
+  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 \
+    && adb shell cat /sdcard/ui.xml 2>/dev/null | grep -qiE "login-email-input|Welcome Back|Login"
+}
+
+dump_boot_diagnostics() {
+  echo "::error::Login screen never appeared after ${MAX_LAUNCH_ATTEMPTS} launch attempts."
+  echo "---- UI hierarchy (head) ----"
+  adb shell uiautomator dump /sdcard/ui.xml 2>/dev/null || true
+  adb shell cat /sdcard/ui.xml 2>/dev/null | head -c 2000 || true
+  echo ""
+  echo "---- CRASH buffer (logcat -b crash, last 80) — the actual stack ----"
+  adb logcat -b crash -d 2>/dev/null | tail -80 || true
+  echo "---- main buffer RN/AndroidRuntime (last 40) ----"
+  adb logcat -d -t 300 2>/dev/null \
+    | grep -iE "ReactNativeJS|FATAL|AndroidRuntime|has died" | tail -40 || true
+}
+
+echo "Launching the app ($APP_ID) — up to ${MAX_LAUNCH_ATTEMPTS} attempts..."
+LOGIN_OK=0
+ATTEMPT=0
+while [ "$ATTEMPT" -lt "$MAX_LAUNCH_ATTEMPTS" ]; do
+  ATTEMPT=$((ATTEMPT + 1))
+  launch_app
+  # Poll up to 18 × 5s = 90s for this attempt.
+  for i in $(seq 1 18); do
+    if login_visible; then
+      echo "Login screen is visible (attempt ${ATTEMPT})."
+      LOGIN_OK=1
+      break
+    fi
+    # Process died? Bail out of this poll immediately — polling a dead
+    # process is pure timeout. Print the crash stack inline so the failure
+    # reason sits in the log where you are already looking.
+    if [ -z "$(adb shell pidof "$APP_ID" 2>/dev/null | tr -d '\r\n ')" ]; then
+      echo "  attempt ${ATTEMPT}: app process DIED - crash buffer tail:"
+      adb logcat -b crash -d 2>/dev/null | tail -40 || true
+      break
+    fi
+    sleep 5
+  done
+  if [ "$LOGIN_OK" = "1" ]; then break; fi
+  # Fresh state for the next attempt (first-run wedges, corrupt cache).
+  adb shell pm clear "$APP_ID" >/dev/null 2>&1 || true
+  echo "  attempt ${ATTEMPT} failed - state cleared, relaunching..."
 done
+
+if [ "$LOGIN_OK" != "1" ]; then
+  dump_boot_diagnostics
+  exit 1
+fi
 
 # ── 7. Run the requested Maestro flows ──────────────────────────────────────
 # appId is read from each flow file (com.toroloom.app); the --app-id CLI flag

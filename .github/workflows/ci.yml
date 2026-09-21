@@ -812,17 +812,23 @@ jobs:
   #
   # KVM is enabled via the "Enable KVM" step before booting the emulator.
   #
-  # If the job consistently fails due to emulator timeout, consider:
-  #   1. Using Maestro Cloud (https://maestro.mobile.dev/cloud)
-  #   2. Running on a self-hosted runner with KVM support
-  #   3. Switching to a real-device testing service (BrowserStack, etc.)
+  # Stabilization levers (ACTIVE today, no code changes needed):
+  #   - Repo VARIABLE E2E_RUNNER_LABELS -> run on a self-hosted KVM runner
+  #     (Settings -> Secrets and variables -> Actions -> Variables).
+  #   - Repo SECRET MAESTRO_CLOUD_API_KEY -> flows run on Maestro Cloud;
+  #     the local emulator (primary flake source) is skipped entirely.
+  # Unset => GitHub-hosted emulator (default).
   # ───────────────────────────────────────────────────────────────────────
   e2e:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     name: E2E — Full Suite (master)
-    runs-on: ubuntu-latest
+    # Override via repo variable, e.g. [self-hosted, linux, kvm] for stable
+    # hardware KVM. Falls back to the GitHub-hosted runner when unset.
+    runs-on: ${{ vars.E2E_RUNNER_LABELS || 'ubuntu-latest' }}
     timeout-minutes: 60
     continue-on-error: true
+    env:
+      MAESTRO_CLOUD_API_KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY || '' }}
     strategy:
       fail-fast: false
 
@@ -897,7 +903,29 @@ jobs:
 
       # Wrapped in Wandalen/wretry.action so if the emulator boot times out,
       # it is retried once automatically before failing the step.
+      # Maestro Cloud fast-path: when MAESTRO_CLOUD_API_KEY is configured,
+      # no local emulator is booted at all. The release APK is built with
+      # plain gradle (JS bundle embedded, no device needed) and handed to
+      # Maestro Cloud along with the full flow suite; devices, boot and
+      # retries are their problem, not a shared GitHub runner's.
+      - name: Build release APK and run full suite on Maestro Cloud
+        if: env.MAESTRO_CLOUD_API_KEY != ''
+        id: cloud
+        env:
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+        run: |
+          cd android && ./gradlew :app:assembleRelease -x lint
+          cd ..
+          maestro cloud \
+            --appFile android/app/build/outputs/apk/release/app-release.apk \
+            --env TEST_EMAIL="$TEST_EMAIL" \
+            --env TEST_PASSWORD="$TEST_PASSWORD" \
+            .maestro
       - name: Boot Android emulator and run E2E full suite (retry once on failure)
+        # Skipped entirely when Maestro Cloud is configured (see cloud step).
+        if: env.MAESTRO_CLOUD_API_KEY == ''
+        id: emu
         env:
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
@@ -930,6 +958,20 @@ jobs:
             script: |
               bash .github/scripts/e2e-boot.sh .maestro
 
+      # Soft-fail visibility: this job never blocks the build, but a red
+      # E2E must be visible in the run summary — never silently green.
+      - name: Record E2E result in run summary
+        if: always()
+        run: |
+          RESULT="${{ steps.emu.outcome || steps.cloud.outcome || 'skipped' }}"
+          MODE="local emulator (soft-fail, non-blocking)"
+          if [ -n "${{ steps.cloud.outcome || '' }}" ]; then MODE="Maestro Cloud (soft-fail, non-blocking)"; fi
+          if [ "$RESULT" = "failure" ]; then
+            echo "::warning::E2E full suite FAILED (soft-fail, non-blocking) — mode: $MODE. See job logs."
+            echo "| E2E Full Suite | ❌ failed (soft-fail) | $MODE |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| E2E Full Suite | ✅ $RESULT | $MODE |" >> "$GITHUB_STEP_SUMMARY"
+          fi
   # ── E2E — Maestro (Android) PR Critical Flows ───────────────────────────
   # Fast PR-level E2E: runs 5 key flows to catch critical regressions before
   # merge. Blocks the build on failure (continue-on-error: false).
@@ -1037,6 +1079,7 @@ jobs:
           ls -l /dev/kvm
 
       - name: Boot Android emulator and run E2E critical flows (retry once on failure)
+        id: emu
         env:
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
@@ -1068,6 +1111,17 @@ jobs:
             # previously wedged blank in the headless emulator.
             script: |
               bash .github/scripts/e2e-boot.sh .maestro/flows/smoke/smokeTest.yaml .maestro/flows/navigation/tabNavigation.yaml .maestro/flows/trade/placeOrder.yaml .maestro/flows/kyc/bankLinking.yaml .maestro/flows/stock/stockDetail.yaml .maestro/flows/settings/twoFactorSetup.yaml .maestro/flows/trade/fnoOptionsChain.yaml .maestro/flows/ui/calculators.yaml .maestro/flows/ai/aiInsights.yaml
+      # e2e-pr BLOCKS builds; surface the gate in the run summary too so
+      # merge decisions are auditable at a glance.
+      - name: Record E2E result in run summary
+        if: always()
+        run: |
+          RESULT="${{ steps.emu.outcome || 'skipped' }}"
+          if [ "$RESULT" = "failure" ]; then
+            echo "| E2E Critical Flows (PR) | ❌ failed (BLOCKING) | local emulator |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| E2E Critical Flows (PR) | ✅ $RESULT | local emulator |" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   # ── Coverage badge deployment ────────────────────────────────────────────
   # Runs after frontend and backend (with their coverage data) finish.
