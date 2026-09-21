@@ -963,9 +963,17 @@ jobs:
       - name: Record E2E result in run summary
         if: always()
         run: |
-          RESULT="${{ steps.emu.outcome || steps.cloud.outcome || 'skipped' }}"
           MODE="local emulator (soft-fail, non-blocking)"
-          if [ -n "${{ steps.cloud.outcome || '' }}" ]; then MODE="Maestro Cloud (soft-fail, non-blocking)"; fi
+          # steps.X.outcome is the literal string 'skipped' for a skipped step,
+          # not empty — so test for the exact 'success'/'failure' values only.
+          EMU_OUTCOME="${{ steps.emu.outcome || '' }}"
+          CLOUD_OUTCOME="${{ steps.cloud.outcome || '' }}"
+          RESULT="skipped"
+          if [ "$EMU_OUTCOME" = "success" ] || [ "$EMU_OUTCOME" = "failure" ]; then RESULT="$EMU_OUTCOME"; fi
+          if [ "$CLOUD_OUTCOME" = "success" ] || [ "$CLOUD_OUTCOME" = "failure" ]; then
+            RESULT="$CLOUD_OUTCOME"
+            MODE="Maestro Cloud (soft-fail, non-blocking)"
+          fi
           if [ "$RESULT" = "failure" ]; then
             echo "::warning::E2E full suite FAILED (soft-fail, non-blocking) — mode: $MODE. See job logs."
             echo "| E2E Full Suite | ❌ failed (soft-fail) | $MODE |" >> "$GITHUB_STEP_SUMMARY"
