@@ -24,7 +24,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
 import type { JournalEntry } from '../../types';
 import {
-  CHALLENGE_PRESETS, makeCustomConfig, deriveLimits, formatChallengeMoney,
+  CHALLENGE_PRESETS, makeCustomConfig, formatChallengeMoney,
 } from '../../services/propFirm/challengePresets';
 import type { ChallengeConfig, PropProvider } from '../../services/propFirm/challengePresets';
 import {
@@ -52,7 +52,7 @@ const CHECK_VERDICT_KEYS: Record<PreTradeVerdict, string> = {
   block: 'propFirm.check.verdictBlock',
 };
 
-export default function PropChallengeScreen({ navigation }: Props) {
+export default function PropChallengeScreen(_props: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useT();
