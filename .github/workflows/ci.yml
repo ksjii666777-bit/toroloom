@@ -926,6 +926,41 @@ jobs:
       # plain gradle (JS bundle embedded, no device needed) and handed to
       # Maestro Cloud along with the full flow suite; devices, boot and
       # retries are their problem, not a shared GitHub runner's.
+      # Self-heal: the test account lives only in the production DB. If the
+      # database was reset/recreated (e.g. the Postgres volume restore), every
+      # Maestro flow would otherwise die on the login step with a generic
+      # "Invalid credentials" error. Login first; on any failure attempt a
+      # signup with the same creds so the account is always present.
+      - name: Ensure E2E test account exists
+        env:
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+        run: |
+          set -e
+          BASE="${EXPO_PUBLIC_API_URL%/}"
+          echo "Ensuring E2E test account on ${BASE} ..."
+          STATUS=$(curl -s -o /tmp/login_resp.json -w "%{http_code}" --max-time 30 \
+            -X POST "$BASE/auth/login" -H 'Content-Type: application/json' \
+            -d "{\"email\":\"$TEST_EMAIL\",\"password\":\"$TEST_PASSWORD\"}") || STATUS=000
+          if [ "$STATUS" = "200" ]; then
+            echo "Test account already exists (login 200)."
+          else
+            echo "Login returned $STATUS — attempting signup (self-heal after DB reset)..."
+            SU=$(curl -s -o /tmp/signup_resp.json -w "%{http_code}" --max-time 30 \
+              -X POST "$BASE/auth/signup" -H 'Content-Type: application/json' \
+              -d "{\"name\":\"E2E Test User\",\"email\":\"$TEST_EMAIL\",\"phone\":\"9999999999\",\"password\":\"$TEST_PASSWORD\"}") || SU=000
+            if [ "$SU" = "200" ] || [ "$SU" = "201" ]; then
+              echo "Test account created via signup ($SU)."
+            elif grep -qiE "already|exists|duplicate" /tmp/signup_resp.json 2>/dev/null; then
+              echo "::error::Account exists but login failed — credentials drift between secrets and DB."
+              exit 1
+            else
+              echo "::error::Cannot ensure test account. login=$STATUS signup=$SU body=$(head -c 200 /tmp/signup_resp.json 2>/dev/null)"
+              exit 1
+            fi
+          fi
+
       - name: Build release APK and run full suite on Maestro Cloud
         if: env.MAESTRO_CLOUD_API_KEY != ''
         id: cloud
