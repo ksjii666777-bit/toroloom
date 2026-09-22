@@ -95,4 +95,51 @@ describe('secureTokenStorage', () => {
     expect(await loadUserProfile()).toBeNull();
     expect(await AsyncStorage.getItem('toroloom_isAdmin')).toBeNull();
   });
+
+  // ── Keystore-resilient fallback (E2E root-cause fix) ──────────────────
+  // Emulators with a broken keystore2 (OUT_OF_KEYS_TRANSIENT_ERROR) make
+  // every SecureStore call throw; login must still work end-to-end.
+  describe('when SecureStore (keystore) is broken', () => {
+    let setErr: unknown;
+    let getErr: unknown;
+
+    beforeEach(() => {
+      setErr = undefined;
+      getErr = undefined;
+      (SecureStore.setItemAsync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+        () => { setErr = new Error('keystore2 OUT_OF_KEYS_TRANSIENT_ERROR'); throw setErr; },
+      );
+      (SecureStore.getItemAsync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+        () => { getErr = new Error('keystore2 OUT_OF_KEYS_TRANSIENT_ERROR'); throw getErr; },
+      );
+    });
+
+    afterEach(() => {
+      (SecureStore.setItemAsync as unknown as ReturnType<typeof vi.fn>).mockRestore();
+      (SecureStore.getItemAsync as unknown as ReturnType<typeof vi.fn>).mockRestore();
+    });
+
+    it('saveToken falls back to AsyncStorage instead of throwing', async () => {
+      await expect(saveToken('tok_fallback_save')).resolves.toBeUndefined();
+      expect(await AsyncStorage.getItem('fallback:toroloom_token')).toBe('tok_fallback_save');
+    });
+
+    it('loadToken reads the AsyncStorage fallback and deleteToken clears it', async () => {
+      await saveToken('tok_fallback_roundtrip');
+      expect(await loadToken()).toBe('tok_fallback_roundtrip');
+      await deleteToken();
+      expect(await loadToken()).toBeNull();
+      expect(await AsyncStorage.getItem('fallback:toroloom_token')).toBeNull();
+    });
+
+    it('prefers a working SecureStore value over a stale fallback copy', async () => {
+      // SecureStore works again (mock restored in afterEach of previous run is
+      // not enough inside this describe — re-stub per test as needed)
+      (SecureStore.setItemAsync as unknown as ReturnType<typeof vi.fn>).mockRestore();
+      (SecureStore.getItemAsync as unknown as ReturnType<typeof vi.fn>).mockRestore();
+      await saveToken('tok_secure_layer');
+      await AsyncStorage.setItem('fallback:toroloom_token', 'tok_stale_fallback');
+      expect(await loadToken()).toBe('tok_secure_layer');
+    });
+  });
 });
