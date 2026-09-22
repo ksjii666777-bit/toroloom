@@ -59,7 +59,74 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
-# Navigate to Home tab
+# ── Login retry (transient backend blips) ─────────────────────────────────
+# A Railway Postgres restart window ("terminating connection due to
+# administrator command") returns 5xx for ~a minute; the app maps any
+# login failure to a generic error and stays on the login screen. Run
+# #335 passed, #336 failed twice exactly like that. So: if we are STILL
+# on the login screen, wait for the blip to clear and retry — up to two
+# more attempts. extendedWaitUntil notVisible = real cool-down that
+# early-exits the moment login lands.
+- runFlow:
+    when:
+      visible:
+        id: "login-btn"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: "login-btn"
+          timeout: 20000
+      - runFlow:
+          when:
+            visible:
+              id: "login-btn"
+          commands:
+            - tapOn:
+                id: "login-btn"
+            - extendedWaitUntil:
+                notVisible:
+                  id: "login-btn"
+                timeout: 30000
+            - runFlow:
+                when:
+                  visible:
+                    id: "login-btn"
+                commands:
+                  - tapOn:
+                      id: "login-btn"
+                  - extendedWaitUntil:
+                      notVisible:
+                        id: "login-btn"
+                      timeout: 30000
+
+# Second onboarding/offline pass — the lazy onboarding screen can mount
+# AFTER the first check on a cold emulator (run #336: first check
+# skipped, tab bar then unreachable behind the walkthrough).
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# Navigate to Home tab — give the post-login screens up to 30s to settle
+# before tapping (lazy screens mount asynchronously on cold emulators).
+- extendedWaitUntil:
+    visible:
+      id: "tab-home"
+    timeout: 30000
 - tapOn:
     id: "tab-home"
 - waitForAnimationToEnd:

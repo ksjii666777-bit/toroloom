@@ -1017,6 +1017,20 @@ jobs:
             script: |
               bash .github/scripts/e2e-boot.sh .maestro
 
+      # Failure evidence: the boot script dumps the UI hierarchy + screenshot
+      # into the workspace on any non-zero exit. Without this, every opaque
+      # "element not found" costs another 40-minute blind run (runs #331-#336).
+      - name: Upload E2E failure diagnosis
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure-diagnosis-${{ github.run_id }}
+          path: |
+            e2e-failure.png
+            e2e-failure-hierarchy.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
       # Soft-fail visibility: this job never blocks the build, but a red
       # E2E must be visible in the run summary — never silently green.
       - name: Record E2E result in run summary

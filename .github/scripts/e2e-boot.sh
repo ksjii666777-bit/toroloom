@@ -54,6 +54,26 @@ if [ -z "${EXPO_PUBLIC_API_URL:-}" ]; then
 fi
 echo "API base URL for release bundle: set (${EXPO_PUBLIC_API_URL%%://*}://...)"
 
+# ── 0b. Failure diagnosis: dump what was on screen when anything exits ──────
+# Runs #331-#336 all died with an opaque "tab-home not found"; without the
+# UI hierarchy at failure time every fix is a guess. Best-effort: if the
+# dump fails (e.g. emulator already gone) the original exit code still wins.
+command -v adb >/dev/null 2>&1 || PATH="${ANDROID_HOME:-}/platform-tools:$PATH"
+diag_on_fail() {
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    echo "::group::E2E failure diagnosis — visible texts & ids at failure time"
+    adb shell uiautomator dump /sdcard/e2e_fail.xml >/dev/null 2>&1 || true
+    adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
+      | grep -oE '(text|resource-id)="[^"]+"' \
+      | tee e2e-failure-hierarchy.txt | head -80 || true
+    adb exec-out screencap -p > e2e-failure.png 2>/dev/null || true
+    echo "::endgroup::"
+  fi
+  exit "$rc"
+}
+trap diag_on_fail EXIT
+
 # ── 1. Wait for the device to appear (max 120s — do NOT hang forever) ───────
 # The android-emulator-runner action boots the emulator asynchronously; if
 # the adb daemon cannot connect ("Unable to connect to adb daemon on port
@@ -241,10 +261,11 @@ if maestro test .maestro/flows/smoke/smokeTest.yaml \
   echo "Smoke gate passed - running the full suite."
 else
   echo "::error::Smoke gate FAILED: login -> Home did not complete."
-  echo "::error::The release build talks to the production API. Check /ready on"
-  echo "::error::the backend first: a 503 there (Postgres down) makes login fail,"
-  echo "::error::so every flow would die with element-not-found. Other suspects:"
-  echo "::error::app-store/EULA gate blocking login, or a broken home-tab testID."
+  echo "::error::The flow already retried login 3x, so this is likely not a"
+  echo "::error::one-off blip. Check, in order: /ready on the backend (Postgres"
+  echo "::error::down makes login 5xx), the E2E failure diagnosis group above"
+  echo "::error::(visible texts/ids at failure time), and the e2e-failure.png"
+  echo "::error::artifact uploaded with this run."
   exit 1
 fi
 
