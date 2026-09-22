@@ -40,17 +40,17 @@ jobs:
       fail-fast: false          # Don't cancel other jobs if this one fails
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
       - name: Cache node_modules (backend)
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: backend/node_modules
           key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
@@ -67,7 +67,7 @@ jobs:
 
 
       - name: Restore TypeScript build cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             *.tsbuildinfo
@@ -76,7 +76,7 @@ jobs:
       - name: TypeScript compilation check
         run: npm run typecheck
       - name: Save TypeScript build cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         if: always()
         with:
           path: |
@@ -100,7 +100,7 @@ jobs:
           NODE_ENV: test
 
       - name: Upload backend coverage report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: backend-coverage
@@ -200,7 +200,7 @@ jobs:
       # created at backend/badge-artifact/ (because working-directory is
       # backend), so we must specify backend/badge-artifact/ here.
       - name: Upload backend coverage badge
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: backend-coverage-badge
@@ -212,17 +212,17 @@ jobs:
     name: Frontend — Static Checks (typecheck, lint, i18n parity)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
@@ -244,7 +244,7 @@ jobs:
       # Vitest globals (`vi`, `describe`, `it`, `expect`) are made available
       # to TypeScript via src/vitest.d.ts  —  no separate test tsconfig needed.
       - name: Restore TypeScript build cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             *.tsbuildinfo
@@ -255,7 +255,7 @@ jobs:
         run: npm run typecheck
 
       - name: Save TypeScript build cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         if: always()
         with:
           path: |
@@ -286,17 +286,17 @@ jobs:
         shard: [1, 2, 3, 4]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
@@ -319,7 +319,7 @@ jobs:
         run: npx vitest run --shard=${{ matrix.shard }}/${{ strategy.job-total }} --reporter=blob --coverage || true
 
       - name: Upload shard blob report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vitest-blob-${{ matrix.shard }}
           path: .vitest-reports/
@@ -336,17 +336,17 @@ jobs:
     needs: [frontend-tests]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
@@ -362,7 +362,7 @@ jobs:
         run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
       - name: Download all shard blob reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: vitest-blob-*
           merge-multiple: true
@@ -377,7 +377,7 @@ jobs:
           NODE_ENV: test
 
       - name: Upload coverage report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: frontend-coverage
@@ -478,7 +478,7 @@ jobs:
           "
 
       - name: Upload frontend coverage badge
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: frontend-coverage-badge
@@ -504,17 +504,17 @@ jobs:
     env:
       BUNDLE_PLATFORM: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
@@ -542,7 +542,7 @@ jobs:
       # job if the limit was exceeded, so no gate is lost.
       - name: Post bundle size PR comment
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           MATRIX_PLATFORM: ${{ matrix.platform }}
           PLATFORM: ${{ steps.bundle-size.outputs.platform }}
@@ -625,17 +625,17 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
       - name: Cache node_modules (backend)
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: backend/node_modules
           key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
@@ -702,17 +702,17 @@ jobs:
           --health-start-period 20s
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
       - name: Cache node_modules (backend)
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: backend/node_modules
           key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
@@ -755,17 +755,17 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
       - name: Cache node_modules (backend)
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: backend/node_modules
           key: nodes-BACKEND-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('backend/package-lock.json') }}
@@ -837,17 +837,17 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
@@ -909,7 +909,7 @@ jobs:
       # cold release build measured 33 min on CI; a warm cache cuts it to a
       # fraction, which is what leaves room for boot + flows under the cap.
       - name: Cache Gradle
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/caches
@@ -988,7 +988,7 @@ jobs:
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
           # Baked into the release JS bundle at build time — see cloud step note.
           EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
-        uses: Wandalen/wretry.action@v3.1.0
+        uses: Wandalen/wretry.action@v3.8.0
         with:
           action: reactivecircus/android-emulator-runner@v2
           attempt_limit: 2
@@ -1022,7 +1022,7 @@ jobs:
       # "element not found" costs another 40-minute blind run (runs #331-#336).
       - name: Upload E2E failure diagnosis
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-failure-diagnosis-${{ github.run_id }}
           path: |
@@ -1082,17 +1082,17 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: nodes-ROOT-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
@@ -1164,7 +1164,7 @@ jobs:
         env:
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-        uses: Wandalen/wretry.action@v3.1.0
+        uses: Wandalen/wretry.action@v3.8.0
         with:
           action: reactivecircus/android-emulator-runner@v2
           attempt_limit: 2
@@ -1217,16 +1217,16 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download frontend coverage badge
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frontend-coverage-badge
           path: badges/
 
       - name: Download backend coverage badge
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: backend-coverage-badge
           path: badges/
@@ -1255,10 +1255,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -1278,7 +1278,7 @@ jobs:
       # itself is carried by the gate step above and is never masked here.
       - name: Post dependency audit PR comment
         if: always() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
