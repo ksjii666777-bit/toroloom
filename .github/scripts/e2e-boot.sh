@@ -27,7 +27,10 @@
 #
 # Required env (passed inline from workflow secrets):
 #   TEST_EMAIL, TEST_PASSWORD — Maestro login credentials
-# =============================================================================
+#   EXPO_PUBLIC_API_URL       — repo variable, baked into the release bundle
+#                               (App.tsx configureApi). Missing = every API
+#                               call fails and login can never complete.
+# ==============================================================================
 
 set -euo pipefail
 
@@ -41,6 +44,15 @@ if [ -z "${TEST_EMAIL:-}" ] || [ -z "${TEST_PASSWORD:-}" ]; then
   echo "::error::TEST_EMAIL and/or TEST_PASSWORD are not set."
   exit 1
 fi
+
+if [ -z "${EXPO_PUBLIC_API_URL:-}" ]; then
+  echo "::error::EXPO_PUBLIC_API_URL is not set. The release APK bakes this in"
+  echo "::error::at build time; without it every API call fails and login never"
+  echo "::error::completes (31/31 flows die with element-not-found). Add the"
+  echo "::error::repo variable in Settings → Secrets and variables → Actions."
+  exit 1
+fi
+echo "API base URL for release bundle: set (${EXPO_PUBLIC_API_URL%%://*}://...)"
 
 # ── 1. Wait for the device to appear (max 120s — do NOT hang forever) ───────
 # The android-emulator-runner action boots the emulator asynchronously; if

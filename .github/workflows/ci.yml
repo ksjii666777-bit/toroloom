@@ -932,6 +932,10 @@ jobs:
         env:
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+          # Release builds BAKE this in at build time (App.tsx configureApi).
+          # Without it the APK ships with baseUrl='' and every API call fails
+          # instantly → login never completes → 31/31 flows element-not-found.
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
         run: |
           cd android && ./gradlew :app:assembleRelease -x lint
           cd ..
@@ -947,6 +951,8 @@ jobs:
         env:
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+          # Baked into the release JS bundle at build time — see cloud step note.
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
         uses: Wandalen/wretry.action@v3.1.0
         with:
           action: reactivecircus/android-emulator-runner@v2
