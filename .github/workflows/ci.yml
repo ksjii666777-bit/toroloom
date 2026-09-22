@@ -825,11 +825,12 @@ jobs:
     # Override via repo variable, e.g. [self-hosted, linux, kvm] for stable
     # hardware KVM. Falls back to the GitHub-hosted runner when unset.
     runs-on: ${{ vars.E2E_RUNNER_LABELS || 'ubuntu-latest' }}
-    # 90 min: the release gradle build took 33 min cold on CI (vs ~4 min
-    # locally) and boot + smoke gate + 31 flows need ~35 more. A 60-min cap
-    # cancelled the run mid-retry (both attempts of 059d3d5 died at exactly
-    # the job timeout, long after the app itself was proven healthy).
-    timeout-minutes: 90
+    # 150 min: post-fix the E2E job genuinely runs its full budget — gradle
+    # build ~25 min (warm cache) + boot ~4 + smoke gate ~2 + 31 flows ~50 min.
+    # The old 90-min cap cancelled the suite mid-run twice (runs #337 rerun
+    # and its retry) at exactly T+90, right after the smoke gate had passed
+    # for the first time. Headroom for a cold-cache build: 2x the warm path.
+    timeout-minutes: 150
     continue-on-error: true
     env:
       MAESTRO_CLOUD_API_KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY || '' }}
