@@ -110,10 +110,22 @@ appId: com.toroloom.app
 
 # Verify key menu items are present (via testIDs — i18n-safe). The menu
 # scrolls, so scroll each into view before asserting.
-# NOTE: scrolling on this emulator is slow (~350px/s regardless of speed
-# setting), and off-screen sections are unmounted (removeClippedSubviews)
-# with entering animations replaying on re-mount — use a slow speed and a
-# generous timeout so each section can mount/settle before the next scroll.
+# NOTE: scroll targets must be in STRICT MENU ORDER (top → bottom):
+#   TradeHistory (trading section) → FundsDashboard → MutualFunds (portfolio)
+#   → Help (support, last section). scrollUntilVisible only scrolls DOWN —
+#   an out-of-order target that sits ABOVE the current viewport can never be
+#   found again and the flow dies with "No visible element found" (run #335).
+# Off-screen sections are unmounted (removeClippedSubviews) with entering
+# animations replaying on re-mount — slow speed + generous timeout lets each
+# section mount/settle before the next scroll.
+- scrollUntilVisible:
+    element:
+      id: "menu-TradeHistory"
+    direction: DOWN
+    speed: 20
+    timeout: 60000
+- assertVisible:
+    id: "menu-TradeHistory"
 - scrollUntilVisible:
     element:
       id: "menu-FundsDashboard"
@@ -130,14 +142,6 @@ appId: com.toroloom.app
     timeout: 60000
 - assertVisible:
     id: "menu-MutualFunds"
-- scrollUntilVisible:
-    element:
-      id: "menu-TradeHistory"
-    direction: DOWN
-    speed: 20
-    timeout: 60000
-- assertVisible:
-    id: "menu-TradeHistory"
 - scrollUntilVisible:
     element:
       id: "menu-Help"
