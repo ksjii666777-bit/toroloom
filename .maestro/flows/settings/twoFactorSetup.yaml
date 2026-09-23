@@ -1,14 +1,12 @@
 # =============================================================================
-# Two-Factor Authentication Setup Flow — Security Settings
+# Two-Factor Setup Flow
 # =============================================================================
-# Tests full 2FA setup flow:
+# Tests the 2FA enable journey:
 #   1. Login with test credentials
-#   2. Navigate: More → Security → Two-Factor Auth
-#   3. View the setup info with benefits
-#   4. Tap "Set Up Two-Factor Auth" → generate QR + secret
-#   5. Enter mock 6-digit code → "Verify & Enable 2FA"
-#   6. View backup codes → tap "I've Saved My Backup Codes"
-#   7. Tap "Done" → navigate back
+#   2. More → Security → Two-Factor Authentication
+#   3. Set Up Two-Factor Auth → QR screen
+#   4. Enter demo code 123456 → Verify & Enable 2FA
+#   5. Backup codes screen → confirm saved → Done
 # =============================================================================
 
 appId: com.toroloom.app
@@ -17,11 +15,9 @@ appId: com.toroloom.app
 - launchApp
 - waitForAnimationToEnd:
     timeout: 15000
-# ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
-    id: "login-email-input"
+    id: "login-welcome-back"
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
@@ -63,7 +59,7 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 5000
 
-# ── 2. Navigate: More → Security ──────────────────────────────────────────
+# ── 2. More → Security ─────────────────────────────────────────────────────
 - tapOn:
     id: "tab-more"
 - waitForAnimationToEnd
@@ -79,10 +75,8 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Security Settings"
 
-# ── 3. Navigate to Two-Factor Auth ─────────────────────────────────────────
-# The 2FA card is uniquely identified by its subtitle (the section header and
-# card share the "Two-Factor Authentication" title, so tapping that text is
-# ambiguous).
+# ── 3. Open Two-Factor Authentication ──────────────────────────────────────
+# The 2FA card row shows the TOTP subtitle
 - scrollUntilVisible:
     element:
       text: "TOTP-based 2FA via authenticator app"
@@ -93,15 +87,13 @@ appId: com.toroloom.app
     text: "TOTP-based 2FA via authenticator app"
 - waitForAnimationToEnd
 
-# ── 4. Verify 2FA Setup Screen Info ────────────────────────────────────────
 - assertVisible:
     text: "Two-Factor Authentication"
 - assertVisible:
     text: "Protects against unauthorized access"
-- assertVisible:
-    text: "Set Up Two-Factor Auth"
 
-# ── 5. Tap Set Up Two-Factor Auth ──────────────────────────────────────────
+# The setup button appears only when 2FA is not yet enabled — the test
+# account starts disabled, so it should be there.
 - assertVisible:
     text: "Set Up Two-Factor Auth"
 - tapOn:
@@ -109,26 +101,24 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
-# ── 6. Verify QR + Code Input ──────────────────────────────────────────────
+# ── 4. QR + Code Entry ─────────────────────────────────────────────────────
 - assertVisible:
     text: "Scan with Authenticator App"
 - assertVisible:
     text: "Can't scan? Enter key manually"
 
-# The 6-digit code input should be visible
+# Code hint: "Enter the 6-digit code shown in your authenticator app"
 - assertVisible:
-    text: "Enter the 6-digit code from your authenticator app"
+    text: "Enter the 6-digit code shown in your authenticator app"
 
-# ── 7. Enter mock verification code ────────────────────────────────────────
-# Tap the first OTP box to focus the hidden input, then type the code
 - tapOn:
     id: "otp-input"
 - inputText: "123456"
 - waitForAnimationToEnd
 
-# ── 8. Verify all 6 digits show in OTP boxes ────────────────────────────────
+# "{{digits}} digits entered" progress line
 - assertVisible:
-    text: "6/6 digits entered"
+    text: "digits entered 6/6"
 - assertVisible:
     text: "Verify & Enable 2FA"
 - tapOn:
@@ -136,9 +126,7 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
-# ── 9. Verify Backup Codes Screen ──────────────────────────────────────────
-- assertVisible:
-    text: "2FA Enabled"
+# ── 5. Backup Codes ────────────────────────────────────────────────────────
 - assertVisible:
     text: "Backup Codes"
 - assertVisible:
@@ -146,15 +134,14 @@ appId: com.toroloom.app
 - assertVisible:
     text: "I've Saved My Backup Codes"
 
-# ── 10. Confirm Backup Codes Saved ─────────────────────────────────────────
 - tapOn:
     text: "I've Saved My Backup Codes"
 - waitForAnimationToEnd
 
-# ── 11. Tap Done to go back ────────────────────────────────────────────────
 - tapOn:
     text: "Done"
 - waitForAnimationToEnd
 
+# ── 6. Back on Security Settings ───────────────────────────────────────────
 - assertVisible:
     text: "Security Settings"

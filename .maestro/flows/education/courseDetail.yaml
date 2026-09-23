@@ -1,16 +1,14 @@
 # =============================================================================
-# Education / Learning Flow — Course Detail & Lesson View
+# Course Detail Flow
 # =============================================================================
-# Tests the Education (Learn) screen:
+# Tests the Learn hub → Course detail → Lesson flow:
 #   1. Login with test credentials
-#   2. Navigate to Learn tab
-#   3. Verify Learn screen renders with "Learning Hub" header
-#   4. Tap on the first course in "All Courses" section
-#   5. Verify Course Detail screen with hero, progress, lessons
-#   6. Tap on the first lesson in the lessons list
-#   7. Verify Lesson View screen with content, takeaways, quiz
-#   8. Navigate back to Course Detail
-#   9. Navigate back to Learn screen
+#   2. Navigate to the Learn tab
+#   3. Verify Learning Hub header + All Courses section
+#   4. Open a real course ("Stock Market Basics")
+#   5. Verify Course Progress + About this Course
+#   6. Open lesson 01 → verify lesson header, Key Takeaways, Summary
+#   7. Navigate back to Learning Hub
 # =============================================================================
 
 appId: com.toroloom.app
@@ -23,15 +21,15 @@ appId: com.toroloom.app
 - assertVisible:
     id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -58,38 +56,46 @@ appId: com.toroloom.app
           text: "Close"
       - waitForAnimationToEnd:
           timeout: 5000
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
     id: "home-greeting"
 
-# ── 2. Navigate to Learn Tab ──────────────────────────────────────────────
-- tapOn: "Learn"
+# ── 2. Navigate to the Learn tab ───────────────────────────────────────────
+# Learn is reached via More → Courses (no dedicated tab)
+- tapOn:
+    id: "tab-more"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Courses"
+    direction: DOWN
+    speed: 20
+    timeout: 60000
+- tapOn:
+    text: "Courses"
 - waitForAnimationToEnd
 
-# ── 3. Verify Learn Screen ────────────────────────────────────────────────
+# ── 3. Verify Learning Hub ─────────────────────────────────────────────────
 - assertVisible:
     text: "Learning Hub"
 - assertVisible:
     text: "Master the markets, one lesson at a time"
-
-# Verify "All Courses" section exists
 - assertVisible:
     text: "All Courses"
 
-# Scroll down to see course cards
-- scroll
-
-# ── 4. Tap on First Visible Course ─────────────────────────────────────────
-# Tap on the first course card's level badge (e.g., "Beginner")
+# ── 4. Open a Real Course ──────────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "Stock Market Basics"
+    direction: DOWN
 - tapOn:
-    text: "Beginner"
-- waitForAnimationToEnd:
-    timeout: 5000
+    text: "Stock Market Basics"
+- waitForAnimationToEnd
 
-# ── 5. Verify Course Detail Screen ─────────────────────────────────────────
-# Verify hero section with course title
+# ── 5. Verify Course Detail ────────────────────────────────────────────────
 - assertVisible:
     text: "Course Progress"
 - assertVisible:
@@ -97,54 +103,39 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Remaining"
 - assertVisible:
-    text: "Duration"
-
-# Verify "About this Course" card
-- assertVisible:
     text: "About this Course"
 
-# Verify lessons section
-- assertVisible:
-    text: "Lessons"
-
-# ── 6. Scroll to lessons and tap first lesson ──────────────────────────────
+# ── 6. Open Lesson 01 ──────────────────────────────────────────────────────
 - scroll
 - waitForAnimationToEnd
 
-# Tap on the first lesson number (identified by "01")
 - tapOn:
     text: "01"
 - waitForAnimationToEnd:
     timeout: 5000
 
-# ── 7. Verify Lesson View Screen ──────────────────────────────────────────
-# Verify lesson header shows position
+# Lesson header: "Lesson 1 of N" / "Key Takeaways" / "Summary"
 - assertVisible:
     text: "Lesson 1 of"
-
-# Verify lesson content sections
 - assertVisible:
     text: "Key Takeaways"
 - assertVisible:
     text: "Summary"
 
-# Scroll down to see more content
 - scroll
+- waitForAnimationToEnd
 
-# Verify "Mark as Complete" button exists
 - assertVisible:
     text: "Mark as Complete"
 
-# ── 8. Navigate Back to Course Detail ──────────────────────────────────────
+# ── 7. Navigate Back to Learning Hub ───────────────────────────────────────
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd
 
-# Verify back on Course Detail screen
 - assertVisible:
     text: "Course Progress"
 
-# ── 9. Navigate Back to Learn Screen ──────────────────────────────────────
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd

@@ -2,8 +2,9 @@
 # Login Error Handling — Edge Case Flow
 # =============================================================================
 # Tests form validation and error messages on the login screen:
-#   1. Empty fields → "Please enter email and password"
-#   2. Invalid credentials → "Invalid credentials. Try again."
+#   1. Empty fields     → errors.fieldRequired ("This field is required")
+#   2. Invalid creds    → auth.invalidCredentials ("Invalid credentials. Try again.")
+#   3. Valid creds      → Home screen (home-greeting)
 # =============================================================================
 
 appId: com.toroloom.app
@@ -45,19 +46,19 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
-# Verify the validation error message appears
+# Verify the validation error message appears (errors.fieldRequired)
 - assertVisible:
-    text: "Please enter email and password"
+    text: "This field is required"
 
 # ── 2. Invalid credentials ───────────────────────────────────────────────
 # Enter email but wrong password
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: "wrong@email.com"
 - hideKeyboard
 
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: "wrongpassword123"
 
 # Dismiss keyboard before tapping Log In
@@ -65,31 +66,8 @@ appId: com.toroloom.app
 
 - tapOn:
     text: "Log In"
-- waitForAnimationToEnd
-
-# Fresh installs show the onboarding walkthrough after login — skip it
-# (idempotent: skipped when already completed)
-- runFlow:
-    when:
-      visible:
-        text: "Skip"
-    commands:
-      - tapOn:
-          text: "Skip"
-      - waitForAnimationToEnd:
-          timeout: 5000
-
-# If the backend health check fails (no local backend), dismiss the
-# offline modal so the Home screen is reachable (idempotent).
-- runFlow:
-    when:
-      visible:
-        text: "You're offline"
-    commands:
-      - tapOn:
-          text: "Close"
-      - waitForAnimationToEnd:
-          timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 8000
 
 # Verify the invalid credentials error message appears
 - assertVisible:
@@ -98,13 +76,13 @@ appId: com.toroloom.app
 # ── 3. Verify the form is still interactive after errors ──────────────────
 # Clear and retype — ensure inputs are still functional
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - eraseText
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - eraseText
 - inputText: ${TEST_PASSWORD}
 
@@ -119,7 +97,7 @@ appId: com.toroloom.app
 - tapOn:
     text: "Log In"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 8000
 
 # Fresh installs show the onboarding walkthrough after login — skip it
 # (idempotent: skipped when already completed)

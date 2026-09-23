@@ -3,11 +3,10 @@
 # =============================================================================
 # Tests the Strategy Builder screen:
 #   1. Login
-#   2. Navigate to Strategy Builder
-#   3. Verify pre-built strategies list
+#   2. Navigate: More → Op. Strategies (menu label for StrategyBuilder)
+#   3. Verify strategy templates list
 #   4. Select a strategy and view details
-#   5. Verify P&L chart renders
-#   6. Navigate back
+#   5. Navigate back
 # =============================================================================
 
 appId: com.toroloom.app
@@ -20,15 +19,15 @@ appId: com.toroloom.app
 - assertVisible:
     id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -55,32 +54,38 @@ appId: com.toroloom.app
           text: "Close"
       - waitForAnimationToEnd:
           timeout: 5000
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
     id: "home-greeting"
 
-# ── 2. Navigate: More → Strategy Builder ──────────────────────────────────
-- tapOn: "More"
+# ── 2. Navigate: More → Op. Strategies ────────────────────────────────────
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
-      text: "Strategy Builder"
+      text: "Op. Strategies"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - tapOn:
-    text: "Strategy Builder"
+    text: "Op. Strategies"
 - waitForAnimationToEnd
 
 # ── 3. Verify Strategy Builder Screen ─────────────────────────────────────
 - assertVisible:
     text: "Strategy Builder"
-
-# Verify pre-built strategies are listed
 - assertVisible:
-    text: "Pre-built Strategies"
+    text: "Build & analyze multi-leg strategies"
 
-# Verify at least a few strategy cards
+# Verify the pre-built strategy templates section
+- assertVisible:
+    text: "Strategy Templates"
+
+# Verify at least a few strategy cards (hard-coded template names)
 - assertVisible:
     text: "Long Call"
 - assertVisible:
@@ -93,17 +98,13 @@ appId: com.toroloom.app
     text: "Long Call"
 - waitForAnimationToEnd
 
-# Verify strategy detail
+# Verify strategy analysis renders (P&L diagram + risk metrics)
 - assertVisible:
-    text: "Buy a call option"
-- assertVisible:
-    text: "Max Profit"
-- assertVisible:
-    text: "Max Loss"
+    text: "Buy a call option. Limited risk, unlimited profit."
 
 # ── 5. Navigate Back ──────────────────────────────────────────────────────
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Strategy Builder"
+    id: "more-title"

@@ -1,12 +1,12 @@
 # =============================================================================
-# Calculators — E2E Test
+# Calculators Flow
 # =============================================================================
-# Tests the SIP Calculator (reachable from Home quick actions):
-#   1. Login
-#   2. Navigate: Home → SIP Calculator quick action
-#   3. Verify calculator renders with live results + presets
-#   4. Change an input via preset chip → results update live
-#   5. Navigate back
+# Tests the SIP calculator from the Home quick actions:
+#   1. Login with test credentials
+#   2. Home → SIP Calculator quick action
+#   3. Verify fields + preset chips + result cards
+#   4. Tap the ₹5K preset → verify Yearly Growth / Quick Summary
+#   5. Back to Home
 # =============================================================================
 
 appId: com.toroloom.app
@@ -15,11 +15,9 @@ appId: com.toroloom.app
 - launchApp
 - waitForAnimationToEnd:
     timeout: 15000
-# ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
-    id: "login-email-input"
+    id: "login-welcome-back"
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
@@ -30,9 +28,6 @@ appId: com.toroloom.app
 - hideKeyboard
 - tapOn:
     id: "login-btn"
-# After login the app hydrates onboarding state from AsyncStorage and may
-# show a blank Loading screen briefly — wait for the tab bar to appear
-# before interacting further.
 - extendedWaitUntil:
     visible:
       id: "tab-home"
@@ -66,9 +61,7 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 5000
 
-# ── 2. Navigate: Home → SIP Calculator quick action ───────────────────────
-# (SIP Calculator is only reachable from Home quick actions / Wealth Dashboard —
-#  the More menu's "My SIPs" entry opens the Mutual Funds screen instead)
+# ── 2. Home → SIP Calculator Quick Action ──────────────────────────────────
 - scrollUntilVisible:
     element:
       id: "home-quick-sipcalculator"
@@ -76,14 +69,13 @@ appId: com.toroloom.app
     speed: 20
     timeout: 30000
 
-# ── 3. SIP Calculator ─────────────────────────────────────────────────────
 - tapOn:
     id: "home-quick-sipcalculator"
 - waitForAnimationToEnd
 - assertVisible:
     text: "SIP Calculator"
 
-# Result card is live-computed from default inputs (₹10K/mo, 12%, 10Y)
+# ── 3. Verify Result Cards ─────────────────────────────────────────────────
 - assertVisible:
     text: "Maturity Value"
 - assertVisible:
@@ -91,7 +83,7 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Total Returns"
 
-# Input labels match the real screen
+# ── 4. Verify Input Fields ─────────────────────────────────────────────────
 - assertVisible:
     text: "Monthly Investment (₹)"
 - assertVisible:
@@ -99,18 +91,32 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Investment Period (Years)"
 
-# ── 4. Change investment via preset chip → results update live ────────────
+# Preset chips render as "₹5K" "₹10K" "₹25K" "₹50K"
 - tapOn:
     text: "₹5K"
 - waitForAnimationToEnd
+
+# ── 5. Verify Growth Summary ───────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "Yearly Growth"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     text: "Yearly Growth"
+- scrollUntilVisible:
+    element:
+      text: "Quick Summary"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     text: "Quick Summary"
 - assertVisible:
     text: "Returns / Invested Ratio"
 
-# ── 5. Go back ────────────────────────────────────────────────────────────
+# ── 6. Back to Home ────────────────────────────────────────────────────────
 - pressKey: back
 - waitForAnimationToEnd
 - assertVisible:

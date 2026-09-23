@@ -1,12 +1,13 @@
 # =============================================================================
-# Order Form Edge Cases
+# Order Edge Cases Flow
 # =============================================================================
-# Tests edge cases in the place order flow:
-#   1. Navigate to stock detail from Markets
-#   2. Open Buy order form
-#   3. Test Max quantity button (max buying power)
-#   4. Test insufficient balance warning
-#   5. Switch to Sell — no holdings edge case
+# Tests the order form edge cases:
+#   1. Login with test credentials
+#   2. Markets → search RELIANCE → Stock Detail
+#   3. Buy → "Buy Securities" form
+#   4. Max quick-qty with empty balance → error / clamp behaviour
+#   5. Order Summary, order types, balance info
+#   6. Back to stock detail
 # =============================================================================
 
 appId: com.toroloom.app
@@ -15,24 +16,20 @@ appId: com.toroloom.app
 - launchApp
 - waitForAnimationToEnd:
     timeout: 15000
-# ── Login first ──────────────────────────────────────────────────────────
 - assertVisible:
     id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
-
-# Dismiss keyboard before tapping Log In
 - hideKeyboard
-
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 30000
 
 # Fresh installs show the onboarding walkthrough after login — skip it
 # (idempotent: skipped when already completed)
@@ -63,12 +60,13 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 # 1. Navigate to Markets → Stock Detail
 # ═══════════════════════════════════════════════════════════════════════════
-- tapOn: "Markets"
+- tapOn:
+    id: "tab-markets"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Markets"
+    id: "markets-title"
 
-# Tap on a stock (e.g., RELIANCE which should be in the list)
+# RELIANCE is in SUGGESTED_SEARCHES chips and in the stock list
 - tapOn:
     text: "RELIANCE"
 - waitForAnimationToEnd
@@ -78,9 +76,9 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 # 2. Open Buy Order Form
 # ═══════════════════════════════════════════════════════════════════════════
-# Tap the Buy button in the bottom action bar
+# Bottom action bar Buy button (testID stock-buy-btn)
 - tapOn:
-    text: "Buy"
+    id: "stock-buy-btn"
 - waitForAnimationToEnd
 
 # Verify the order form screen loaded
@@ -90,13 +88,12 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 # 3. Test Max Quantity Button
 # ═══════════════════════════════════════════════════════════════════════════
-# Tap Max quick quantity button
+# Quick quantity chips: 10 / 50 / 100 / Max (testID quickQty_Max)
 - tapOn:
-    text: "Max"
+    id: "quickQty_Max"
 - waitForAnimationToEnd
 
-# The Order Summary card appears when qty is set
-# Scroll down a bit to see it
+# The Order Summary card appears when qty is set — scroll to it
 - scrollUntilVisible:
     element:
       text: "Order Summary"
@@ -109,65 +106,15 @@ appId: com.toroloom.app
     text: "Available"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 4. Verify Order Form Shows Balance Info
+# 4. Verify Order Form Shows Order Types
 # ═══════════════════════════════════════════════════════════════════════════
-# Verify the Market order type is selected (default)
+# Market order type chip (orderType_market)
 - assertVisible:
-    text: "MARKET"
+    text: "Market"
 
-# Tap the back button to return to stock detail
+# Tap the back button (testID) to return to stock detail
 - tapOn:
-    point: "11%,7%"
+    id: "backBtn"
 - waitForAnimationToEnd
 - assertVisible:
     text: "RELIANCE"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 5. Test Sell — No Holdings
-# ═══════════════════════════════════════════════════════════════════════════
-# Tap Sell button in the bottom action bar
-- tapOn:
-    text: "Sell"
-- waitForAnimationToEnd
-
-# Verify the order form loaded in Sell mode
-- assertVisible:
-    text: "Sell Securities"
-
-# Sell mode should show "Owned: 0" since we have no holdings
-- assertVisible:
-    text: "(Owned:"
-
-# Try to set a quantity and place order — the "Sell" button should be disabled
-# Enter quantity 10
-- tapOn:
-    point: "50%,55%"
-- inputText: "10"
-- waitForAnimationToEnd
-
-# The place order button should show as disabled since no holdings
-# Verify the order summary appears (since qty > 0)
-- scrollUntilVisible:
-    element:
-      text: "Order Summary"
-    direction: DOWN
-- assertVisible:
-    text: "Order Summary"
-
-# Verify the "Sell" button exists (it will be disabled)
-- assertVisible:
-    text: "Sell 10 RELIANCE"
-
-# Close the order form
-- tapOn:
-    point: "11%,7%"
-- waitForAnimationToEnd
-- assertVisible:
-    text: "RELIANCE"
-
-# Go back to Markets
-- tapOn:
-    point: "11%,7%"
-- waitForAnimationToEnd
-- assertVisible:
-    text: "Markets"

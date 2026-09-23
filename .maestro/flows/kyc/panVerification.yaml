@@ -1,12 +1,12 @@
 # =============================================================================
-# PAN Verification Flow — KYC
+# PAN Verification KYC Flow
 # =============================================================================
-# Tests PAN verification flow:
+# Tests the KYC → PAN verification path:
 #   1. Login with test credentials
-#   2. Navigate: More → Profile → Verify PAN
-#   3. Enter a valid PAN number
-#   4. Verify PAN verification success
-#   5. Test invalid PAN validation
+#   2. Navigate: More → Profile & KYC → KYC & Banks tab
+#   3. Open PAN Verification from the KYC step list
+#   4. Enter a valid PAN → Verify → "PAN Verified ✓" result
+#   5. Go back to KYC
 # =============================================================================
 
 appId: com.toroloom.app
@@ -19,15 +19,15 @@ appId: com.toroloom.app
 - assertVisible:
     id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -54,41 +54,53 @@ appId: com.toroloom.app
           text: "Close"
       - waitForAnimationToEnd:
           timeout: 5000
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
     id: "home-greeting"
 
-# ── 2. Navigate: More → Profile ──────────────────────────────────────────
-- tapOn: "More"
-- waitForAnimationToEnd
+# ── 2. Navigate: More → Profile & KYC → KYC & Banks ───────────────────────
 - tapOn:
-    text: "Profile"
+    id: "tab-more"
 - waitForAnimationToEnd
-- assertVisible:
-    text: "Profile"
-
-# ── 3. Navigate to KYC section ────────────────────────────────────────────
 - scrollUntilVisible:
     element:
-      text: "KYC Verification"
+      text: "Profile & KYC"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - tapOn:
-    text: "KYC Verification"
+    text: "Profile & KYC"
 - waitForAnimationToEnd
 
-# ── 4. Verify PAN screen ──────────────────────────────────────────────────
+- tapOn:
+    text: "KYC & Banks"
+- waitForAnimationToEnd
+
+# ── 3. Open PAN Verification ───────────────────────────────────────────────
+- assertVisible:
+    text: "KYC Verification"
+- scrollUntilVisible:
+    element:
+      text: "PAN Verification"
+    direction: DOWN
+- tapOn:
+    text: "PAN Verification"
+- waitForAnimationToEnd
+
+# ── 4. Verify PAN Screen ───────────────────────────────────────────────────
 - assertVisible:
     text: "PAN Verification"
 - assertVisible:
-    text: "Verify your PAN to start trading"
+    text: "PAN (Permanent Account Number) is a 10-character alphanumeric identifier issued by the Income Tax Department."
 - assertVisible:
     text: "Enter PAN Number"
 
-# ── 5. Enter valid PAN and submit ─────────────────────────────────────────
+# The input placeholder is the format example "ABCDE1234F"
 - tapOn:
-    text: "Enter your 10-digit PAN"
+    text: "ABCDE1234F"
 - inputText: "ABCDE1234F"
 - hideKeyboard
 - tapOn:
@@ -96,7 +108,7 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
-# ── 6. Verify success ─────────────────────────────────────────────────────
+# ── 5. Verify Result ───────────────────────────────────────────────────────
 - assertVisible:
     text: "PAN Verified"
 - assertVisible:
@@ -104,7 +116,7 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Verified"
 
-# ── 7. Navigate Back ──────────────────────────────────────────────────────
+# ── 6. Back to KYC ─────────────────────────────────────────────────────────
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd

@@ -4,13 +4,12 @@
 # Tests the Chat (Messages) feature:
 #   1. Login with test credentials
 #   2. Navigate: More → Messages
-#   3. Verify Chat Room List screen with "Messages" header
-#   4. Tap on the first visible conversation/room
-#   5. Verify Chat Room screen with messages
+#   3. Verify Chat Room List screen ("Chat Rooms" header + search box)
+#   4. Tap on the first room ("Trading Discussion")
+#   5. Verify Chat Room screen renders
 #   6. Type and send a message
 #   7. Verify message appears in the chat
-#   8. Navigate back to Messages list
-#   9. Navigate back to More screen
+#   8. Navigate back to the room list, then to More
 # =============================================================================
 
 appId: com.toroloom.app
@@ -21,7 +20,7 @@ appId: com.toroloom.app
     timeout: 15000
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
-    id: "login-email-input"
+    id: "login-welcome-back"
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
@@ -71,54 +70,63 @@ appId: com.toroloom.app
     element:
       text: "Messages"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - tapOn:
     text: "Messages"
 - waitForAnimationToEnd
 
 # ── 3. Verify Chat Room List Screen ────────────────────────────────────────
+# Header title is community.chatRooms = "Chat Rooms"
 - assertVisible:
-    text: "Messages"
+    text: "Chat Rooms"
 
-# Verify subtitle with conversation count
+# Verify the first mock room card
 - assertVisible:
-    text: "conversations"
+    text: "Trading Discussion"
 
-# ── 4. Tap on First Room Card ──────────────────────────────────────────────
-# Tap on the first room name (e.g., "General" or first in the list)
+# ── 4. Tap on the First Room Card ─────────────────────────────────────────
 - tapOn:
-    text: "General"
+    text: "Trading Discussion"
 - waitForAnimationToEnd
 
 # ── 5. Verify Chat Room Screen ────────────────────────────────────────────
-# Verify room name visible in header
+# Input bar is rendered on the room screen (placeholder = typeMessage)
 - assertVisible:
-    text: "online"
+    text: "Type a message..."
 
 # ── 6. Type and Send a Message ────────────────────────────────────────────
-# Tap the text input field
 - tapOn:
     text: "Type a message..."
 - inputText: "Hello team! Testing chat from E2E."
+- hideKeyboard
 
-# Tap the send button using its testID
+# Send button has no testID — it is the icon button in the input bar
 - tapOn:
-    id: "sendMessageBtn"
+    id: "com.toroloom.app:id/send"
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        text: "Hello team! Testing chat from E2E."
+    commands:
+      # Fallback: tap the send icon area (right edge of the input bar)
+      - tapOn:
+          point: "92%,94%"
 - waitForAnimationToEnd
 
 # ── 7. Verify Message Appears ─────────────────────────────────────────────
 - assertVisible:
     text: "Hello team! Testing chat from E2E."
 
-# ── 8. Navigate Back to Messages List ──────────────────────────────────────
+# ── 8. Navigate Back to Room List ─────────────────────────────────────────
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd
 
-# Verify back on Messages list
+# Verify back on the room list
 - assertVisible:
-    text: "Messages"
-- assertVisible:
-    text: "conversations"
+    text: "Chat Rooms"
 
 # ── 9. Navigate Back to More Screen ───────────────────────────────────────
 - tapOn:
@@ -126,4 +134,4 @@ appId: com.toroloom.app
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "More"
+    id: "more-title"

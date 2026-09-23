@@ -2,8 +2,9 @@
 # Deep Link → Signup Flow
 # =============================================================================
 # Opens toroloom://signup?ref=test123 via a deep link, verifies the Signup
-# screen loads correctly, fills in all registration fields, submits the
-# form, and confirms the user lands on the Home screen.
+# screen loads correctly, fills in all registration fields (including the
+# mandatory Terms acceptance), submits the form, and confirms the user
+# lands on the Home screen.
 #
 # This validates:
 #   1. Custom scheme deep link handling (toroloom://)
@@ -29,7 +30,7 @@ appId: com.toroloom.app
 
 # Verify the Signup screen rendered (not stuck on Login)
 - assertVisible:
-    text: "Create Account"
+    id: "signup-name-input"
 - assertVisible:
     text: "Start your investment journey today"
 
@@ -43,42 +44,55 @@ appId: com.toroloom.app
 - assertVisible:
     text: "🎉 Referred by test123"
 
-# ── 3. Fill in Full Name ──────────────────────────────────────────────────
+# ── 4. Generate a unique email (no 409 collisions on re-runs) ─────────────
+- runScript:
+    when:
+      platform: Android
+    commands:
+      - ${TAU}/signEmail.js
+
+# ── 5. Fill in Full Name ──────────────────────────────────────────────────
 - tapOn:
     text: "Enter your full name"
 - inputText: "Rahul Sharma"
 
-# ── 4. Fill in Email ──────────────────────────────────────────────────────
+# ── 6. Fill in Email ──────────────────────────────────────────────────────
 - tapOn:
     text: "Enter your email"
-- inputText: "rahul+deeplink@toroloom.com"
+- inputText: ${SIGNUP_EMAIL}
 - hideKeyboard
 
-# ── 5. Fill in Phone ──────────────────────────────────────────────────────
+# ── 7. Fill in Phone ──────────────────────────────────────────────────────
 - tapOn:
     text: "Enter your phone number"
 - inputText: "9876543210"
 
-# ── 6. Fill in Password ───────────────────────────────────────────────────
+# ── 8. Fill in Password ───────────────────────────────────────────────────
 - tapOn:
     text: "Create a strong password"
 - inputText: "Secure@123"
 
-# ── 7. Fill in Confirm Password ───────────────────────────────────────────
+# ── 9. Fill in Confirm Password ───────────────────────────────────────────
 - tapOn:
     text: "Re-enter your password"
 - inputText: "Secure@123"
 
-# ── 8. Dismiss the keyboard ───────────────────────────────────────────────
+# ── 10. Dismiss the keyboard ──────────────────────────────────────────────
 - hideKeyboard
 
-# ── 9. Submit the form ─────────────────────────────────────────────────────
+# ── 11. Mandatory Terms acceptance ────────────────────────────────────────
+- assertVisible:
+    id: "signup-terms-checkbox"
+- tapOn:
+    id: "signup-terms-checkbox"
+
+# ── 12. Submit the form ────────────────────────────────────────────────────
 - tapOn:
     text: "Create Account"
 
-# ── 10. Wait for signup to complete ────────────────────────────────────────
+# ── 13. Wait for signup to complete ────────────────────────────────────────
 - waitForAnimationToEnd:
-    timeout: 15000
+    timeout: 10000
 
 # Fresh installs show the onboarding walkthrough after signup — skip it
 # (idempotent: skipped when already completed)
@@ -104,9 +118,6 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
-
-# ── 11. Verify navigation to Home screen ───────────────────────────────────
+# ── 14. Verify navigation to Home screen ──────────────────────────────────
 - assertVisible:
     id: "home-greeting"
-- assertVisible:
-    text: "Portfolio"

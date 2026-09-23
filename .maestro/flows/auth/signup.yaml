@@ -2,9 +2,12 @@
 # Signup Flow
 # =============================================================================
 # Tests the signup screen: navigates from Login → Signup, fills in all
-# fields, taps "Create Account", and verifies login screen is shown after.
+# fields (including the mandatory Terms acceptance), taps "Create Account",
+# and verifies the user lands on the Home screen.
 #
-# Uses testID-based targeting for i18n-independent robustness.
+# Uses testID-based targeting for i18n-independent robustness. The signup
+# email is made unique at runtime via runScript so re-runs don't collide
+# with an account persisted by a previous run.
 # =============================================================================
 
 appId: com.toroloom.app
@@ -21,6 +24,13 @@ appId: com.toroloom.app
 - assertVisible:
     id: "signup-name-input"
 
+# Generate a unique email so repeated runs never hit 409 email-exists
+- runScript:
+    when:
+      platform: Android
+    commands:
+      - ${TAU}/signEmail.js
+
 # Fill in Full Name
 - tapOn:
     id: "signup-name-input"
@@ -29,7 +39,7 @@ appId: com.toroloom.app
 # Fill in Email
 - tapOn:
     id: "signup-email-input"
-- inputText: "rahul@toroloom.com"
+- inputText: ${SIGNUP_EMAIL}
 
 # Fill in Phone
 - tapOn:
@@ -46,8 +56,14 @@ appId: com.toroloom.app
     id: "signup-confirm-password-input"
 - inputText: "Secure@123"
 
-# Dismiss keyboard
+# Dismiss keyboard so the Terms row and submit button are reachable
 - hideKeyboard
+
+# ── Mandatory Terms acceptance (added in the legal-consent release) ───────
+- assertVisible:
+    id: "signup-terms-checkbox"
+- tapOn:
+    id: "signup-terms-checkbox"
 
 # Tap "Create Account" button
 - tapOn:
@@ -55,7 +71,7 @@ appId: com.toroloom.app
 
 # Wait for signup to process
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 # Fresh installs show the onboarding walkthrough after signup — skip it
 # (idempotent: skipped when already completed)
@@ -81,7 +97,6 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
-
-# After successful signup, user should see the Home screen
+# After successful signup, the user is logged in and sees the Home screen
 - assertVisible:
-    text: "Portfolio"
+    id: "home-greeting"

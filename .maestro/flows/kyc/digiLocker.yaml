@@ -1,13 +1,14 @@
 # =============================================================================
-# DigiLocker Verification Flow — KYC
+# DigiLocker KYC Flow
 # =============================================================================
-# Tests DigiLocker document fetch flow:
+# Tests the KYC → DigiLocker verification path:
 #   1. Login with test credentials
-#   2. Navigate: More → Profile → KYC → DigiLocker
-#   3. Verify info screen with document types + benefits
-#   4. Tap "Connect DigiLocker" → handle consent alert
-#   5. Verify documents are fetched and displayed
-#   6. Tap "Complete Verification" → navigate back
+#   2. Navigate: More → Profile & KYC
+#   3. Switch to the "KYC & Banks" tab
+#   4. Open DigiLocker from the KYC step list
+#   5. Verify DigiLocker screen (hero, document types, benefits)
+#   6. Connect → consent alert → Authorize → documents fetched
+#   7. Complete Verification → back on KYC
 # =============================================================================
 
 appId: com.toroloom.app
@@ -20,15 +21,15 @@ appId: com.toroloom.app
 - assertVisible:
     id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -55,31 +56,37 @@ appId: com.toroloom.app
           text: "Close"
       - waitForAnimationToEnd:
           timeout: 5000
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
     id: "home-greeting"
 
-# ── 2. Navigate: More → Profile ──────────────────────────────────────────
-- tapOn: "More"
-- waitForAnimationToEnd
+# ── 2. Navigate: More → Profile & KYC ─────────────────────────────────────
 - tapOn:
-    text: "Profile"
+    id: "tab-more"
 - waitForAnimationToEnd
-- assertVisible:
-    text: "Profile"
-
-# ── 3. Navigate to KYC section ────────────────────────────────────────────
 - scrollUntilVisible:
     element:
-      text: "KYC Verification"
+      text: "Profile & KYC"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - tapOn:
-    text: "KYC Verification"
+    text: "Profile & KYC"
 - waitForAnimationToEnd
 
-# ── 4. Navigate to DigiLocker ─────────────────────────────────────────────
+# ── 3. Switch to the KYC & Banks Tab ──────────────────────────────────────
+- assertVisible:
+    text: "Profile"
+- tapOn:
+    text: "KYC & Banks"
+- waitForAnimationToEnd
+
+# ── 4. Open DigiLocker from the KYC Steps ─────────────────────────────────
+- assertVisible:
+    text: "KYC Verification"
 - scrollUntilVisible:
     element:
       text: "DigiLocker"
@@ -88,7 +95,7 @@ appId: com.toroloom.app
     text: "DigiLocker"
 - waitForAnimationToEnd
 
-# ── 5. Verify DigiLocker screen ───────────────────────────────────────────
+# ── 5. Verify DigiLocker Screen ───────────────────────────────────────────
 - assertVisible:
     text: "DigiLocker"
 - assertVisible:
@@ -104,15 +111,14 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Instant document verification"
 
-# ── 6. Tap Connect DigiLocker ─────────────────────────────────────────────
+# ── 6. Connect DigiLocker ──────────────────────────────────────────────────
 - assertVisible:
     text: "Connect DigiLocker"
 - tapOn:
     text: "Connect DigiLocker"
 - waitForAnimationToEnd
 
-# ── 7. Handle consent alert ───────────────────────────────────────────────
-# The alert shows "DigiLocker Consent" title with Authorize/Cancel options
+# Consent alert: "DigiLocker Consent" with Authorize/Cancel
 - assertVisible:
     text: "DigiLocker Consent"
 - tapOn:
@@ -120,19 +126,20 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
-# ── 8. Verify documents fetched ───────────────────────────────────────────
+# ── 7. Verify Documents Fetched ────────────────────────────────────────────
+# documentsFetched: "{{count}} Document{{plural}} Fetched"
 - assertVisible:
-    text: "Documents Fetched"
+    text: "Fetched"
 - assertVisible:
     text: "Complete Verification"
 - assertVisible:
     text: "Verified"
 
-# ── 9. Tap Complete Verification ──────────────────────────────────────────
+# ── 8. Complete Verification ───────────────────────────────────────────────
 - tapOn:
     text: "Complete Verification"
 - waitForAnimationToEnd
 
-# ── 10. Verify back on KYC screen ─────────────────────────────────────────
+# ── 9. Verify Back on KYC Screen ───────────────────────────────────────────
 - assertVisible:
     text: "KYC Verification"

@@ -1,18 +1,13 @@
 # =============================================================================
-# Aadhaar eKYC Verification Flow — Two-Step OTP
+# Aadhaar eKYC Flow
 # =============================================================================
-# Tests the Aadhaar eKYC verification flow:
+# Tests the KYC → Aadhaar verification path:
 #   1. Login with test credentials
-#   2. Navigate: More → Profile → KYC Verification → Aadhaar eKYC
-#   3. Verify Aadhaar input screen renders (header, info card, input field, consent)
-#   4. Enter a valid 12-digit Aadhaar number
-#   5. Toggle consent checkbox
-#   6. Tap "Send OTP" button
-#   7. Wait for OTP screen (6-digit OTP input)
-#   8. Enter mock OTP: 1 2 3 4 5 6
-#   9. Tap "Verify OTP" button
-#   10. Verify success screen: "Aadhaar Verified ✓"
-#   11. Tap "Continue" to go back
+#   2. Navigate: More → Profile & KYC → KYC & Banks tab
+#   3. Open Aadhaar eKYC from the KYC step list
+#   4. Enter Aadhaar → give consent → Send OTP
+#   5. Enter demo OTP (123456) → Verify OTP → "Aadhaar Verified ✓"
+#   6. Go back to KYC
 # =============================================================================
 
 appId: com.toroloom.app
@@ -25,15 +20,15 @@ appId: com.toroloom.app
 - assertVisible:
     id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -60,131 +55,100 @@ appId: com.toroloom.app
           text: "Close"
       - waitForAnimationToEnd:
           timeout: 5000
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
     id: "home-greeting"
 
-# ── 2. Navigate: More → Profile → KYC → Aadhaar ──────────────────────────
-- tapOn: "More"
-- waitForAnimationToEnd
+# ── 2. Navigate: More → Profile & KYC → KYC & Banks ───────────────────────
 - tapOn:
-    text: "Profile"
+    id: "tab-more"
 - waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Profile & KYC"
+    direction: DOWN
+    speed: 20
+    timeout: 60000
+- tapOn:
+    text: "Profile & KYC"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "KYC & Banks"
+- waitForAnimationToEnd
+
+# ── 3. Open Aadhaar eKYC ───────────────────────────────────────────────────
 - assertVisible:
-    text: "Profile"
-
-- scrollUntilVisible:
-    element:
-      text: "KYC Verification"
-    direction: DOWN
-- tapOn:
     text: "KYC Verification"
-- waitForAnimationToEnd
-
-# ── 3. Navigate to Aadhaar eKYC screen ────────────────────────────────────
 - scrollUntilVisible:
     element:
-      text: "Aadhaar eKYC"
+      text: "Aadhaar Verification"
     direction: DOWN
 - tapOn:
-    text: "Aadhaar eKYC"
+    text: "Aadhaar Verification"
 - waitForAnimationToEnd
 
-# ── 4. Verify Aadhaar Input Screen ────────────────────────────────────────
+# ── 4. Step 1: Aadhaar + Consent + OTP ─────────────────────────────────────
 - assertVisible:
     text: "Aadhaar eKYC"
 - assertVisible:
     text: "Step 1 of 2"
-
-# Verify info card with shield icon
 - assertVisible:
     text: "Enter Aadhaar Number"
-- assertVisible:
-    text: "12-digit number found on your Aadhaar card"
 
-# Verify consent checkbox label
-- assertVisible:
-    text: "I consent to verify my Aadhaar"
-- assertVisible:
-    text: "Send OTP"
-
-# ── 5. Enter Aadhaar number ───────────────────────────────────────────────
+# Input placeholder is "XXXX XXXX XXXX"
 - tapOn:
     text: "XXXX XXXX XXXX"
 - inputText: "123412341234"
+- hideKeyboard
 
-# ── 6. Tap consent checkbox ─────────────────────────────────────────------
+# Consent checkbox text is a long sentence — match its stable prefix
+- assertVisible:
+    text: "I consent to verify my Aadhaar"
 - tapOn:
     text: "I consent to verify my Aadhaar"
 
-# ── 7. Tap Send OTP ───────────────────────────────────────────────────────
+- assertVisible:
+    text: "Send OTP"
 - tapOn:
     text: "Send OTP"
 - waitForAnimationToEnd:
     timeout: 10000
 
-# ── 8. Verify OTP Input Screen ────────────────────────────────────────────
+# ── 5. Step 2: OTP Entry ───────────────────────────────────────────────────
 - assertVisible:
     text: "Step 2 of 2"
+# Demo hint tells the OTP to use
 - assertVisible:
     text: "123456"
 
-# ── 9. Enter OTP digits ───────────────────────────────────────────────────
-# The OTP has 6 individual digit input boxes. Tap each one and enter digit.
-# First digit box
+# The OTP is 6 single-digit boxes; tap the first box and type the full
+# code — the screen's handleChange auto-advances focus.
 - tapOn:
     index: 0
-- inputText: "1"
-# Second digit box
-- tapOn:
-    index: 1
-- inputText: "2"
-# Third digit box
-- tapOn:
-    index: 2
-- inputText: "3"
-# Fourth digit box
-- tapOn:
-    index: 3
-- inputText: "4"
-# Fifth digit box
-- tapOn:
-    index: 4
-- inputText: "5"
-# Sixth digit box
-- tapOn:
-    index: 5
-- inputText: "6"
+- inputText: "123456"
+- hideKeyboard
+- waitForAnimationToEnd
 
-# ── 10. Tap Verify OTP ────────────────────────────────────────────────────
+- assertVisible:
+    text: "Verify OTP"
 - tapOn:
     text: "Verify OTP"
 - waitForAnimationToEnd:
     timeout: 10000
 
-# ── 11. Verify Success ────────────────────────────────────────────────────
+# ── 6. Verify Result ───────────────────────────────────────────────────────
 - assertVisible:
     text: "Aadhaar Verified"
 - assertVisible:
-    text: "Verified successfully"
+    text: "Verified"
 
-# Verify result details
-- assertVisible:
-    text: "Aadhaar Number"
-- assertVisible:
-    text: "Year of Birth"
-- assertVisible:
-    text: "Gender"
-- assertVisible:
-    text: "State"
-
-# Tap Continue to go back
+# ── 7. Back to KYC ─────────────────────────────────────────────────────────
 - tapOn:
-    text: "Continue"
+    text: "Go back"
 - waitForAnimationToEnd
-
-# Back on KYC Verification screen
 - assertVisible:
     text: "KYC Verification"

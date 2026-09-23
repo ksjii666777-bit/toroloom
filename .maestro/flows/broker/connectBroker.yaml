@@ -1,27 +1,21 @@
 # =============================================================================
-# Broker Connection Flow — Zero-API Hybrid Gateway
+# Broker Connection Flow — SnapTrade OAuth Gateway
 # =============================================================================
-# Tests the broker connection experience via development build:
+# Tests the broker connection experience:
 #   1. Login with test credentials
 #   2. Navigate to Connect Broker (from More screen)
 #   3. Verify ConnectBrokerView renders correctly:
-#      - Status pills: ZERO-API SYNC, 100% FREE, ENCRYPTED
-#      - Broker grid with 3 cards (Angel One, Zerodha, Groww)
-#      - Glassmorphic info card
-#   4. Open WebView session sync for each broker (tap → WebView opens)
-#   5. Close WebView via Cancel button (text-based selector)
-#   6. Re-open WebView for next broker
-#   7. Verify no connected-state elements are visible
-#   8. Navigate back to More screen
-#
-# NOTE: All three brokers open the WebView session sync (not a credentials
-# modal) because all have login URLs mapped. The credentials modal is only
-# accessible as a fallback for brokers without a login URL.
-#
-# Broker login URLs (for reference):
-#   - Zerodha: https://kite.zerodha.com/
-#   - Angel:   https://smartapi.angelbroking.com/
-#   - Groww:   https://groww.in/login
+#      - Header + SnapTrade subtitle
+#      - Status pills: O AUTH 2.0, 20+ BROKERS, SECURE
+#      - Broker grid with 3 cards (Angel One, Zerodha, Groww) + taglines
+#      - SnapTrade info card
+#   4. Tapping a broker now opens the DEVICE BROWSER (SnapTrade OAuth
+#      portal via Linking.openURL) — no in-app WebView anymore. The E2E
+#      emulator has no browser session to complete OAuth, so we only
+#      verify the "Connection Failed" error alert path (no oauthUrl in
+#      test env → API error → alert) and dismiss it.
+#   5. Verify no connected-state elements are visible
+#   6. Navigate back to More screen
 # =============================================================================
 
 appId: com.toroloom.app
@@ -34,17 +28,17 @@ appId: com.toroloom.app
 # 1. Login
 # ═══════════════════════════════════════════════════════════════════════════
 - assertVisible:
-    text: "Welcome Back! 👋"
+    id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -72,8 +66,9 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
-# Navigate to Home tab (More is default after login)
-- tapOn: "Home"
+# Navigate to Home tab
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
@@ -82,7 +77,8 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 # 2. Navigate: More → Connect Broker
 # ═══════════════════════════════════════════════════════════════════════════
-- tapOn: "More"
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
@@ -92,7 +88,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Connect Broker"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 3. Verify ConnectBrokerView Renders Correctly
@@ -101,19 +98,21 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Connect Broker"
 - assertVisible:
-    text: "Zero-API gateway"
+    text: "1-tap OAuth — powered by SnapTrade"
 
 # Status pills
 - assertVisible:
-    text: "ZERO-API SYNC"
+    text: "O AUTH 2.0"
 - assertVisible:
-    text: "100% FREE"
+    text: "20+ BROKERS"
 - assertVisible:
-    text: "ENCRYPTED"
+    text: "SECURE"
 
 # Section + broker grid
 - assertVisible:
     text: "Choose Your Broker"
+- assertVisible:
+    text: "Select a broker — no API keys needed"
 - assertVisible:
     text: "Angel One"
 - assertVisible:
@@ -129,114 +128,60 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Simple, modern investing platform"
 
-# Verify each card has "Sync Now" badge
-- assertVisible:
-    text: "Sync Now"
-
-# Glassmorphic info card (scroll down if needed)
+# SnapTrade info card (scroll down if needed)
 - scrollUntilVisible:
     element:
-      text: "Zero-API Hybrid Gateway"
+      text: "SnapTrade OAuth Gateway"
     direction: DOWN
 - assertVisible:
-    text: "Zero-API Hybrid Gateway"
+    text: "SnapTrade OAuth Gateway"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 4. Open WebView — Zerodha (hasOAuth: true)
+# 4. Broker tap → device-browser OAuth (no in-app WebView)
 # ═══════════════════════════════════════════════════════════════════════════
+# The connect call needs the SnapTrade backend; on failure (or when no
+# oauthUrl is returned) an error alert appears. Accept either outcome:
+# an alert ("Connection Failed") or the screen staying put.
 - scrollUntilVisible:
     element:
       text: "Zerodha"
     direction: UP
 - tapOn:
     text: "Zerodha"
-- waitForAnimationToEnd
-
-# Verify the WebView modal rendered with header + Cancel
-- assertVisible:
-    text: "Connect Zerodha"
-- assertVisible:
-    text: "Cancel"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 5. Close WebView — Zerodha
-# ═══════════════════════════════════════════════════════════════════════════
-# Use the Cancel button text instead of point coordinates (more robust)
-- tapOn:
-    text: "Cancel"
 - waitForAnimationToEnd:
-    timeout: 3000
+    timeout: 10000
 
-# Verify back on main Connect Broker screen
-- assertVisible:
-    text: "Choose Your Broker"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 6. Open & Close WebView — Angel One
-# ═══════════════════════════════════════════════════════════════════════════
-# All brokers open WebView because all have login URLs mapped.
-# The hasOAuth flag is cosmetic and not used for routing.
-- tapOn:
-    text: "Angel One"
-- waitForAnimationToEnd
-
-# Verify Angel One WebView header
-- assertVisible:
-    text: "Connect Angel One"
-- assertVisible:
-    text: "Cancel"
-
-# Close via Cancel
-- tapOn:
-    text: "Cancel"
-- waitForAnimationToEnd:
-    timeout: 3000
-
-- assertVisible:
-    text: "Choose Your Broker"
+- runFlow:
+    when:
+      visible:
+        text: "Connection Failed"
+    commands:
+      - assertVisible:
+          text: "Please check your internet connection and try again."
+      - tapOn:
+          text: "OK"
+      - waitForAnimationToEnd:
+          timeout: 3000
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 7. Open & Close WebView — Groww
+# 5. Verify No Connected State
 # ═══════════════════════════════════════════════════════════════════════════
-- tapOn:
-    text: "Groww"
-- waitForAnimationToEnd
-
-# Verify Groww WebView header
-- assertVisible:
-    text: "Connect Groww"
-- assertVisible:
-    text: "Cancel"
-
-# Close via Cancel
-- tapOn:
-    text: "Cancel"
-- waitForAnimationToEnd:
-    timeout: 3000
-
-- assertVisible:
-    text: "Choose Your Broker"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 8. Verify No Connected State
-# ═══════════════════════════════════════════════════════════════════════════
-# Since we never completed a real broker authentication, no session should
-# be stored and no connection banner should appear.
-- assertNotVisible:
-    text: "Disconnect"
+# Since we never completed a real OAuth, no session should be stored and
+# no connection banner should appear.
 - assertNotVisible:
     text: "Test API"
 - assertNotVisible:
     text: "Session Active"
+- assertVisible:
+    text: "Choose Your Broker"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 9. Navigate Back to More Screen
+# 6. Navigate Back to More Screen
 # ═══════════════════════════════════════════════════════════════════════════
-# Tap the back arrow (Ionicons arrow-back in header)
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd
 
 # Confirm we're back on the More screen
 - assertVisible:
-    text: "More"
+    id: "more-title"

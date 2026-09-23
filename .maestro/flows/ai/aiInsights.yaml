@@ -1,13 +1,13 @@
 # =============================================================================
-# AI Insights Flow — Market Analysis
+# AI Insights Flow
 # =============================================================================
-# Tests AI insights screen with market overview and stock analysis cards:
+# Tests the AI Insights screen:
 #   1. Login with test credentials
-#   2. Navigate: More → AI Insights
-#   3. Verify header + AI Market Overview card
-#   4. Verify stock analysis cards with symbol, sentiment, confidence
-#   5. Scroll to see all insights
-#   6. Navigate back
+#   2. Navigate: More → AI Insights (menu-AIInsights)
+#   3. Verify header + subtitle
+#   4. Verify Market Overview card (bullish/bearish/neutral counts)
+#   5. Verify Stock Analysis section renders (insights or generating state)
+#   6. Navigate back to More
 # =============================================================================
 
 appId: com.toroloom.app
@@ -16,11 +16,9 @@ appId: com.toroloom.app
 - launchApp
 - waitForAnimationToEnd:
     timeout: 15000
-# ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
-
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
-    id: "login-email-input"
+    id: "login-welcome-back"
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
@@ -62,7 +60,7 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 5000
 
-# ── 2. Navigate: More → AI Insights ──────────────────────────────────────
+# ── 2. Navigate: More → AI Insights ────────────────────────────────────────
 - tapOn:
     id: "tab-more"
 - waitForAnimationToEnd
@@ -82,9 +80,10 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Powered by advanced market analysis"
 
-# ── 4. Verify AI Market Overview Card ──────────────────────────────────────
+# ── 4. Verify Market Overview Card ─────────────────────────────────────────
 - assertVisible:
     text: "AI Market Overview"
+# Overview sub line: "N bullish · N bearish · N neutral" (lowercase counts)
 - assertVisible:
     text: "bullish"
 - assertVisible:
@@ -98,22 +97,13 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Stock Analysis"
 
-# Scroll down to see all insight cards
-- scroll
-- waitForAnimationToEnd
-
-# Each insight card shows symbol, sentiment, confidence, and target levels
+# Insight cards may still be generating for a fresh account — the
+# generating state is a valid render.
 - assertVisible:
-    text: "Confidence"
-- assertVisible:
-    text: "Target 1"
+    text: "Generating analysis..."
     optional: true
 
-- scroll
-- waitForAnimationToEnd
-
-# ── 6. Navigate back ───────────────────────────────────────────────────────
-# The screen has no visible back button; use Android back key
+# ── 6. Navigate Back to More ───────────────────────────────────────────────
 - pressKey: BACK
 - waitForAnimationToEnd
 

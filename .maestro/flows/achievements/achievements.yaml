@@ -5,10 +5,10 @@
 #   1. Login with test credentials
 #   2. Navigate: More → Achievements
 #   3. Verify header: title + subtitle (unlocked/total count)
-#   4. Verify Level Card: level number, title, XP progress bar
+#   4. Verify Level Card: Total XP
 #   5. Verify Stats Grid: Total Badges, Unlocked, Locked, Completion
-#   6. Verify Badges Grid: badge cards with icons + names
-#   7. Tap a badge → verify modal with name, description, status
+#   6. Verify Tab Toggle: All Badges / Unlocked (N)
+#   7. Tap a badge → verify modal with Requirement/Status
 #   8. Dismiss modal → navigate back
 # =============================================================================
 
@@ -22,15 +22,15 @@ appId: com.toroloom.app
 - assertVisible:
     id: "login-welcome-back"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - hideKeyboard
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -57,19 +57,23 @@ appId: com.toroloom.app
           text: "Close"
       - waitForAnimationToEnd:
           timeout: 5000
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
     id: "home-greeting"
 
 # ── 2. Navigate: More → Achievements ──────────────────────────────────────
-- tapOn: "More"
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
       text: "Achievements"
     direction: DOWN
+    speed: 20
+    timeout: 60000
 - tapOn:
     text: "Achievements"
 - waitForAnimationToEnd
@@ -77,10 +81,12 @@ appId: com.toroloom.app
 # ── 3. Verify Header ───────────────────────────────────────────────────────
 - assertVisible:
     text: "Achievements"
+# Subtitle: "{{unlocked}} of {{total}} badges unlocked"
 - assertVisible:
     text: "badges unlocked"
 
 # ── 4. Verify Level Card ───────────────────────────────────────────────────
+# "{{xp}} Total XP"
 - assertVisible:
     text: "Total XP"
 
@@ -98,10 +104,10 @@ appId: com.toroloom.app
 - assertVisible:
     text: "All Badges"
 - assertVisible:
-    text: "Unlocked"
+    text: "Upcoming Challenges"
 
 # ── 7. Verify Badges Grid ──────────────────────────────────────────────────
-# Badge cards should be visible with names
+# Mock badges (mockData.ts): b1 unlocked by default
 - assertVisible:
     text: "First Trade"
     optional: true
@@ -132,14 +138,10 @@ appId: com.toroloom.app
     optional: true
 - waitForAnimationToEnd
 
-# ── 10. Verify Upcoming Challenges ─────────────────────────────────────────
-- assertVisible:
-    text: "Upcoming Challenges"
-
-# ── 11. Navigate back ──────────────────────────────────────────────────────
+# ── 10. Navigate back ──────────────────────────────────────────────────────
 - tapOn:
     text: "Go back"
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "More"
+    id: "more-title"
