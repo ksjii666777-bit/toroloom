@@ -255,18 +255,56 @@ echo "Running Maestro E2E flows: $*"
 # decides: backend healthy -> run the full suite; backend broken -> exit
 # immediately with the diagnosis instead of failing 31 times.
 echo "── Smoke gate: login -> Home (backend health check) ──"
-if maestro test .maestro/flows/smoke/smokeTest.yaml \
+
+# ── 7a-0. Re-ensure the test account RIGHT BEFORE the gate ──────────────────
+# The production Postgres (custom pgbackrest image) restarts every ~5 minutes
+# and on some reschedules the restore-gate rolls data back to its last
+# snapshot — accounts created at job start can vanish before the smoke gate
+# runs ~45 min later (observed: ensure-step login 200 at 16:38, smoke login
+# 401 at 17:24, run 35755384048). Re-creating here is idempotent and
+# self-heals that rollback window.
+BASE_URL="${EXPO_PUBLIC_API_URL%/}"
+ENSURE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+  -X POST "$BASE_URL/auth/login" -H 'Content-Type: application/json' \
+  -d "{\"email\":\"${TEST_EMAIL}\",\"password\":\"${TEST_PASSWORD}\"}") || ENSURE=000
+if [ "$ENSURE" != "200" ]; then
+  echo "Test account missing at gate time (login $ENSURE) — re-creating..."
+  SU2=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+    -X POST "$BASE_URL/auth/signup" -H 'Content-Type: application/json' \
+    -d "{\"name\":\"E2E Test User\",\"email\":\"${TEST_EMAIL}\",\"phone\":\"9999999999\",\"password\":\"${TEST_PASSWORD}\"}") || SU2=000
+  echo "Re-ensure signup => $SU2"
+fi
+
+run_smoke() {
+  maestro test .maestro/flows/smoke/smokeTest.yaml \
     --env "TEST_EMAIL=${TEST_EMAIL}" \
-    --env "TEST_PASSWORD=${TEST_PASSWORD}"; then
+    --env "TEST_PASSWORD=${TEST_PASSWORD}"
+}
+
+if run_smoke; then
   echo "Smoke gate passed - running the full suite."
 else
-  echo "::error::Smoke gate FAILED: login -> Home did not complete."
-  echo "::error::The flow already retried login 3x, so this is likely not a"
-  echo "::error::one-off blip. Check, in order: /ready on the backend (Postgres"
-  echo "::error::down makes login 5xx), the E2E failure diagnosis group above"
-  echo "::error::(visible texts/ids at failure time), and the e2e-failure.png"
-  echo "::error::artifact uploaded with this run."
-  exit 1
+  # One structured retry: a transient backend blip (Postgres restart window,
+  # ~50s shutdown/restore cycle) can fail the first pass even when everything
+  # is healthy (run #336). Re-ensure the account, wait out a restart cycle,
+  # then try the gate once more before declaring failure.
+  echo "Smoke gate failed on first pass — re-ensuring account and retrying once."
+  SU3=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+    -X POST "$BASE_URL/auth/signup" -H 'Content-Type: application/json' \
+    -d "{\"name\":\"E2E Test User\",\"email\":\"${TEST_EMAIL}\",\"phone\":\"9999999999\",\"password\":\"${TEST_PASSWORD}\"}") || SU3=000
+  echo "Retry re-ensure signup => $SU3"
+  sleep 70
+  if run_smoke; then
+    echo "Smoke gate passed on retry - running the full suite."
+  else
+    echo "::error::Smoke gate FAILED: login -> Home did not complete (2 passes)."
+    echo "::error::The flow already retried login 3x per pass, so this is likely"
+    echo "::error::not a one-off blip. Check, in order: /ready on the backend"
+    echo "::error::(Postgres down makes login 5xx), the E2E failure diagnosis group"
+    echo "::error::above (visible texts/ids at failure time), and the e2e-failure.png"
+    echo "::error::artifact uploaded with this run."
+    exit 1
+  fi
 fi
 
 # ── 7b. Full suite ──────────────────────────────────────────────────────────
