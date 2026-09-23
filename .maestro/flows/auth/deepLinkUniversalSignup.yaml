@@ -52,11 +52,9 @@ appId: com.toroloom.app
     text: "🎉 Referred by test123"
 
 # ── 4. Generate a unique email (no 409 collisions on re-runs) ─────────────
-- runScript:
-    when:
-      platform: Android
-    commands:
-      - ${TAU}/signEmail.js
+# Inline evalScript — runScript rejects every path form on Maestro 2.6.0
+# with "Config Field Required", which killed the whole suite.
+- evalScript: ${output.SIGNUP_EMAIL = "e2e.uni." + Date.now() + "@toroloom-test.com"}
 
 # ── 5. Fill in Full Name ──────────────────────────────────────────────────
 - tapOn:

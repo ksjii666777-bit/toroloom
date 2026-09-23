@@ -6,7 +6,7 @@
 # and verifies the user lands on the Home screen.
 #
 # Uses testID-based targeting for i18n-independent robustness. The signup
-# email is made unique at runtime via runScript so re-runs don't collide
+# email is made unique at runtime via evalScript so re-runs don't collide
 # with an account persisted by a previous run.
 # =============================================================================
 
@@ -25,11 +25,9 @@ appId: com.toroloom.app
     id: "signup-name-input"
 
 # Generate a unique email so repeated runs never hit 409 email-exists
-- runScript:
-    when:
-      platform: Android
-    commands:
-      - ${TAU}/signEmail.js
+# (inline evalScript — runScript rejects every path form on Maestro 2.6.0
+# with "Config Field Required", which killed the whole suite)
+- evalScript: ${output.SIGNUP_EMAIL = "e2e.maestro." + Date.now() + "@toroloom-test.com"}
 
 # Fill in Full Name
 - tapOn:
