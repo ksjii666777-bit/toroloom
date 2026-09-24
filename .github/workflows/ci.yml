@@ -976,6 +976,7 @@ jobs:
           cd android && ./gradlew :app:assembleRelease -x lint
           cd ..
           maestro cloud \
+            --android pixel_6 \
             --appFile android/app/build/outputs/apk/release/app-release.apk \
             --env TEST_EMAIL="$TEST_EMAIL" \
             --env TEST_PASSWORD="$TEST_PASSWORD" \
