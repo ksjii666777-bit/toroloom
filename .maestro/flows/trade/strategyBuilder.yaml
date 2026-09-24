@@ -81,8 +81,10 @@ appId: com.toroloom.app
 # ── 3. Verify Strategy Builder Screen ─────────────────────────────────────
 - assertVisible:
     text: "Strategy Builder"
+# The header subtitle shows the SELECTED TEMPLATE name (defaults to the
+# template list heading, not a static tagline) — assert only stable texts
 - assertVisible:
-    text: "Build & analyze multi-leg strategies"
+    text: "Strategy Templates"
 
 # Verify the pre-built strategy templates section
 - assertVisible:

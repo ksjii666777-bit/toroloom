@@ -81,7 +81,7 @@ appId: com.toroloom.app
 - assertVisible:
     text: "AI Insights"
 - assertVisible:
-    text: "AI-powered market analysis"
+    text: "Powered by advanced market analysis"
 
 # ── 4. Verify Market Overview Card ─────────────────────────────────────────
 - assertVisible:

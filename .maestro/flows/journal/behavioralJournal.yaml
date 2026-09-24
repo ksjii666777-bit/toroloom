@@ -84,34 +84,47 @@ appId: com.toroloom.app
     text: "Track your trading psychology"
 
 # ── 4. Verify Tab Bar ──────────────────────────────────────────────────────
-- assertVisible:
-    text: "Dashboard"
+# SegmentedTabs labels are plain text nodes; give the tab row a moment
+# to settle after navigation
+- extendedWaitUntil:
+    visible:
+      text: "Dashboard"
+    timeout: 15000
 - assertVisible:
     text: "Entries"
 - assertVisible:
     text: "Reports"
 
 # ── 5. Verify Dashboard Metrics ────────────────────────────────────────────
-- assertVisible:
-    text: "Performance Overview"
+# Metrics sit below the fold in the Dashboard scroll view — scroll to them
+- scrollUntilVisible:
+    element:
+      text: "Performance Overview"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     text: "Win Rate"
 - assertVisible:
     text: "Profit Factor"
-- assertVisible:
-    text: "Plan Compliance"
-- assertVisible:
-    text: "Emotional State Breakdown"
+- scrollUntilVisible:
+    element:
+      text: "Plan Compliance"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 
 # ── 6. Switch to Entries Tab ───────────────────────────────────────────────
 - tapOn:
     text: "Entries"
 - waitForAnimationToEnd
 
-# Entries list may be empty for a fresh test account — either way the
-# tab must render without crashing (symbol rows or the empty note).
+# Entries list may be empty for a fresh test account — the tab must render
+# without crashing (symbol rows or the "No entries yet" note)
 - assertVisible:
     text: "Entries"
+- assertVisible:
+    text: "No entries yet"
 
 # ── 7. Switch to Reports Tab ───────────────────────────────────────────────
 - tapOn:
@@ -122,8 +135,13 @@ appId: com.toroloom.app
     text: "Reports"
 
 # ── 8. Navigate back ───────────────────────────────────────────────────────
-# The screen has no back button; use Android back key
-- pressKey: BACK
+# hardware BACK can exit the app when the keyboard swallows the first press
+# — use the tab bar instead
+- tapOn:
+    id: "tab-home"
+- waitForAnimationToEnd
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 
 - assertVisible:

@@ -109,9 +109,13 @@ appId: com.toroloom.app
 - assertVisible:
     text: ".*Showing.*article.*"
 
-# ── 5. Navigate Back to More ───────────────────────────────────────────────
+# ── 5. Navigate Back to More ──────────────────────────────────────────────
+# Market News is a TAB-level screen with NO back button — go to the tab bar
 - tapOn:
-    text: "Go back"
+    id: "tab-home"
+- waitForAnimationToEnd
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 
 - assertVisible:

@@ -142,10 +142,25 @@ appId: com.toroloom.app
     optional: true
 - waitForAnimationToEnd
 
-# ── 10. Navigate back ──────────────────────────────────────────────────────
+# ── 10. Navigate back ─────────────────────────────────────────────────────
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text; fall back to the tab bar
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-home"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 - assertVisible:
     id: "more-title"

@@ -33,26 +33,31 @@ appId: com.toroloom.app
 - tapOn:
     id: "signup-name-input"
 - inputText: "Rahul Sharma"
+- hideKeyboard
 
 # Fill in Email
 - tapOn:
     id: "signup-email-input"
 - inputText: ${SIGNUP_EMAIL}
+- hideKeyboard
 
 # Fill in Phone
 - tapOn:
     id: "signup-phone-input"
 - inputText: "9876543210"
+- hideKeyboard
 
 # Fill in Password
 - tapOn:
     id: "signup-password-input"
 - inputText: "Secure@123"
+- hideKeyboard
 
 # Fill in Confirm Password
 - tapOn:
     id: "signup-confirm-password-input"
 - inputText: "Secure@123"
+- hideKeyboard
 
 # Dismiss keyboard so the Terms row and submit button are reachable
 - hideKeyboard

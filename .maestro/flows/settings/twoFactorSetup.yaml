@@ -110,7 +110,9 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Can't scan? Enter key manually"
 
-# Code hint: "Enter the 6-digit code shown in your authenticator app"
+# Code hint: "Enter the 6-digit code shown in your authenticator app" —
+# shown only while the field is EMPTY; after typing it flips to
+# "digits entered N/6", so assert BEFORE the input
 - assertVisible:
     text: "Enter the 6-digit code shown in your authenticator app"
 
@@ -119,9 +121,9 @@ appId: com.toroloom.app
 - inputText: "123456"
 - waitForAnimationToEnd
 
-# "{{digits}} digits entered" progress line
+# "{{digits}} digits entered" progress line — parameterized full node
 - assertVisible:
-    text: "digits entered 6/6"
+    text: ".*digits entered 6/6"
 - assertVisible:
     text: "Verify & Enable 2FA"
 - tapOn:

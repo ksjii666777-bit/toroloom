@@ -69,7 +69,13 @@ appId: com.toroloom.app
 - assertVisible:
     id: "markets-title"
 
-# RELIANCE is in SUGGESTED_SEARCHES chips and in the stock list
+# RELIANCE chips render only when the search bar is FOCUSED — type into
+# the search input to open the suggestion dashboard, then tap the chip
+- tapOn:
+    text: "Search stocks by name or symbol..."
+- inputText: "RELIANCE"
+- waitForAnimationToEnd:
+    timeout: 5000
 - tapOn:
     text: "RELIANCE"
 - waitForAnimationToEnd

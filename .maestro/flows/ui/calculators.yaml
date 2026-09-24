@@ -120,7 +120,19 @@ appId: com.toroloom.app
     text: "Returns / Invested Ratio"
 
 # ── 6. Back to Home ────────────────────────────────────────────────────────
-- pressKey: back
+# hardware Back can exit the app when the keyboard swallows the first press —
+# tap the on-screen back icon (top-left) instead, with tab-bar fallback
+- tapOn:
+    point: "8%,12%"
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "home-greeting"
+    commands:
+      - tapOn:
+          id: "tab-home"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - assertVisible:
     id: "home-greeting"

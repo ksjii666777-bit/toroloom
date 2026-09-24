@@ -98,15 +98,23 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Extract trades from broker contract notes automatically"
 
+# Action cards are titled "Upload PDF" / "Batch Upload" (subtitles "Parse a
+# single contract note PDF" / "Process multiple contract notes at once");
+# lower cards sit below the fold — scroll to them
 - assertVisible:
-    text: "Upload PDF Contract Note"
+    text: "Upload PDF"
 - assertVisible:
-    text: "Select a PDF from your device"
-
+    text: "Parse a single contract note PDF"
+- scrollUntilVisible:
+    element:
+      text: "Batch Upload"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
-    text: "Batch Upload (Multi)"
+    text: "Batch Upload"
 - assertVisible:
-    text: "Select multiple PDFs to process at once"
+    text: "Process multiple contract notes at once"
 
 - assertVisible:
     text: "Paste Contract Note Text"
@@ -119,7 +127,7 @@ appId: com.toroloom.app
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "Paste your contract note text here..."
+    text: "Paste contract note text here…"
 
 - assertVisible:
     text: "Parse Text"
@@ -140,7 +148,7 @@ appId: com.toroloom.app
 
 # ── 6. Paste a Sample Note and Parse ───────────────────────────────────────
 - tapOn:
-    text: "Paste your contract note text here..."
+    text: "Paste contract note text here…"
 - inputText: |
     ZERODHA BROKING LTD
     Contract Note
@@ -190,20 +198,23 @@ appId: com.toroloom.app
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "Upload PDF Contract Note"
+    text: "Upload PDF"
 - assertVisible:
-    text: "Batch Upload (Multi)"
+    text: "Batch Upload"
 - assertVisible:
-    text: "Paste Contract Note Text"
+    text: "Paste Text"
 
+# "Trades extracted" is a substring of the result header line — use regex
 - assertNotVisible:
-    text: "Trades extracted"
+    text: ".*Trades extracted.*"
 - assertNotVisible:
     text: "Export CSV"
 
 # ── 9. Navigate Back to Analytics ──────────────────────────────────────────
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
 
 - assertVisible:

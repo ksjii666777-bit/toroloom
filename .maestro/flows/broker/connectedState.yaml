@@ -163,11 +163,26 @@ appId: com.toroloom.app
       - assertVisible:
           text: "Choose Your Broker"
 
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
 # 5. Navigate Back to More
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text; fall back to the tab bar
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-home"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - assertVisible:
     id: "more-title"

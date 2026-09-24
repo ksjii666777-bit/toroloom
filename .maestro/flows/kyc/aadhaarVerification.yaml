@@ -108,11 +108,12 @@ appId: com.toroloom.app
 - inputText: "123412341234"
 - hideKeyboard
 
-# Consent checkbox text is a long sentence — match its stable prefix
+# Consent checkbox text is ONE long hardcoded sentence — full-node regex on
+# its stable prefix (plain text would need the ENTIRE sentence)
 - assertVisible:
-    text: "I consent to verify my Aadhaar"
+    text: "I consent to verify my Aadhaar.*"
 - tapOn:
-    text: "I consent to verify my Aadhaar"
+    text: "I consent to verify my Aadhaar.*"
 
 - assertVisible:
     text: "Send OTP"
@@ -124,9 +125,10 @@ appId: com.toroloom.app
 # ── 5. Step 2: OTP Entry ───────────────────────────────────────────────────
 - assertVisible:
     text: "Step 2 of 2"
-# Demo hint tells the OTP to use
+# Demo hint text is one inline node: "For demo/mock: use 123456" —
+# regex on the stable prefix (the bare "123456" node does not exist)
 - assertVisible:
-    text: "123456"
+    text: "For demo/mock: use.*"
 
 # The OTP is 6 single-digit boxes; tap the first box and type the full
 # code — the screen's handleChange auto-advances focus.
@@ -143,15 +145,18 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
-# ── 6. Verify Result ───────────────────────────────────────────────────────
+# ── 6. Verify Result ───────────────────────────────────────────────────
+# Result title is "Aadhaar Verified ✓" (one node with the checkmark) — regex
 - assertVisible:
-    text: "Aadhaar Verified"
+    text: "Aadhaar Verified.*"
 - assertVisible:
-    text: "Verified"
+    text: "Your Aadhaar has been verified successfully via UIDAI"
 
-# ── 7. Back to KYC ─────────────────────────────────────────────────────────
+# ── 7. Back to KYC ────────────────────────────────────────────────────────
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
 - assertVisible:
     text: "KYC Verification"

@@ -123,7 +123,15 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Groww"
 
-# Verify broker taglines
+# Verify broker taglines — these sit BELOW the fold in the 2-col grid, so
+# scroll to them first (Angel One is the first card, its tagline is visible
+# once the grid starts; Groww is row 2)
+- scrollUntilVisible:
+    element:
+      text: "Simple, modern investing platform"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     text: "India's largest retail broking house"
 - assertVisible:
@@ -178,12 +186,27 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Choose Your Broker"
 
-# ═══════════════════════════════════════════════════════════════════════════
+# ═════════════════════════════════════════════════════════════════════
 # 6. Navigate Back to More Screen
-# ═══════════════════════════════════════════════════════════════════════════
+# ═════════════════════════════════════════════════════════════════════
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text; fall back to the tab bar
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-home"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 # Confirm we're back on the More screen
 - assertVisible:

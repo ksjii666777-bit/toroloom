@@ -81,13 +81,19 @@ appId: com.toroloom.app
     text: "Courses"
 - waitForAnimationToEnd
 
-# ── 3. Verify Learning Hub ─────────────────────────────────────────────────
+# ── 3. Verify Learning Hub ────────────────────────────────────────────────
 - assertVisible:
     text: "Learning Hub"
 - assertVisible:
     text: "Master the markets, one lesson at a time"
-- assertVisible:
-    text: "All Courses"
+# "All Courses" section sits below the fold — scroll to it (a plain assert
+# races the scroll and fails on slower emulators)
+- scrollUntilVisible:
+    element:
+      text: "All Courses"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 
 # ── 4. Open a Real Course ──────────────────────────────────────────────────
 - scrollUntilVisible:
@@ -105,8 +111,13 @@ appId: com.toroloom.app
     text: "Completed"
 - assertVisible:
     text: "Remaining"
-- assertVisible:
-    text: "About this Course"
+# "About this Course" is a Card header below the hero — scroll to it
+- scrollUntilVisible:
+    element:
+      text: "About this Course"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 
 # ── 6. Open Lesson 01 ──────────────────────────────────────────────────────
 - scroll

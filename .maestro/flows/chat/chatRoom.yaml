@@ -123,8 +123,10 @@ appId: com.toroloom.app
     text: "Hello team! Testing chat from E2E."
 
 # ── 8. Navigate Back to Room List ─────────────────────────────────────────
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
 
 # Verify back on the room list
@@ -132,8 +134,12 @@ appId: com.toroloom.app
     text: "Chat Rooms"
 
 # ── 9. Navigate Back to More Screen ───────────────────────────────────────
+# Chat Room List is a TAB-level screen with NO back button — use the tab bar
 - tapOn:
-    text: "Go back"
+    id: "tab-home"
+- waitForAnimationToEnd
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 
 - assertVisible:

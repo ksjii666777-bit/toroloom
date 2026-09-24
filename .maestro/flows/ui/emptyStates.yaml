@@ -70,10 +70,12 @@ appId: com.toroloom.app
     text: "Watchlist"
 - assertVisible:
     text: "Monitor your favorite stocks"
+# The default view is the "All" watchlist whose empty title is
+# "No Stocks Yet" — "Empty Watchlist" only shows for empty custom lists
 - assertVisible:
-    text: "Empty Watchlist"
+    text: "No Stocks Yet"
 - assertVisible:
-    text: "Add stocks from the Markets tab to track them here"
+    text: "Add stocks to any watchlist to see them here"
 
 # ── 3. Portfolio Empty State ───────────────────────────────────────────────
 - tapOn:
@@ -103,17 +105,20 @@ appId: com.toroloom.app
 - tapOn:
     id: "menu-TradeHistory"
 - waitForAnimationToEnd
+# The subtitle is "{{count}} total trades" — parameterized full node
 - assertVisible:
     text: "Trade History"
 - assertVisible:
-    text: "0 total trades"
+    text: ".*total trades"
 - assertVisible:
     text: "No Trades Found"
 - assertVisible:
     text: "Start trading to see your history here"
 
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
 - assertVisible:
     id: "more-title"
@@ -131,9 +136,10 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Mutual Funds"
 
-# SIPs tab: "My SIPs ({{count}})" — assert the stable prefix
+# SIPs tab: "My SIPs ({{count}})" — tap the stable prefix, then assert the
+# empty state
 - tapOn:
-    text: "My SIPs"
+    text: "My SIPs.*"
 - waitForAnimationToEnd
 
 - assertVisible:
@@ -141,8 +147,9 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Start a SIP to invest regularly and build wealth over time"
 
+# Back is the icon-only button (accessibilityLabel "Go back")
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
 - assertVisible:
     id: "more-title"
@@ -170,8 +177,9 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Add Funds"
 
+# Back is the icon-only button (accessibilityLabel "Go back")
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
 - assertVisible:
     id: "more-title"

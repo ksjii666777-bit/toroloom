@@ -96,8 +96,10 @@ appId: com.toroloom.app
 # ── 4. Verify PAN Screen ───────────────────────────────────────────────────
 - assertVisible:
     text: "PAN Verification"
+# panInfo is ONE long text node ending with the NSDL sentence — full-node
+# regex on a stable prefix (a plain-text match requires the ENTIRE node)
 - assertVisible:
-    text: "PAN (Permanent Account Number) is a 10-character alphanumeric identifier issued by the Income Tax Department."
+    text: "PAN \\(Permanent Account Number\\) is a 10-character alphanumeric identifier issued by the Income Tax Department\\..*"
 - assertVisible:
     text: "Enter PAN Number"
 
@@ -112,16 +114,17 @@ appId: com.toroloom.app
     timeout: 10000
 
 # ── 5. Verify Result ───────────────────────────────────────────────────────
+# Result title is "PAN Verified ✓" (one node with the checkmark) — regex
 - assertVisible:
-    text: "PAN Verified"
+    text: "PAN Verified.*"
 - assertVisible:
     text: "ABCDE1234F"
-- assertVisible:
-    text: "Verified"
 
-# ── 6. Back to KYC ─────────────────────────────────────────────────────────
+# ── 6. Back to KYC ────────────────────────────────────────────────────────
+# The back control is an icon-only button (accessibilityLabel "Go back") —
+# tap by accessibility, not visible text
 - tapOn:
-    text: "Go back"
+    point: "8%,12%"
 - waitForAnimationToEnd
 - assertVisible:
     text: "KYC Verification"

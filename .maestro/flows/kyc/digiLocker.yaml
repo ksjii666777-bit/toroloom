@@ -130,13 +130,16 @@ appId: com.toroloom.app
     timeout: 10000
 
 # ── 7. Verify Documents Fetched ────────────────────────────────────────────
-# documentsFetched: "{{count}} Document{{plural}} Fetched"
+# documentsFetched: "{{count}} Document{{plural}} Fetched" — parameterized
+# full text node, so match with a regex. "Verified" appears inside the
+# documents subtitle ("Verified documents from DigiLocker…") — assert that
+# full node instead of the bare word.
 - assertVisible:
-    text: "Fetched"
+    text: ".*Document.*Fetched"
 - assertVisible:
     text: "Complete Verification"
 - assertVisible:
-    text: "Verified"
+    text: "Verified documents from DigiLocker are used for your KYC verification."
 
 # ── 8. Complete Verification ───────────────────────────────────────────────
 - tapOn:
