@@ -17,8 +17,11 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 15000
 # ── 1. Login ───────────────────────────────────────────────────────────────
-- assertVisible:
-    id: "login-welcome-back"
+# Cold-start can be slow on the cloud emulator — wait up to 60s
+- extendedWaitUntil:
+    visible:
+      id: "login-welcome-back"
+    timeout: 60000
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
@@ -78,20 +81,19 @@ appId: com.toroloom.app
 - assertVisible:
     text: "AI Insights"
 - assertVisible:
-    text: "Powered by advanced market analysis"
+    text: "AI-powered market analysis"
 
 # ── 4. Verify Market Overview Card ─────────────────────────────────────────
 - assertVisible:
     text: "AI Market Overview"
-# Overview sub line: "N bullish · N bearish · N neutral" (lowercase counts)
+# Overview sub line is ONE text node: "N bullish · N bearish · N neutral"
+# (lowercase counts) — match it as a full-node regex.
 - assertVisible:
-    text: "bullish"
+    text: ".*bullish.*bearish.*"
 - assertVisible:
-    text: "bearish"
+    text: ".*neutral.*"
 - assertVisible:
-    text: "neutral"
-- assertVisible:
-    text: "Always do your own research"
+    text: ".*Always do your own research.*"
 
 # ── 5. Verify Stock Analysis Section ───────────────────────────────────────
 - assertVisible:

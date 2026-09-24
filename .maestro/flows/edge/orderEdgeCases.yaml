@@ -16,8 +16,11 @@ appId: com.toroloom.app
 - launchApp
 - waitForAnimationToEnd:
     timeout: 15000
-- assertVisible:
-    id: "login-welcome-back"
+# Cold-start can be slow on the cloud emulator — wait up to 60s
+- extendedWaitUntil:
+    visible:
+      id: "login-welcome-back"
+    timeout: 60000
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}

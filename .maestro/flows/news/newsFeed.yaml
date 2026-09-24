@@ -16,8 +16,11 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 15000
 # ── 1. Login ───────────────────────────────────────────────────────────────
-- assertVisible:
-    id: "login-welcome-back"
+# Cold-start can be slow on the cloud emulator — wait up to 60s
+- extendedWaitUntil:
+    visible:
+      id: "login-welcome-back"
+    timeout: 60000
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
@@ -87,9 +90,9 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Corporate"
 
-# Result count line: "Showing N articles" (plain text, not i18n)
+# Result count line: "Showing N articles" — full node, so use a regex
 - assertVisible:
-    text: "Showing"
+    text: ".*Showing.*article.*"
 
 # ── 4. Switch Category ─────────────────────────────────────────────────────
 - tapOn:
@@ -104,7 +107,7 @@ appId: com.toroloom.app
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "Showing"
+    text: ".*Showing.*article.*"
 
 # ── 5. Navigate Back to More ───────────────────────────────────────────────
 - tapOn:

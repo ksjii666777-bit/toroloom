@@ -14,8 +14,11 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 15000
 # ── 1. Empty fields validation ────────────────────────────────────────────
-- assertVisible:
-    id: "login-welcome-back"
+# Cold-start can be slow on the cloud emulator — wait up to 60s
+- extendedWaitUntil:
+    visible:
+      id: "login-welcome-back"
+    timeout: 60000
 
 # Tap Log In without entering any credentials
 - tapOn:

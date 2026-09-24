@@ -19,8 +19,11 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 15000
 # ── 1. Login ───────────────────────────────────────────────────────────────
-- assertVisible:
-    id: "login-welcome-back"
+# Cold-start can be slow on the cloud emulator — wait up to 60s
+- extendedWaitUntil:
+    visible:
+      id: "login-welcome-back"
+    timeout: 60000
 - tapOn:
     id: "login-email-input"
 - inputText: ${TEST_EMAIL}
@@ -81,14 +84,15 @@ appId: com.toroloom.app
 # ── 3. Verify Header ───────────────────────────────────────────────────────
 - assertVisible:
     text: "Achievements"
-# Subtitle: "{{unlocked}} of {{total}} badges unlocked"
+# Subtitle is parameterized: "{{unlocked}} of {{total}} badges unlocked"
+# — one text node, so match with a full-node regex.
 - assertVisible:
-    text: "badges unlocked"
+    text: ".*badges unlocked"
 
 # ── 4. Verify Level Card ───────────────────────────────────────────────────
-# "{{xp}} Total XP"
+# "{{xp}} Total XP" — parameterized, full-node regex
 - assertVisible:
-    text: "Total XP"
+    text: ".*Total XP"
 
 # ── 5. Verify Stats Grid ───────────────────────────────────────────────────
 - assertVisible:

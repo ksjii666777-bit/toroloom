@@ -250,8 +250,11 @@ appId: com.toroloom.app
 
 # Verify we're back on the login screen (signup row is below the fold on
 # smaller screens — let the logout transition settle, then scroll it in)
-- assertVisible:
-    id: "login-welcome-back"
+# Cold-start can be slow on the cloud emulator — wait up to 60s
+- extendedWaitUntil:
+    visible:
+      id: "login-welcome-back"
+    timeout: 60000
 - waitForAnimationToEnd:
     timeout: 5000
 - scrollUntilVisible:
