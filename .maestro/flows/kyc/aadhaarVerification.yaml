@@ -102,10 +102,12 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Enter Aadhaar Number"
 
-# Input placeholder is "XXXX XXXX XXXX"
+# Input placeholder is "XXXX XXXX XXXX". Aadhaar format: 12 digits, no
+# leading 0/1 (backend regex ^[2-9]\d{11}$) — 234123412341 passes it
+# (1234... starts with 1 and is rejected).
 - tapOn:
     text: "XXXX XXXX XXXX"
-- inputText: "123412341234"
+- inputText: "234123412341"
 - hideKeyboard
 
 # Consent checkbox text is ONE long hardcoded sentence — full-node regex on
@@ -153,10 +155,18 @@ appId: com.toroloom.app
     text: "Your Aadhaar has been verified successfully via UIDAI"
 
 # ── 7. Back to KYC ────────────────────────────────────────────────────────
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text
-- tapOn:
-    point: "8%,12%"
+# AadhaarVerification is a root-stack screen ABOVE MainTabs — hardware BACK
+# pops to the underlying tab (More).
+- pressKey: BACK
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        text: "KYC Verification"
+    commands:
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - assertVisible:
     text: "KYC Verification"

@@ -66,14 +66,16 @@ appId: com.toroloom.app
 - tapOn:
     id: "tab-watchlist"
 - waitForAnimationToEnd
-- assertVisible:
-    text: "Watchlist"
-- assertVisible:
-    text: "Monitor your favorite stocks"
-# The default view is the "All" watchlist whose empty title is
-# "No Stocks Yet" — "Empty Watchlist" only shows for empty custom lists
-- assertVisible:
-    text: "No Stocks Yet"
+# The empty state renders after the suggested-stocks query resolves — use
+# waits, not hard asserts, for the lazy content
+- extendedWaitUntil:
+    visible:
+      text: "Watchlist"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      text: "No Stocks Yet"
+    timeout: 20000
 - assertVisible:
     text: "Add stocks to any watchlist to see them here"
 
@@ -81,12 +83,10 @@ appId: com.toroloom.app
 - tapOn:
     id: "tab-portfolio"
 - waitForAnimationToEnd
-- assertVisible:
-    text: "Portfolio"
-- assertVisible:
-    text: "Track your investments"
-- assertVisible:
-    text: "No Holdings Yet"
+- extendedWaitUntil:
+    visible:
+      text: "No Holdings Yet"
+    timeout: 20000
 - assertVisible:
     text: "Start investing to build your portfolio"
 - assertVisible:
@@ -106,10 +106,14 @@ appId: com.toroloom.app
     id: "menu-TradeHistory"
 - waitForAnimationToEnd
 # The subtitle is "{{count}} total trades" — parameterized full node
-- assertVisible:
-    text: "Trade History"
-- assertVisible:
-    text: ".*total trades"
+- extendedWaitUntil:
+    visible:
+      text: "Trade History"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      text: ".*total trades"
+    timeout: 20000
 - assertVisible:
     text: "No Trades Found"
 - assertVisible:

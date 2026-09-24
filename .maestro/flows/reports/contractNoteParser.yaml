@@ -116,14 +116,22 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Process multiple contract notes at once"
 
+# Paste card is titled "Paste Text" with subtitle "Paste raw contract note
+# text" (reports namespace) — below the Batch card, scroll to it
+- scrollUntilVisible:
+    element:
+      text: "Paste Text"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
-    text: "Paste Contract Note Text"
+    text: "Paste Text"
 - assertVisible:
-    text: "Copy-paste from your broker's email or portal"
+    text: "Paste raw contract note text"
 
 # ── 5. Paste Mode: Empty Parse ─────────────────────────────────────────────
 - tapOn:
-    text: "Paste Contract Note Text"
+    text: "Paste Text"
 - waitForAnimationToEnd
 
 - assertVisible:
@@ -169,6 +177,13 @@ appId: com.toroloom.app
     timeout: 15000
 
 # ── 7. Verify Extracted Trades ─────────────────────────────────────────────
+# The result card renders below the input — scroll to it first
+- scrollUntilVisible:
+    element:
+      text: "Trades extracted"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - assertVisible:
     text: "Trades extracted"
 
@@ -211,10 +226,10 @@ appId: com.toroloom.app
     text: "Export CSV"
 
 # ── 9. Navigate Back to Analytics ──────────────────────────────────────────
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text
-- tapOn:
-    point: "8%,12%"
+# Contract Note Parser is a root-stack screen ABOVE MainTabs — the tab bar
+# is covered and the header back icon is custom-positioned. Hardware BACK
+# pops to the underlying tab (Reports came from More).
+- pressKey: BACK
 - waitForAnimationToEnd
 
 - assertVisible:

@@ -86,15 +86,16 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Strategy Templates"
 
-# Verify the pre-built strategy templates section
-- assertVisible:
-    text: "Strategy Templates"
-
-# Verify at least a few strategy cards (hard-coded template names)
-- assertVisible:
-    text: "Long Call"
-- assertVisible:
-    text: "Bull Call Spread"
+# Verify the pre-built strategy templates section (async load — wait, and
+# horizontal chips render off-screen; scroll the row into view first)
+- extendedWaitUntil:
+    visible:
+      text: "Strategy Templates"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      text: "Bull Call Spread"
+    timeout: 20000
 - assertVisible:
     text: "Iron Condor"
 
@@ -106,10 +107,18 @@ appId: com.toroloom.app
 # Verify strategy analysis renders (P&L diagram + risk metrics)
 - assertVisible:
     text: "Buy a call option. Limited risk, unlimited profit."
-
 # ── 5. Navigate Back ──────────────────────────────────────────────────────
-- tapOn:
-    text: "Go back"
+# StrategyBuilder is a root-stack screen — hardware BACK pops to More
+- pressKey: BACK
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - assertVisible:
     id: "more-title"

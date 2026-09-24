@@ -80,13 +80,20 @@ appId: com.toroloom.app
 - tapOn:
     text: "Re-enter your password"
 - inputText: "UnivLink@456"
+- hideKeyboard
 
 # ── 10. Dismiss the keyboard ──────────────────────────────────────────────
 - hideKeyboard
 
-# ── 11. Mandatory Terms acceptance ────────────────────────────────────────
-- assertVisible:
-    id: "signup-terms-checkbox"
+# ── 11. Mandatory Terms acceptance ──────────────────────────────────────
+# The checkbox sits below the form; scroll to it explicitly in case the
+# keyboard covered it (hideKeyboard can no-op on number-pad keyboards)
+- scrollUntilVisible:
+    element:
+      id: "signup-terms-checkbox"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - tapOn:
     id: "signup-terms-checkbox"
 

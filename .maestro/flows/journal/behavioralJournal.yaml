@@ -84,12 +84,12 @@ appId: com.toroloom.app
     text: "Track your trading psychology"
 
 # ── 4. Verify Tab Bar ──────────────────────────────────────────────────────
-# SegmentedTabs labels are plain text nodes; give the tab row a moment
-# to settle after navigation
+# SegmentedTabs labels are plain text nodes; the journal is a lazy-loaded
+# chunk, so give it a generous settle window
 - extendedWaitUntil:
     visible:
       text: "Dashboard"
-    timeout: 15000
+    timeout: 30000
 - assertVisible:
     text: "Entries"
 - assertVisible:
@@ -135,14 +135,19 @@ appId: com.toroloom.app
     text: "Reports"
 
 # ── 8. Navigate back ───────────────────────────────────────────────────────
-# hardware BACK can exit the app when the keyboard swallows the first press
-# — use the tab bar instead
-- tapOn:
-    id: "tab-home"
+# BehavioralJournal pushes as a root-stack screen ABOVE MainTabs — the tab
+# bar is covered. Hardware BACK pops to the More tab underneath.
+- pressKey: BACK
 - waitForAnimationToEnd
-- tapOn:
-    id: "tab-more"
-- waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 - assertVisible:
     id: "more-title"

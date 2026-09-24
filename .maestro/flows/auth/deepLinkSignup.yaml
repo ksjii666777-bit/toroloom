@@ -63,7 +63,6 @@ appId: com.toroloom.app
 - inputText: "Rahul Sharma"
 
 # ── 6. Fill in Email ──────────────────────────────────────────────────────
-# ── 6. Fill in Email ──────────────────────────────────────────────────────
 # testID-based fill (placeholder taps race the keyboard on cloud emulators)
 - tapOn:
     id: "signup-email-input"
@@ -80,18 +79,26 @@ appId: com.toroloom.app
 - tapOn:
     text: "Create a strong password"
 - inputText: "Secure@123"
+- hideKeyboard
 
 # ── 9. Fill in Confirm Password ───────────────────────────────────────────
 - tapOn:
     text: "Re-enter your password"
 - inputText: "Secure@123"
+- hideKeyboard
 
 # ── 10. Dismiss the keyboard ──────────────────────────────────────────────
 - hideKeyboard
 
-# ── 11. Mandatory Terms acceptance ────────────────────────────────────────
-- assertVisible:
-    id: "signup-terms-checkbox"
+# ── 11. Mandatory Terms acceptance ──────────────────────────────────────
+# The checkbox sits below the form; scroll to it explicitly in case the
+# keyboard covered it (hideKeyboard can no-op on number-pad keyboards)
+- scrollUntilVisible:
+    element:
+      id: "signup-terms-checkbox"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - tapOn:
     id: "signup-terms-checkbox"
 

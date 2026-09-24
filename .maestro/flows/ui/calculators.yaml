@@ -120,10 +120,10 @@ appId: com.toroloom.app
     text: "Returns / Invested Ratio"
 
 # ── 6. Back to Home ────────────────────────────────────────────────────────
-# hardware Back can exit the app when the keyboard swallows the first press —
-# tap the on-screen back icon (top-left) instead, with tab-bar fallback
-- tapOn:
-    point: "8%,12%"
+# SIPCalculator is a root-stack screen ABOVE MainTabs — the tab bar is
+# covered there, so tap-back/tab-home both fail. Hardware BACK pops to the
+# underlying tab (Home).
+- pressKey: BACK
 - waitForAnimationToEnd
 - runFlow:
     when:

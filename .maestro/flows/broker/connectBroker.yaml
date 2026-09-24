@@ -189,20 +189,15 @@ appId: com.toroloom.app
 # ═════════════════════════════════════════════════════════════════════
 # 6. Navigate Back to More Screen
 # ═════════════════════════════════════════════════════════════════════
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text; fall back to the tab bar
-- tapOn:
-    point: "8%,12%"
+# BrokerConnect is a root-stack screen ABOVE MainTabs — the tab bar is
+# covered there, so tab taps fail. Hardware BACK pops to the More tab.
+- pressKey: BACK
 - waitForAnimationToEnd
 - runFlow:
     when:
       notVisible:
         id: "more-title"
     commands:
-      - tapOn:
-          id: "tab-home"
-      - waitForAnimationToEnd:
-          timeout: 5000
       - tapOn:
           id: "tab-more"
       - waitForAnimationToEnd:

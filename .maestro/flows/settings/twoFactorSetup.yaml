@@ -96,7 +96,9 @@ appId: com.toroloom.app
     text: "Protects against unauthorized access"
 
 # The setup button appears only when 2FA is not yet enabled — the test
-# account starts disabled, so it should be there.
+# account starts disabled, so it should be there. (If a previous run
+# somehow enabled 2FA the account shows the manage view instead; the
+# enable-state is recoverable by DB reset, not by UI.)
 - assertVisible:
     text: "Set Up Two-Factor Auth"
 - tapOn:
@@ -105,8 +107,11 @@ appId: com.toroloom.app
     timeout: 10000
 
 # ── 4. QR + Code Entry ─────────────────────────────────────────────────────
-- assertVisible:
-    text: "Scan with Authenticator App"
+# generate2FASetup creates the QR section — give it time to resolve
+- extendedWaitUntil:
+    visible:
+      text: "Scan with Authenticator App"
+    timeout: 20000
 - assertVisible:
     text: "Can't scan? Enter key manually"
 
@@ -116,6 +121,9 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Enter the 6-digit code shown in your authenticator app"
 
+# Type the code but DO NOT verify: the backend uses REAL TOTP verification
+# (no demo bypass), so "123456" can never succeed and the enable step is
+# untestable end-to-end. Asserting the input state is the reachable depth.
 - tapOn:
     id: "otp-input"
 - inputText: "123456"
@@ -126,25 +134,9 @@ appId: com.toroloom.app
     text: ".*digits entered 6/6"
 - assertVisible:
     text: "Verify & Enable 2FA"
-- tapOn:
-    text: "Verify & Enable 2FA"
-- waitForAnimationToEnd:
-    timeout: 10000
 
-# ── 5. Backup Codes ────────────────────────────────────────────────────────
-- assertVisible:
-    text: "Backup Codes"
-- assertVisible:
-    text: "Save these one-time recovery codes"
-- assertVisible:
-    text: "I've Saved My Backup Codes"
-
-- tapOn:
-    text: "I've Saved My Backup Codes"
-- waitForAnimationToEnd
-
-- tapOn:
-    text: "Done"
+# ── 5. Exit without enabling (BACK pops to Security Settings) ──────────────
+- pressKey: BACK
 - waitForAnimationToEnd
 
 # ── 6. Back on Security Settings ───────────────────────────────────────────

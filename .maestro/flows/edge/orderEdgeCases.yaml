@@ -69,13 +69,17 @@ appId: com.toroloom.app
 - assertVisible:
     id: "markets-title"
 
-# RELIANCE chips render only when the search bar is FOCUSED — type into
-# the search input to open the suggestion dashboard, then tap the chip
+# RELIANCE chip lives in the suggestion dashboard, visible ONLY while the
+# search bar is focused AND the query is EMPTY — typing hides the chips and
+# shows API results instead. Tap the chip right after focusing.
 - tapOn:
     text: "Search stocks by name or symbol..."
-- inputText: "RELIANCE"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 3000
+- extendedWaitUntil:
+    visible:
+      text: "RELIANCE"
+    timeout: 20000
 - tapOn:
     text: "RELIANCE"
 - waitForAnimationToEnd

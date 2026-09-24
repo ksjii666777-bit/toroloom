@@ -62,9 +62,15 @@ appId: com.toroloom.app
 # Dismiss keyboard so the Terms row and submit button are reachable
 - hideKeyboard
 
-# ── Mandatory Terms acceptance (added in the legal-consent release) ───────
-- assertVisible:
-    id: "signup-terms-checkbox"
+# ── Mandatory Terms acceptance (added in the legal-consent release) ─────
+# The checkbox sits below the form; scroll to it explicitly in case the
+# keyboard covered it (hideKeyboard can no-op on number-pad keyboards)
+- scrollUntilVisible:
+    element:
+      id: "signup-terms-checkbox"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - tapOn:
     id: "signup-terms-checkbox"
 

@@ -105,9 +105,20 @@ appId: com.toroloom.app
     text: "Generating analysis..."
     optional: true
 
-# ── 6. Navigate Back to More ───────────────────────────────────────────────
+# ── 6. Navigate Back to More ──────────────────────────────────────────
+# AIInsights pushes as a root-stack screen — BACK pops to the More tab.
+# Give the pop a moment, then recover via the tab bar if needed.
 - pressKey: BACK
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 - assertVisible:
     id: "more-title"

@@ -107,8 +107,13 @@ appId: com.toroloom.app
 # ── 6. Verify Tab Toggle ───────────────────────────────────────────────────
 - assertVisible:
     text: "All Badges"
-- assertVisible:
-    text: "Upcoming Challenges"
+# "Upcoming Challenges" section sits BELOW the badges grid — scroll to it
+- scrollUntilVisible:
+    element:
+      text: "Upcoming Challenges"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 
 # ── 7. Verify Badges Grid ──────────────────────────────────────────────────
 # Mock badges (mockData.ts): b1 unlocked by default
@@ -143,20 +148,15 @@ appId: com.toroloom.app
 - waitForAnimationToEnd
 
 # ── 10. Navigate back ─────────────────────────────────────────────────────
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text; fall back to the tab bar
-- tapOn:
-    point: "8%,12%"
+# Achievements pushes as a root-stack screen ABOVE MainTabs — the tab bar
+# is covered. Hardware BACK pops to the More tab underneath.
+- pressKey: BACK
 - waitForAnimationToEnd
 - runFlow:
     when:
       notVisible:
         id: "more-title"
     commands:
-      - tapOn:
-          id: "tab-home"
-      - waitForAnimationToEnd:
-          timeout: 5000
       - tapOn:
           id: "tab-more"
       - waitForAnimationToEnd:

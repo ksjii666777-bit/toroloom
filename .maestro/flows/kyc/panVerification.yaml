@@ -103,10 +103,14 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Enter PAN Number"
 
-# The input placeholder is the format example "ABCDE1234F"
+# The input placeholder is the format example "ABCDE1234F". The TEST PAN
+# must pass BOTH regexes: frontend ^[A-Z]{5}\d{4}[A-Z]$ AND backend
+# ^[A-Z]{3}[ABCEFGHLJPT][A-Z]\d{4}[A-Z]$ (4th char class) — "ABCDE1234F"
+# fails the backend one (4th char 'D'). "PQRST5678G" passes both and is in
+# the backend mock database → returns isVerified=true.
 - tapOn:
     text: "ABCDE1234F"
-- inputText: "ABCDE1234F"
+- inputText: "PQRST5678G"
 - hideKeyboard
 - tapOn:
     text: "Verify PAN"
@@ -114,17 +118,32 @@ appId: com.toroloom.app
     timeout: 10000
 
 # ── 5. Verify Result ───────────────────────────────────────────────────────
-# Result title is "PAN Verified ✓" (one node with the checkmark) — regex
+# Result title is "PAN Verified ✓" (one node with the checkmark) — regex.
+# Result section renders below the fold — scroll to it first.
+- scrollUntilVisible:
+    element:
+      text: "PAN Verified.*"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "PAN Verified.*"
 - assertVisible:
-    text: "ABCDE1234F"
+    text: "PQRST5678G"
 
 # ── 6. Back to KYC ────────────────────────────────────────────────────────
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text
-- tapOn:
-    point: "8%,12%"
+# PanVerification is a root-stack screen ABOVE MainTabs — hardware BACK
+# pops to the underlying tab (More).
+- pressKey: BACK
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        text: "KYC Verification"
+    commands:
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - assertVisible:
     text: "KYC Verification"

@@ -60,6 +60,53 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
+# If we are STILL on the login screen, a transient backend blip swallowed
+# the first login — cool down and retry up to two more times (smoke-test
+# pattern; a Railway Postgres restart window returns 5xx for ~a minute).
+- runFlow:
+    when:
+      visible:
+        id: "login-btn"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: "login-btn"
+          timeout: 20000
+      - runFlow:
+          when:
+            visible:
+              id: "login-btn"
+          commands:
+            - tapOn:
+                id: "login-btn"
+            - extendedWaitUntil:
+                notVisible:
+                  id: "login-btn"
+                timeout: 30000
+            - runFlow:
+                when:
+                  visible:
+                    id: "login-btn"
+                commands:
+                  - tapOn:
+                      id: "login-btn"
+                  - extendedWaitUntil:
+                      notVisible:
+                        id: "login-btn"
+                      timeout: 30000
+
+# Second onboarding/offline pass — the lazy onboarding screen can mount
+# AFTER the first check on a cold emulator
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
 # If the backend health check fails (no local backend), dismiss the
 # offline modal so the Home screen is reachable (idempotent).
 - runFlow:
@@ -166,20 +213,15 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════
 # 5. Navigate Back to More
 # ═══════════════════════════════════════════════════════════════════════
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text; fall back to the tab bar
-- tapOn:
-    point: "8%,12%"
+# BrokerConnect is a root-stack screen ABOVE MainTabs — the tab bar is
+# covered there, so tab taps fail. Hardware BACK pops to the More tab.
+- pressKey: BACK
 - waitForAnimationToEnd
 - runFlow:
     when:
       notVisible:
         id: "more-title"
     commands:
-      - tapOn:
-          id: "tab-home"
-      - waitForAnimationToEnd:
-          timeout: 5000
       - tapOn:
           id: "tab-more"
       - waitForAnimationToEnd:

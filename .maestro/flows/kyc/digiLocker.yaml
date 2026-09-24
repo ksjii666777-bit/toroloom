@@ -133,9 +133,18 @@ appId: com.toroloom.app
 # documentsFetched: "{{count}} Document{{plural}} Fetched" — parameterized
 # full text node, so match with a regex. "Verified" appears inside the
 # documents subtitle ("Verified documents from DigiLocker…") — assert that
-# full node instead of the bare word.
-- assertVisible:
-    text: ".*Document.*Fetched"
+# full node instead of the bare word. The documents card + CTA render
+# below the hero — scroll to them instead of hard-asserting.
+- extendedWaitUntil:
+    visible:
+      text: ".*Document.*Fetched"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "Complete Verification"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "Complete Verification"
 - assertVisible:

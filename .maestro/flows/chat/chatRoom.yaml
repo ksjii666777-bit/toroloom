@@ -123,24 +123,30 @@ appId: com.toroloom.app
     text: "Hello team! Testing chat from E2E."
 
 # ── 8. Navigate Back to Room List ─────────────────────────────────────────
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text
-- tapOn:
-    point: "8%,12%"
+# ChatRoom pushes as a root-stack screen — hardware BACK pops to the list
+- pressKey: BACK
 - waitForAnimationToEnd
 
-# Verify back on the room list
-- assertVisible:
-    text: "Chat Rooms"
+# Verify back on the room list — lazy chunk + keyboard dismiss settle time
+- extendedWaitUntil:
+    visible:
+      text: "Chat Rooms"
+    timeout: 20000
 
 # ── 9. Navigate Back to More Screen ───────────────────────────────────────
-# Chat Room List is a TAB-level screen with NO back button — use the tab bar
-- tapOn:
-    id: "tab-home"
+# ChatList is ALSO a root-stack screen above MainTabs — the tab bar is
+# covered. Hardware BACK pops to the More tab underneath.
+- pressKey: BACK
 - waitForAnimationToEnd
-- tapOn:
-    id: "tab-more"
-- waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 - assertVisible:
     id: "more-title"

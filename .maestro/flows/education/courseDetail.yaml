@@ -120,13 +120,18 @@ appId: com.toroloom.app
     timeout: 30000
 
 # ── 6. Open Lesson 01 ──────────────────────────────────────────────────────
-- scroll
-- waitForAnimationToEnd
-
+# Lessons grid is below the fold — scroll to the chip instead of a blind
+# scroll (the number of screens scrolled depends on emulator size)
+- scrollUntilVisible:
+    element:
+      text: "01"
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - tapOn:
     text: "01"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 # Lesson header: "Lesson 1 of N" / "Key Takeaways" / "Summary"
 - assertVisible:
@@ -143,15 +148,15 @@ appId: com.toroloom.app
     text: "Mark as Complete"
 
 # ── 7. Navigate Back to Learning Hub ───────────────────────────────────────
-- tapOn:
-    text: "Go back"
+# LessonView and CourseDetail are root-stack screens — hardware BACK pops
+# one level each time
+- pressKey: BACK
 - waitForAnimationToEnd
 
 - assertVisible:
     text: "Course Progress"
 
-- tapOn:
-    text: "Go back"
+- pressKey: BACK
 - waitForAnimationToEnd
 
 - assertVisible:

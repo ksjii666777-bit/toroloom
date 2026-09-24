@@ -46,6 +46,53 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
+# If we are STILL on the login screen, a transient backend blip swallowed
+# the first login — cool down and retry up to two more times (smoke-test
+# pattern; a Railway Postgres restart window returns 5xx for ~a minute).
+- runFlow:
+    when:
+      visible:
+        id: "login-btn"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: "login-btn"
+          timeout: 20000
+      - runFlow:
+          when:
+            visible:
+              id: "login-btn"
+          commands:
+            - tapOn:
+                id: "login-btn"
+            - extendedWaitUntil:
+                notVisible:
+                  id: "login-btn"
+                timeout: 30000
+            - runFlow:
+                when:
+                  visible:
+                    id: "login-btn"
+                commands:
+                  - tapOn:
+                      id: "login-btn"
+                  - extendedWaitUntil:
+                      notVisible:
+                        id: "login-btn"
+                      timeout: 30000
+
+# Second onboarding/offline pass — the lazy onboarding screen can mount
+# AFTER the first check on a cold emulator
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
 # If the backend health check fails (no local backend), dismiss the
 # offline modal so the Home screen is reachable (idempotent).
 - runFlow:
@@ -110,13 +157,20 @@ appId: com.toroloom.app
     text: ".*Showing.*article.*"
 
 # ── 5. Navigate Back to More ──────────────────────────────────────────────
-# Market News is a TAB-level screen with NO back button — go to the tab bar
-- tapOn:
-    id: "tab-home"
+# NewsFeed pushes as a ROOT-stack screen ABOVE MainTabs (headerShown:false,
+# no in-app back button) — the tab bar is covered, so tab taps fail there.
+# Hardware BACK pops back to the More tab underneath.
+- pressKey: BACK
 - waitForAnimationToEnd
-- tapOn:
-    id: "tab-more"
-- waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
 
 - assertVisible:
     id: "more-title"
