@@ -66,12 +66,40 @@ appId: com.toroloom.app
 - tapOn:
     id: "tab-watchlist"
 - waitForAnimationToEnd
-# The empty state renders after the suggested-stocks query resolves — use
-# waits, not hard asserts, for the lazy content
 - extendedWaitUntil:
     visible:
       text: "Watchlist"
     timeout: 20000
+# The E2E account's backend store may have NO default watchlists (fresh
+# account → empty array), in which case the "All" tab shows NO list and the
+# empty state never renders — the design shows the empty card only for an
+# existing (but empty) list or the "All" aggregate. Recover by creating a
+# watchlist via the UI when no list chips are visible.
+- runFlow:
+    when:
+      notVisible:
+        text: "No Stocks Yet"
+    commands:
+      # No lists yet — create one so its (empty) view can render
+      - runFlow:
+          when:
+            notVisible:
+              text: "My Watchlist"
+          commands:
+            - tapOn:
+                id: "watchlist-add-btn"
+            - waitForAnimationToEnd:
+                timeout: 5000
+            # The create input autoFocuses; type the name and confirm
+            - inputText: "My Watchlist"
+            - hideKeyboard
+            - tapOn:
+                text: "Create"
+            - waitForAnimationToEnd:
+                timeout: 5000
+
+# The empty state renders after the suggested-stocks query resolves — use
+# waits, not hard asserts, for the lazy content
 - extendedWaitUntil:
     visible:
       text: "No Stocks Yet"

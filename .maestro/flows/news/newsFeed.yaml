@@ -162,6 +162,16 @@ appId: com.toroloom.app
 # Hardware BACK pops back to the More tab underneath.
 - pressKey: BACK
 - waitForAnimationToEnd
+# The More list keeps its previous scroll offset after BACK — menu items
+# tapped via scrollUntilVisible left it scrolled, so more-title can sit
+# ABOVE the viewport. Scroll it back into view; if the title still isn't
+# visible, recover via the tab bar (and accept the peer "AI Insights" label).
+- scrollUntilVisible:
+    element:
+      id: "more-title"
+    direction: UP
+    speed: 20
+    timeout: 10000
 - runFlow:
     when:
       notVisible:
@@ -171,6 +181,12 @@ appId: com.toroloom.app
           id: "tab-more"
       - waitForAnimationToEnd:
           timeout: 5000
+      - scrollUntilVisible:
+          element:
+            id: "more-title"
+          direction: UP
+          speed: 20
+          timeout: 10000
 
 - assertVisible:
     id: "more-title"

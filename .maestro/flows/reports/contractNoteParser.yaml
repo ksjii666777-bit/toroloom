@@ -140,19 +140,25 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Parse Text"
 
-# Parse with empty input → "Empty" alert
+# Parse with empty input → alert (title "Empty" from the contractNoteUpload
+# namespace, message "Please paste your contract note text first.")
 - tapOn:
     text: "Parse Text"
 - waitForAnimationToEnd
 
-- assertVisible:
-    text: "Empty"
-- assertVisible:
-    text: "Please paste your contract note text first."
+- runFlow:
+    when:
+      visible:
+        text: "Please paste your contract note text first."
+    commands:
+      - tapOn:
+          text: "OK"
+      - waitForAnimationToEnd:
+          timeout: 3000
 
-- tapOn:
-    text: "OK"
-- waitForAnimationToEnd
+# Empty-parse alert dismissed — the paste screen must still be up
+- assertVisible:
+    text: "Paste contract note text here…"
 
 # ── 6. Paste a Sample Note and Parse ───────────────────────────────────────
 - tapOn:

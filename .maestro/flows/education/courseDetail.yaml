@@ -120,16 +120,18 @@ appId: com.toroloom.app
     timeout: 30000
 
 # ── 6. Open Lesson 01 ──────────────────────────────────────────────────────
-# Lessons grid is below the fold — scroll to the chip instead of a blind
-# scroll (the number of screens scrolled depends on emulator size)
+# Lessons list is below the fold — scroll the first lesson card in and tap
+# it via its stable testID (the number badge "01" only renders while the
+# lesson is INCOMPLETE; a completed lesson shows a checkmark instead, so
+# text-targeting is state-dependent).
 - scrollUntilVisible:
     element:
-      text: "01"
+      id: "lesson-card-1"
     direction: DOWN
     speed: 20
     timeout: 30000
 - tapOn:
-    text: "01"
+    id: "lesson-card-1"
 - waitForAnimationToEnd:
     timeout: 10000
 

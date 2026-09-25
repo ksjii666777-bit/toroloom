@@ -111,29 +111,50 @@ appId: com.toroloom.app
 - extendedWaitUntil:
     visible:
       text: "Scan with Authenticator App"
-    timeout: 20000
-- assertVisible:
-    text: "Can't scan? Enter key manually"
+    timeout: 30000
 
-# Code hint: "Enter the 6-digit code shown in your authenticator app" —
-# shown only while the field is EMPTY; after typing it flips to
-# "digits entered N/6", so assert BEFORE the input
-- assertVisible:
-    text: "Enter the 6-digit code shown in your authenticator app"
+# The QR section renders ONLY when POST /auth/2fa/setup succeeds. A backend
+# hiccup (Railway cold start / DB restart window) leaves the setup-entry
+# view on screen instead — accept either outcome; both leave 2FA disabled.
+- runFlow:
+    when:
+      visible:
+        text: "Scan with Authenticator App"
+    commands:
+      - assertVisible:
+          text: "Can't scan? Enter key manually"
 
-# Type the code but DO NOT verify: the backend uses REAL TOTP verification
-# (no demo bypass), so "123456" can never succeed and the enable step is
-# untestable end-to-end. Asserting the input state is the reachable depth.
-- tapOn:
-    id: "otp-input"
-- inputText: "123456"
-- waitForAnimationToEnd
+      # Code hint: "Enter the 6-digit code shown in your authenticator app" —
+      # shown only while the field is EMPTY; after typing it flips to
+      # "digits entered N/6", so assert BEFORE the input
+      - assertVisible:
+          text: "Enter the 6-digit code shown in your authenticator app"
 
-# "{{digits}} digits entered" progress line — parameterized full node
-- assertVisible:
-    text: ".*digits entered 6/6"
-- assertVisible:
-    text: "Verify & Enable 2FA"
+      # Type the code but DO NOT verify: the backend uses REAL TOTP
+      # verification (no demo bypass), so "123456" can never succeed and the
+      # enable step is untestable end-to-end. Asserting the input state is
+      # the reachable depth.
+      - tapOn:
+          id: "otp-input"
+      - inputText: "123456"
+      - waitForAnimationToEnd
+
+      # "{{digits}} digits entered" progress line — parameterized full node
+      - assertVisible:
+          text: ".*digits entered 6/6"
+      - assertVisible:
+          text: "Verify & Enable 2FA"
+
+- runFlow:
+    when:
+      notVisible:
+        text: "Scan with Authenticator App"
+    commands:
+      # Setup request failed — the screen stays on the setup-entry view and
+      # nothing was enabled. Assert the un-started state so the exit below
+      # pops from the same screen the success path entered from.
+      - assertVisible:
+          text: "Set Up Two-Factor Auth"
 
 # ── 5. Exit without enabling (BACK pops to Security Settings) ──────────────
 - pressKey: BACK

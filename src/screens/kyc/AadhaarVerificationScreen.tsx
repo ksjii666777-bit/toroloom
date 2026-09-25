@@ -71,19 +71,31 @@ export default function AadhaarVerificationScreen({ navigation }: NativeStackScr
   }, []);
 
   const handleOtpDigitChange = useCallback((index: number, value: string) => {
-    if (value && !/^\d$/.test(value)) return;
+    // Accept multi-char input (autofill, paste, E2E inputText): distribute the
+    // digits across the boxes starting at `index`. A single digit keeps the
+    // original one-box-per-press behaviour.
+    const digits = value.replace(/\D/g, '');
     setOtp(prev => {
       const newOtp = [...prev];
-      newOtp[index] = value;
+      if (!digits) {
+        newOtp[index] = '';
+        return newOtp;
+      }
+      for (let i = 0; i < digits.length && index + i < newOtp.length; i++) {
+        newOtp[index + i] = digits[i];
+      }
       return newOtp;
     });
     setError(null);
 
-    // Auto-focus next digit
-    if (value && index < 5) {
-      const nextRef = otpInputRefs.current[index + 1];
-      if (nextRef) {
-        nextRef.focus();
+    // Auto-focus the box after the last filled digit
+    if (digits) {
+      const nextIndex = Math.min(index + digits.length, 5);
+      if (nextIndex > index) {
+        const nextRef = otpInputRefs.current[nextIndex];
+        if (nextRef) {
+          nextRef.focus();
+        }
       }
     }
   }, []);
@@ -323,8 +335,9 @@ export default function AadhaarVerificationScreen({ navigation }: NativeStackScr
                         onChangeText={(v) => handleOtpDigitChange(index, v)}
                         onKeyPress={({ nativeEvent }) => handleOtpKeyPress(index, nativeEvent.key)}
                         keyboardType="number-pad"
-                        maxLength={1}
+                        maxLength={index === 0 ? 6 : 1}
                         editable={!isLoading}
+                        testID={`aadhaar-otp-${index}`}
                       />
                     </View>
                   ))}

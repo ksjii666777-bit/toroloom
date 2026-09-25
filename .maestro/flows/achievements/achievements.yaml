@@ -152,6 +152,14 @@ appId: com.toroloom.app
 # is covered. Hardware BACK pops to the More tab underneath.
 - pressKey: BACK
 - waitForAnimationToEnd
+# More keeps its previous scroll offset after BACK — scroll the title back
+# into view, then recover via the tab bar if needed.
+- scrollUntilVisible:
+    element:
+      id: "more-title"
+    direction: UP
+    speed: 20
+    timeout: 10000
 - runFlow:
     when:
       notVisible:
@@ -161,6 +169,12 @@ appId: com.toroloom.app
           id: "tab-more"
       - waitForAnimationToEnd:
           timeout: 5000
+      - scrollUntilVisible:
+          element:
+            id: "more-title"
+          direction: UP
+          speed: 20
+          timeout: 10000
 
 - assertVisible:
     id: "more-title"

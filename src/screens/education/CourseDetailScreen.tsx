@@ -164,6 +164,7 @@ export default function CourseDetailScreen({ route, navigation }: NativeStackScr
                   key={lesson.id}
                   style={({pressed}) => [[styles.lessonCard, isNext && styles.lessonCardNext], {opacity: pressed ? 0.7 : 1}]}
                   onPress={() => handleLessonPress(lesson.id)}
+                  testID={`lesson-card-${index + 1}`}
                 >
                   <View style={styles.lessonRow}>
                     {/* Status indicator */}

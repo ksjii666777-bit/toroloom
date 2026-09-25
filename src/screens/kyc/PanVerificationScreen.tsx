@@ -134,6 +134,7 @@ export default function PanVerificationScreen({ navigation }: NativeStackScreenP
                 maxLength={10}
                 autoCorrect={false}
                 editable={!isVerifying}
+                testID="pan-input"
               />
               {panNumber.length > 0 && (
                 <View style={[styles.inputStatus, {

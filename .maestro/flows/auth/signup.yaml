@@ -57,20 +57,24 @@ appId: com.toroloom.app
 - tapOn:
     id: "signup-confirm-password-input"
 - inputText: "Secure@123"
-- hideKeyboard
 
-# Dismiss keyboard so the Terms row and submit button are reachable
-- hideKeyboard
+# Dismiss keyboard so the Terms row and submit button are reachable.
+# pressKey BACK is the reliable dismiss (hideKeyboard can no-op with the
+# keyboard up and its swallow leaves scroll gestures dead); the keyboard IS
+# open right after the last input, so BACK closes it instead of popping the
+# screen.
+- pressKey: BACK
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # ── Mandatory Terms acceptance (added in the legal-consent release) ─────
-# The checkbox sits below the form; scroll to it explicitly in case the
-# keyboard covered it (hideKeyboard can no-op on number-pad keyboards)
+# The checkbox sits below the form; scroll to it explicitly
 - scrollUntilVisible:
     element:
       id: "signup-terms-checkbox"
     direction: DOWN
     speed: 20
-    timeout: 20000
+    timeout: 30000
 - tapOn:
     id: "signup-terms-checkbox"
 
@@ -107,5 +111,8 @@ appId: com.toroloom.app
           timeout: 5000
 
 # After successful signup, the user is logged in and sees the Home screen
-- assertVisible:
-    id: "home-greeting"
+# (the signup POST can be slow on a cold backend — wait generously)
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 45000

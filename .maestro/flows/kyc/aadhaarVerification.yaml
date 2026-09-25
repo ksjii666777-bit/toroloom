@@ -125,23 +125,32 @@ appId: com.toroloom.app
     timeout: 10000
 
 # ── 5. Step 2: OTP Entry ───────────────────────────────────────────────────
-- assertVisible:
-    text: "Step 2 of 2"
+# The OTP screen mounts after the Send OTP POST returns — wait for it
+# rather than racing the network round-trip.
+- extendedWaitUntil:
+    visible:
+      text: "Step 2 of 2"
+    timeout: 30000
 # Demo hint text is one inline node: "For demo/mock: use 123456" —
 # regex on the stable prefix (the bare "123456" node does not exist)
 - assertVisible:
     text: "For demo/mock: use.*"
 
-# The OTP is 6 single-digit boxes; tap the first box and type the full
-# code — the screen's handleChange auto-advances focus.
+# The OTP is 6 single-digit boxes; tap the FIRST box (stable testID) and
+# type the full code — the screen distributes the digits across the boxes.
 - tapOn:
-    index: 0
+    id: "aadhaar-otp-0"
 - inputText: "123456"
 - hideKeyboard
 - waitForAnimationToEnd
 
-- assertVisible:
-    text: "Verify OTP"
+# Verify button is disabled (dimmed) until all 6 digits are filled — the
+# input above fills all of them, so the button is tappable now. Give the
+# lazy screen a moment before asserting the label.
+- extendedWaitUntil:
+    visible:
+      text: "Verify OTP"
+    timeout: 20000
 - tapOn:
     text: "Verify OTP"
 - waitForAnimationToEnd:

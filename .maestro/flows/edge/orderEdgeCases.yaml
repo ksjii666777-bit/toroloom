@@ -69,20 +69,19 @@ appId: com.toroloom.app
 - assertVisible:
     id: "markets-title"
 
-# RELIANCE chip lives in the suggestion dashboard, visible ONLY while the
-# search bar is focused AND the query is EMPTY — typing hides the chips and
-# shows API results instead. Tap the chip right after focusing.
-- tapOn:
-    text: "Search stocks by name or symbol..."
-- waitForAnimationToEnd:
-    timeout: 3000
-- extendedWaitUntil:
-    visible:
+# RELIANCE is always in the markets list but may sit below the fold —
+# scroll it in and tap (same proven path as placeOrder; the search-focused
+# suggestion dashboard races the tap on slow emulators, so avoid it).
+- scrollUntilVisible:
+    element:
       text: "RELIANCE"
-    timeout: 20000
+    direction: DOWN
+    speed: 20
+    timeout: 30000
 - tapOn:
     text: "RELIANCE"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 5000
 - assertVisible:
     text: "RELIANCE"
 

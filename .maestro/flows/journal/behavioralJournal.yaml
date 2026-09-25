@@ -85,13 +85,15 @@ appId: com.toroloom.app
 
 # ── 4. Verify Tab Bar ──────────────────────────────────────────────────────
 # SegmentedTabs labels are plain text nodes; the journal is a lazy-loaded
-# chunk, so give it a generous settle window
+# chunk, so give it a generous settle window. "Dashboard" is ALSO the More
+# menu's Portfolio-Accessories section header visible before the screen
+# mounts — accept the journal's own peer tab ("Entries") as the mount proof.
 - extendedWaitUntil:
     visible:
-      text: "Dashboard"
+      text: "Entries"
     timeout: 30000
 - assertVisible:
-    text: "Entries"
+    text: "Dashboard"
 - assertVisible:
     text: "Reports"
 
@@ -139,6 +141,14 @@ appId: com.toroloom.app
 # bar is covered. Hardware BACK pops to the More tab underneath.
 - pressKey: BACK
 - waitForAnimationToEnd
+# More keeps its previous scroll offset after BACK — scroll the title back
+# into view, then recover via the tab bar if needed.
+- scrollUntilVisible:
+    element:
+      id: "more-title"
+    direction: UP
+    speed: 20
+    timeout: 10000
 - runFlow:
     when:
       notVisible:
@@ -148,6 +158,12 @@ appId: com.toroloom.app
           id: "tab-more"
       - waitForAnimationToEnd:
           timeout: 5000
+      - scrollUntilVisible:
+          element:
+            id: "more-title"
+          direction: UP
+          speed: 20
+          timeout: 10000
 
 - assertVisible:
     id: "more-title"

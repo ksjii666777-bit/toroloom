@@ -61,6 +61,7 @@ appId: com.toroloom.app
 - tapOn:
     text: "Enter your full name"
 - inputText: "Rahul Sharma"
+- hideKeyboard
 
 # ── 6. Fill in Email ──────────────────────────────────────────────────────
 # testID-based fill (placeholder taps race the keyboard on cloud emulators)
@@ -74,6 +75,9 @@ appId: com.toroloom.app
     text: "Enter your phone number"
 - inputText: "9876543210"
 - hideKeyboard
+# Number-pad keyboards can swallow hideKeyboard — settle before the next field
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # ── 8. Fill in Password ───────────────────────────────────────────────────
 - tapOn:
@@ -87,8 +91,12 @@ appId: com.toroloom.app
 - inputText: "Secure@123"
 - hideKeyboard
 
-# ── 10. Dismiss the keyboard ──────────────────────────────────────────────
-- hideKeyboard
+# pressKey BACK is the reliable dismiss (hideKeyboard can no-op with the
+# keyboard up); the keyboard IS open right after the last input, so BACK
+# closes it instead of popping the screen.
+- pressKey: BACK
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # ── 11. Mandatory Terms acceptance ──────────────────────────────────────
 # The checkbox sits below the form; scroll to it explicitly in case the

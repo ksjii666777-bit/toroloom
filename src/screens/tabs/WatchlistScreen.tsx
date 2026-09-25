@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useWatchlistStore } from '../../store/watchlistStore';
+import { useAuthStore } from '../../store/authStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -133,6 +134,18 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
     const timer = setTimeout(() => setIsLoading(false), 400);
     return () => clearTimeout(timer);
   }, []);
+
+  // ── Fresh-fetch on mount while logged in ───────────────────────────
+  // The store's cache-warming fetch runs at app start (pre-login) and gets
+  // a 401, leaving the seed/mock data in place — so a fresh E2E account's
+  // real (empty) watchlist never loaded and the empty state never rendered.
+  // Re-fetch here once the auth token is actually available.
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchWatchlists();
+    }
+  }, [isLoggedIn, fetchWatchlists]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -787,7 +800,7 @@ export default function WatchlistScreen({ navigation }: CompositeScreenProps<Bot
               </Animated.View>
             </AnimatedPressable>
           ))}
-          <AnimatedPressable onPress={() => setShowCreate(true)} haptic="light" scaleTo={0.9}>
+          <AnimatedPressable onPress={() => setShowCreate(true)} haptic="light" scaleTo={0.9} testID="watchlist-add-btn">
             <View style={styles.addTab}>
               <Ionicons name="add" size={20} color={colors.primary} />
             </View>

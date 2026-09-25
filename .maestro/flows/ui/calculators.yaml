@@ -31,10 +31,43 @@ appId: com.toroloom.app
 - hideKeyboard
 - tapOn:
     id: "login-btn"
-- extendedWaitUntil:
-    visible:
-      id: "tab-home"
-    timeout: 60000
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# If we are STILL on the login screen, a transient backend blip swallowed
+# the first login — cool down and retry up to two more times (smoke-test
+# pattern; a Railway Postgres restart window returns 5xx for ~a minute).
+- runFlow:
+    when:
+      visible:
+        id: "login-btn"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: "login-btn"
+          timeout: 20000
+      - runFlow:
+          when:
+            visible:
+              id: "login-btn"
+          commands:
+            - tapOn:
+                id: "login-btn"
+            - extendedWaitUntil:
+                notVisible:
+                  id: "login-btn"
+                timeout: 30000
+            - runFlow:
+                when:
+                  visible:
+                    id: "login-btn"
+                commands:
+                  - tapOn:
+                      id: "login-btn"
+                  - extendedWaitUntil:
+                      notVisible:
+                        id: "login-btn"
+                      timeout: 30000
 
 # Fresh installs show the onboarding walkthrough after login — skip it
 # (idempotent: skipped when already completed)
@@ -47,6 +80,36 @@ appId: com.toroloom.app
           text: "Skip"
       - waitForAnimationToEnd:
           timeout: 5000
+
+# Second onboarding/offline pass — the lazy onboarding screen can mount
+# AFTER the first check on a cold emulator
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# If the backend health check fails (no local backend), dismiss the
+# offline modal so the Home screen is reachable (idempotent).
+- runFlow:
+    when:
+      visible:
+        text: "You're offline"
+    commands:
+      - tapOn:
+          text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+- tapOn:
+    id: "tab-home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "home-greeting"
 
 # If the backend health check fails (no local backend), dismiss the
 # offline modal so the Home screen is reachable (idempotent).

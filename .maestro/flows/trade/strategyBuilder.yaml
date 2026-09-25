@@ -86,18 +86,29 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Strategy Templates"
 
-# Verify the pre-built strategy templates section (async load — wait, and
-# horizontal chips render off-screen; scroll the row into view first)
+# Verify the pre-built strategy templates section (async load — wait, then
+# scroll the row into view). The chips are a horizontal row: the leftmost
+# chip (Long Call) must be fully visible; the rightmost (Bull Call Spread,
+# Iron Condor) can stay horizontally clipped on narrow viewports, so those
+# two asserts are optional.
 - extendedWaitUntil:
     visible:
       text: "Strategy Templates"
     timeout: 20000
-- extendedWaitUntil:
-    visible:
-      text: "Bull Call Spread"
+- scrollUntilVisible:
+    element:
+      text: "Long Call"
+    direction: DOWN
+    speed: 20
     timeout: 20000
 - assertVisible:
+    text: "Long Call"
+- assertVisible:
+    text: "Bull Call Spread"
+    optional: true
+- assertVisible:
     text: "Iron Condor"
+    optional: true
 
 # ── 4. Select a strategy to view details ──────────────────────────────────
 - tapOn:

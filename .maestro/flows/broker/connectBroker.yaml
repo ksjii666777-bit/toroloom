@@ -120,6 +120,14 @@ appId: com.toroloom.app
     text: "Angel One"
 - assertVisible:
     text: "Zerodha"
+# Groww is row 2 of the 2-col grid — below the fold on the emulator viewport,
+# so scroll it into view before asserting.
+- scrollUntilVisible:
+    element:
+      text: "Groww"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "Groww"
 
@@ -193,6 +201,14 @@ appId: com.toroloom.app
 # covered there, so tab taps fail. Hardware BACK pops to the More tab.
 - pressKey: BACK
 - waitForAnimationToEnd
+# More keeps its previous scroll offset after BACK — scroll the title back
+# into view, then recover via the tab bar if needed.
+- scrollUntilVisible:
+    element:
+      id: "more-title"
+    direction: UP
+    speed: 20
+    timeout: 10000
 - runFlow:
     when:
       notVisible:
@@ -202,6 +218,12 @@ appId: com.toroloom.app
           id: "tab-more"
       - waitForAnimationToEnd:
           timeout: 5000
+      - scrollUntilVisible:
+          element:
+            id: "more-title"
+          direction: UP
+          speed: 20
+          timeout: 10000
 
 # Confirm we're back on the More screen
 - assertVisible:
