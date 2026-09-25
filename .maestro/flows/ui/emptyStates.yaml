@@ -111,6 +111,19 @@ appId: com.toroloom.app
 - tapOn:
     id: "tab-portfolio"
 - waitForAnimationToEnd
+# The store seeds mock holdings and the screen only refetches on
+# pull-to-refresh (mount-fetch crashed the release build in CI), so swipe
+# down to load the fresh account's real (empty) portfolio before asserting.
+- swipe:
+    direction: DOWN
+    duration: 1000
+- waitForAnimationToEnd:
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 1000
+- waitForAnimationToEnd:
+    timeout: 5000
 - extendedWaitUntil:
     visible:
       text: "No Holdings Yet"

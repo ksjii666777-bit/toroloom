@@ -6,7 +6,6 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
-import { useAuthStore } from '../../store/authStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
@@ -43,28 +42,12 @@ export default function PortfolioScreen({ navigation }: CompositeScreenProps<Bot
     return () => clearTimeout(timer);
   }, []);
 
-  // ── Fresh-fetch on mount while logged in ────────────────────────
-  // The store starts with seed/mock holdings and nothing refetches after
-  // login on a healthy network (only the offline-banner recovery path
-  // calls refreshPortfolio), so a fresh account's real (empty) portfolio
-  // never loaded and the empty state could never render.
-  // Deferred + guarded: the direct mount-fetch triggered a fatal JS error
-  // on the Portfolio tab in CI (run 36115901172 — app dropped to launcher
-  // on first mount), so this only runs AFTER the first paint completes.
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  // Pull-to-refresh is the ONLY trigger for refreshPortfolio here: the
+  // store seeds mock holdings and the offline-banner recovery path is the
+  // only other refetch. Mount-fetch (even deferred 1.5s) crashed the
+  // release build on this tab in CI (runs 36115901172 & 36122629048), so
+  // the E2E emptyStates flow pulls to refresh instead.
   const refreshPortfolio = usePortfolioStore((s) => s.refreshPortfolio);
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const t = setTimeout(() => {
-      try {
-        refreshPortfolio();
-      } catch {
-        // never let a warm-up fetch take the screen down
-      }
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [isLoggedIn, refreshPortfolio]);
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
