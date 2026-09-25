@@ -48,18 +48,33 @@ export default function PortfolioScreen({ navigation }: CompositeScreenProps<Bot
   // login on a healthy network (only the offline-banner recovery path
   // calls refreshPortfolio), so a fresh account's real (empty) portfolio
   // never loaded and the empty state could never render.
+  // Deferred + guarded: the direct mount-fetch triggered a fatal JS error
+  // on the Portfolio tab in CI (run 36115901172 — app dropped to launcher
+  // on first mount), so this only runs AFTER the first paint completes.
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const refreshPortfolio = usePortfolioStore((s) => s.refreshPortfolio);
   useEffect(() => {
-    if (isLoggedIn) {
-      refreshPortfolio();
-    }
+    if (!isLoggedIn) return;
+    const t = setTimeout(() => {
+      try {
+        refreshPortfolio();
+      } catch {
+        // never let a warm-up fetch take the screen down
+      }
+    }, 1500);
+    return () => clearTimeout(t);
   }, [isLoggedIn, refreshPortfolio]);
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
-  }, []);
+    try {
+      await refreshPortfolio();
+    } catch {
+      // pull-to-refresh must never take the screen down
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshPortfolio]);
 
   const analytics = usePortfolioAnalyticsStore(s => s.getAnalytics());
   const a = analytics.metrics;

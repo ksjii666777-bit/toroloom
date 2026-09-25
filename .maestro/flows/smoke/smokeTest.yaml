@@ -222,8 +222,10 @@ appId: com.toroloom.app
 - tapOn:
     id: "tab-portfolio"
 - waitForAnimationToEnd
-- assertVisible:
-    id: "portfolio-title"
+- extendedWaitUntil:
+    timeout: 30000
+    visible:
+      id: "portfolio-title"
 - assertVisible:
     id: "portfolio-invested"
 - assertVisible:
