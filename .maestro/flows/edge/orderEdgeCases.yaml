@@ -113,9 +113,17 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Order Summary"
 
-# Verify the balance indicator is visible
+# Verify the balance indicator ("Available: ₹...") — it sits BELOW the
+# summary rows inside the card, so scroll it into view explicitly (the
+# bottom bar shows "Total" once qty > 0, not "Available")
+- scrollUntilVisible:
+    element:
+      text: ".*Available:.*"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
-    text: "Available"
+    text: ".*Available:.*"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 4. Verify Order Form Shows Order Types

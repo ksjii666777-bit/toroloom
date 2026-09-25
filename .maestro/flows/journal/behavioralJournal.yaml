@@ -121,12 +121,10 @@ appId: com.toroloom.app
     text: "Entries"
 - waitForAnimationToEnd
 
-# Entries list may be empty for a fresh test account — the tab must render
-# without crashing (symbol rows or the "No entries yet" note)
+# Entries is a FlatList tab — assert its EMPTY-STATE text (a bare "Entries"
+# assert adds nothing: the tap above already proved the tab label).
 - assertVisible:
-    text: "Entries"
-- assertVisible:
-    text: "No entries yet"
+    text: "No journal entries yet"
 
 # ── 7. Switch to Reports Tab ───────────────────────────────────────────────
 - tapOn:

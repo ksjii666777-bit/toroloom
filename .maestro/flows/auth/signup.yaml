@@ -81,10 +81,38 @@ appId: com.toroloom.app
 # Tap "Create Account" button
 - tapOn:
     id: "signup-btn"
-
-# Wait for signup to process
 - waitForAnimationToEnd:
     timeout: 10000
+
+# If the backend rate-limited the POST (the whole suite logs in ~25+ times
+# from one IP; authLimiter = 10 req / 15 min), the form shows an inline
+# error and stays put. Cool down past the limiter window and resubmit once.
+- runFlow:
+    when:
+      visible:
+        id: "signup-btn"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: "signup-btn"
+          timeout: 20000
+      - runFlow:
+          when:
+            visible:
+              id: "signup-btn"
+          commands:
+            - waitForAnimationToEnd:
+                timeout: 65000
+            - scrollUntilVisible:
+                element:
+                  id: "signup-btn"
+                direction: DOWN
+                speed: 20
+                timeout: 20000
+            - tapOn:
+                id: "signup-btn"
+            - waitForAnimationToEnd:
+                timeout: 10000
 
 # Fresh installs show the onboarding walkthrough after signup — skip it
 # (idempotent: skipped when already completed)

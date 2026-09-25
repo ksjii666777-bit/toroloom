@@ -131,19 +131,32 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Groww"
 
-# Verify broker taglines — these sit BELOW the fold in the 2-col grid, so
-# scroll to them first (Angel One is the first card, its tagline is visible
-# once the grid starts; Groww is row 2)
+# Verify broker taglines — each card's tagline sits BELOW the fold in the
+# 2-col grid, and scrolling to a lower card pushes the upper cards' taglines
+# off the TOP of the viewport. Scroll to each tagline right before asserting
+# it.
+- scrollUntilVisible:
+    element:
+      text: "India's largest retail broking house"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
+- assertVisible:
+    text: "India's largest retail broking house"
+- scrollUntilVisible:
+    element:
+      text: "India's biggest stock broker"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
+- assertVisible:
+    text: "India's biggest stock broker"
 - scrollUntilVisible:
     element:
       text: "Simple, modern investing platform"
     direction: DOWN
     speed: 20
-    timeout: 30000
-- assertVisible:
-    text: "India's largest retail broking house"
-- assertVisible:
-    text: "India's biggest stock broker"
+    timeout: 20000
 - assertVisible:
     text: "Simple, modern investing platform"
 

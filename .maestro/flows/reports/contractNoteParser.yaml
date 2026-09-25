@@ -163,18 +163,26 @@ appId: com.toroloom.app
 # ── 6. Paste a Sample Note and Parse ───────────────────────────────────────
 - tapOn:
     text: "Paste contract note text here…"
-- inputText: |
-    ZERODHA BROKING LTD
-    Contract Note
-
-    Scrip Name             Buy/Sell  Qty    Rate    Value
-    15-06-2026 10:30:00 NSE RELIANCE BUY    50      2890.50 144525.00
-    15-06-2026 14:45:00 NSE TCS      SELL   20      3890.00 77800.00
-    16-06-2026 09:15:00 NSE HDFCBANK BUY    100     1680.25 168025.00
-
-    Total                                 1000000.00
-    Brokerage                             150.00
-    STT                                   200.00
+# Build the note LINE BY LINE (block-scalar inputText collapses newlines on
+# the Android IME — each line must end with an explicit ENTER keypress so
+# the row-based parser sees real line breaks).
+- inputText: "ZERODHA BROKING LTD"
+- pressKey: ENTER
+- inputText: "Contract Note"
+- pressKey: ENTER
+- inputText: "Scrip Name Buy/Sell Qty Rate Value"
+- pressKey: ENTER
+- inputText: "15-06-2026 10:30:00 NSE RELIANCE BUY 50 2890.50 144525.00"
+- pressKey: ENTER
+- inputText: "15-06-2026 14:45:00 NSE TCS SELL 20 3890.00 77800.00"
+- pressKey: ENTER
+- inputText: "16-06-2026 09:15:00 NSE HDFCBANK BUY 100 1680.25 168025.00"
+- pressKey: ENTER
+- inputText: "Total 1000000.00"
+- pressKey: ENTER
+- inputText: "Brokerage 150.00"
+- pressKey: ENTER
+- inputText: "STT 200.00"
 - hideKeyboard
 
 - tapOn:

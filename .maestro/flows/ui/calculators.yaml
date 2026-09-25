@@ -149,24 +149,48 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Total Returns"
 
-# ── 4. Verify Input Fields ─────────────────────────────────────────────────
+# ── 4. Input Form ──────────────────────────────────────────────────────────
+# The Yearly Growth chart sits between the result card and the input form,
+# so the fields are BELOW the fold — scroll to each before asserting.
+- scrollUntilVisible:
+    element:
+      text: "Monthly Investment (₹)"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "Monthly Investment (₹)"
-- assertVisible:
-    text: "Expected Return (% p.a.)"
-- assertVisible:
-    text: "Investment Period (Years)"
 
 # Preset chips render as "₹5K" "₹10K" "₹25K" "₹50K"
 - tapOn:
     text: "₹5K"
 - waitForAnimationToEnd
 
+- scrollUntilVisible:
+    element:
+      text: "Expected Return (% p.a.)"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
+- assertVisible:
+    text: "Expected Return (% p.a.)"
+- scrollUntilVisible:
+    element:
+      text: "Investment Period (Years)"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
+- assertVisible:
+    text: "Investment Period (Years)"
+
 # ── 5. Verify Growth Summary ───────────────────────────────────────────────
+# Content order: Result Card → Yearly Growth chart → Investment Details →
+# Quick Summary. We are at the input fields now, so scroll UP to the chart,
+# then DOWN to the summary.
 - scrollUntilVisible:
     element:
       text: "Yearly Growth"
-    direction: DOWN
+    direction: UP
     speed: 20
     timeout: 30000
 - assertVisible:

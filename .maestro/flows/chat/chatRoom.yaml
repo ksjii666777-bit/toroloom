@@ -134,33 +134,27 @@ appId: com.toroloom.app
     timeout: 20000
 
 # ── 9. Navigate Back to More Screen ───────────────────────────────────────
-# ChatList is ALSO a root-stack screen above MainTabs — the tab bar is
-# covered. Hardware BACK pops to the More tab underneath.
+# ChatList is ALSO a root-stack screen above MainTabs — hardware BACK pops
+# to the More tab underneath.
+#
+# More keeps its previous scroll offset after BACK, and UP-swipes there are
+# swallowed by the pull-to-refresh RefreshControl, so scroll-based recovery
+# is unreliable. Type into the More SEARCH BOX instead: a filter with no
+# matches shrinks the list so the header (more-title) is back on screen
+# without any scrolling.
 - pressKey: BACK
 - waitForAnimationToEnd
-# More keeps its previous scroll offset after BACK — scroll the title back
-# into view, then recover via the tab bar if needed.
-- scrollUntilVisible:
-    element:
-      id: "more-title"
-    direction: UP
-    speed: 20
-    timeout: 10000
 - runFlow:
     when:
       notVisible:
         id: "more-title"
     commands:
       - tapOn:
-          id: "tab-more"
+          id: "more-search-input"
+      - inputText: "zzz"
+      - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 5000
-      - scrollUntilVisible:
-          element:
-            id: "more-title"
-          direction: UP
-          speed: 20
-          timeout: 10000
 
 - assertVisible:
     id: "more-title"

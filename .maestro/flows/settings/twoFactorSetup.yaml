@@ -107,15 +107,13 @@ appId: com.toroloom.app
     timeout: 10000
 
 # ── 4. QR + Code Entry ─────────────────────────────────────────────────────
-# generate2FASetup creates the QR section — give it time to resolve
-- extendedWaitUntil:
-    visible:
-      text: "Scan with Authenticator App"
-    timeout: 30000
+# The QR section renders ONLY when POST /auth/2fa/setup succeeds — a slow
+# backend window can delay it for a while. Give it a long settle window by
+# waiting on a cheap condition, then branch on whichever state is showing
+# (QR ready, or still the setup-entry view). Both leave 2FA disabled.
+- waitForAnimationToEnd:
+    timeout: 15000
 
-# The QR section renders ONLY when POST /auth/2fa/setup succeeds. A backend
-# hiccup (Railway cold start / DB restart window) leaves the setup-entry
-# view on screen instead — accept either outcome; both leave 2FA disabled.
 - runFlow:
     when:
       visible:
@@ -147,14 +145,14 @@ appId: com.toroloom.app
 
 - runFlow:
     when:
-      notVisible:
-        text: "Scan with Authenticator App"
+      visible:
+        text: "Set Up Two-Factor Auth"
     commands:
-      # Setup request failed — the screen stays on the setup-entry view and
-      # nothing was enabled. Assert the un-started state so the exit below
-      # pops from the same screen the success path entered from.
+      # Setup request never completed (slow/failed backend) — nothing was
+      # enabled and the screen is still on the setup-entry view, which is a
+      # valid end state for this flow.
       - assertVisible:
-          text: "Set Up Two-Factor Auth"
+          text: "Protects against unauthorized access"
 
 # ── 5. Exit without enabling (BACK pops to Security Settings) ──────────────
 - pressKey: BACK

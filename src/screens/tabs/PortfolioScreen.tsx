@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { useAuthStore } from '../../store/authStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
@@ -41,6 +42,19 @@ export default function PortfolioScreen({ navigation }: CompositeScreenProps<Bot
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
+
+  // ── Fresh-fetch on mount while logged in ────────────────────────
+  // The store starts with seed/mock holdings and nothing refetches after
+  // login on a healthy network (only the offline-banner recovery path
+  // calls refreshPortfolio), so a fresh account's real (empty) portfolio
+  // never loaded and the empty state could never render.
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const refreshPortfolio = usePortfolioStore((s) => s.refreshPortfolio);
+  useEffect(() => {
+    if (isLoggedIn) {
+      refreshPortfolio();
+    }
+  }, [isLoggedIn, refreshPortfolio]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

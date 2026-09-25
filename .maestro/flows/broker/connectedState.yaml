@@ -216,29 +216,17 @@ appId: com.toroloom.app
 # BrokerConnect is a root-stack screen ABOVE MainTabs — the tab bar is
 # covered there, so tab taps fail. Hardware BACK pops to the More tab.- pressKey: BACK
 - waitForAnimationToEnd
-# More keeps its previous scroll offset after BACK — scroll the title back
-# into view, then recover via the tab bar if needed.
-- scrollUntilVisible:
-    element:
-      id: "more-title"
-    direction: UP
-    speed: 20
-    timeout: 10000
 - runFlow:
     when:
       notVisible:
         id: "more-title"
     commands:
       - tapOn:
-          id: "tab-more"
+          id: "more-search-input"
+      - inputText: "zzz"
+      - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 5000
-      - scrollUntilVisible:
-          element:
-            id: "more-title"
-          direction: UP
-          speed: 20
-          timeout: 10000
 
 - assertVisible:
     id: "more-title"

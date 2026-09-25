@@ -111,13 +111,16 @@ appId: com.toroloom.app
     optional: true
 
 # ── 4. Select a strategy to view details ──────────────────────────────────
+# Selecting a template HIDES the templates section and auto-populates the
+# strategy legs — assert the legs section that replaces it.
 - tapOn:
     text: "Long Call"
 - waitForAnimationToEnd
 
-# Verify strategy analysis renders (P&L diagram + risk metrics)
 - assertVisible:
-    text: "Buy a call option. Limited risk, unlimited profit."
+    text: "Strategy Legs (1)"
+- assertVisible:
+    text: "Add Leg"
 # ── 5. Navigate Back ──────────────────────────────────────────────────────
 # StrategyBuilder is a root-stack screen — hardware BACK pops to More
 - pressKey: BACK

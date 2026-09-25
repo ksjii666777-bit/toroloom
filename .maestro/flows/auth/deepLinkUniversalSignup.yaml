@@ -94,14 +94,31 @@ appId: com.toroloom.app
     timeout: 2000
 
 # ── 11. Mandatory Terms acceptance ──────────────────────────────────────
-# The checkbox sits below the form; scroll to it explicitly in case the
-# keyboard covered it (hideKeyboard can no-op on number-pad keyboards)
+# The checkbox sits below the form. If the keyboard is STILL up (both
+# dismiss attempts raced), one more BACK closes it; then scroll the box
+# into view.
+- runFlow:
+    when:
+      notVisible:
+        id: "signup-terms-checkbox"
+    commands:
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow:
+    when:
+      notVisible:
+        id: "signup-terms-checkbox"
+    commands:
+      - pressKey: BACK
+      - waitForAnimationToEnd:
+          timeout: 2000
 - scrollUntilVisible:
     element:
       id: "signup-terms-checkbox"
     direction: DOWN
     speed: 20
-    timeout: 20000
+    timeout: 30000
 - tapOn:
     id: "signup-terms-checkbox"
 
@@ -114,6 +131,36 @@ appId: com.toroloom.app
 # ── 13. Wait for signup to complete ────────────────────────────────────────
 - waitForAnimationToEnd:
     timeout: 10000
+
+# If the backend rate-limited the POST (the suite logs in ~25+ times from
+# one IP; authLimiter = 10 req / 15 min), the form shows an inline error and
+# stays put. Cool down past the limiter window and resubmit once.
+- runFlow:
+    when:
+      visible:
+        text: "Create Account"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            text: "Create Account"
+          timeout: 20000
+      - runFlow:
+          when:
+            visible:
+              text: "Create Account"
+          commands:
+            - waitForAnimationToEnd:
+                timeout: 65000
+            - scrollUntilVisible:
+                element:
+                  text: "Create Account"
+                direction: DOWN
+                speed: 20
+                timeout: 20000
+            - tapOn:
+                text: "Create Account"
+            - waitForAnimationToEnd:
+                timeout: 10000
 
 # Fresh installs show the onboarding walkthrough after signup — skip it
 # (idempotent: skipped when already completed)

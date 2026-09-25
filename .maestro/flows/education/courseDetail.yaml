@@ -135,9 +135,12 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
-# Lesson header: "Lesson 1 of N" / "Key Takeaways" / "Summary"
-- assertVisible:
-    text: "Lesson 1 of"
+# Lesson header: "Lesson 1 of N" / "Key Takeaways" / "Summary".
+# LessonView is a lazy chunk — give the navigation a settle window.
+- extendedWaitUntil:
+    visible:
+      text: "Lesson 1 of"
+    timeout: 30000
 - assertVisible:
     text: "Key Takeaways"
 - assertVisible:
@@ -146,8 +149,11 @@ appId: com.toroloom.app
 - scroll
 - waitForAnimationToEnd
 
+# "Mark as Complete" renders only while the lesson is INCOMPLETE — a
+# previously completed lesson shows the header checkmark instead.
 - assertVisible:
     text: "Mark as Complete"
+    optional: true
 
 # ── 7. Navigate Back to Learning Hub ───────────────────────────────────────
 # LessonView and CourseDetail are root-stack screens — hardware BACK pops

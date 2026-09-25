@@ -120,13 +120,19 @@ appId: com.toroloom.app
 
 # ── 5. Verify Result ───────────────────────────────────────────────────────
 # Result title is "PAN Verified ✓" (one node with the checkmark) — regex.
-# Result section renders below the fold — scroll to it first. The verify
-# POST can hit a slow backend window, so wait for the result card rather
-# than racing it.
+# The verify POST can hit a slow backend window — wait for the result card
+# (or the error banner) before scrolling to it.
+- runFlow:
+    when:
+      visible:
+        text: ".*Invalid or unknown PAN.*"
+    commands:
+      - assertVisible:
+          text: ".*Invalid or unknown PAN.*"
 - extendedWaitUntil:
     visible:
       text: "PAN Verified.*"
-    timeout: 30000
+    timeout: 60000
 - scrollUntilVisible:
     element:
       text: "PAN Verified.*"
