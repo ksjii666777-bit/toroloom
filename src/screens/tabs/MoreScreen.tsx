@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TextInput, Pressable, RefreshControl } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
@@ -333,39 +333,67 @@ export default function MoreScreen({ navigation }: CompositeScreenProps<BottomTa
   return (
     <AppScreen
       hasTabBar
+      scroll={false}
       padded={false}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-      contentStyle={styles.scrollContent}
-    >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <Text style={styles.title} testID="more-title">{t('profile.more')}</Text>
-            <SyncStatusIndicator variant="inline" />
+      // Pinned header + search bar (outside the scroll view): the menu below
+      // scrolls hundreds of px, and once the header scrolled away neither
+      // more-title nor more-search-input was reachable again — seven E2E
+      // flows failed on exactly that (CI run 36129120557). Pinning keeps
+      // them permanently visible/interactable and the menu scrolls under it.
+      header={
+        <View
+          style={[
+            styles.pinnedHeader,
+            { backgroundColor: colors.bg, borderColor: colors.border },
+          ]}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title} testID="more-title">{t('profile.more')}</Text>
+              <SyncStatusIndicator variant="inline" />
+            </View>
+          </View>
+
+          {/* Search Bar */}
+          <View style={[styles.searchContainer, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+            <Ionicons name="search" size={18} color={colors.textMuted} />
+            <TextInput
+              testID="more-search-input"
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder={t('profile.searchTools')}
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+              </Pressable>
+            )}
           </View>
         </View>
-
-        {/* Search Bar */}
-        <View style={[styles.searchContainer, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-          <Ionicons name="search" size={18} color={colors.textMuted} />
-          <TextInput
-            testID="more-search-input"
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('profile.searchTools')}
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-            autoCorrect={false}
+      }
+    >
+      {/* Menu scroll area — vertical, with its own pull-to-refresh since
+          the pinned header moved off the AppScreen ScrollView */}
+      <ScrollView
+        style={styles.flexScroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.textSecondary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.surface}
           />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </Pressable>
-          )}
-        </View>
-
+        }
+      >
         {/* Category Chips */}
         <ScrollView
           horizontal
@@ -520,11 +548,15 @@ export default function MoreScreen({ navigation }: CompositeScreenProps<BottomTa
           </View>
         </AnimatedPressable>
 
+      </ScrollView>
     </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
+  flexScroll: {
+    flex: 1,
+  },
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: SPACING.xl,
@@ -533,6 +565,13 @@ const createStyles = (colors: any) => StyleSheet.create({
     // AppScreen already pads for the status-bar/safe-area inset
     paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
+  },
+  // Pinned header wrapper — needs horizontal padding of its own since it no
+  // longer sits inside the padded ScrollView, and a bottom hairline so the
+  // scrolling menu separates visually from the fixed search area.
+  pinnedHeader: {
+    paddingHorizontal: SPACING.xl,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerRow: {
     flexDirection: 'row',

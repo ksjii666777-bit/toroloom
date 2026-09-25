@@ -119,15 +119,22 @@ appId: com.toroloom.app
     duration: 1000
 - waitForAnimationToEnd:
     timeout: 5000
-- swipe:
-    direction: DOWN
-    duration: 1000
-- waitForAnimationToEnd:
-    timeout: 5000
+# One fling may release above the RefreshControl threshold — retry while
+# the empty state has not appeared yet (capped so the flow cannot hang).
+- runFlow:
+    when:
+      notVisible:
+        text: "No Holdings Yet"
+    commands:
+      - swipe:
+          direction: DOWN
+          duration: 1200
+      - waitForAnimationToEnd:
+          timeout: 5000
 - extendedWaitUntil:
     visible:
       text: "No Holdings Yet"
-    timeout: 20000
+    timeout: 30000
 - assertVisible:
     text: "Start investing to build your portfolio"
 - assertVisible:

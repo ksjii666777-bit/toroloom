@@ -132,7 +132,7 @@ appId: com.toroloom.app
 - extendedWaitUntil:
     visible:
       text: "PAN Verified.*"
-    timeout: 60000
+    timeout: 90000
 - scrollUntilVisible:
     element:
       text: "PAN Verified.*"

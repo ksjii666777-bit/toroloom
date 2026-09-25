@@ -65,6 +65,9 @@ interface BrokerMeta {
   type: string;
   label: string;
   tagline: string;
+  /** Stable testID for the tagline text (E2E) — taglines clip under
+      numberOfLines={2} on narrow viewports, making text-asserts flaky */
+  testId?: string;
   icon: string;
   color: string;
   gradient: readonly [string, string];
@@ -77,6 +80,7 @@ const BROKERS: BrokerMeta[] = [
     type: 'angel',
     label: 'Angel One',
     tagline: "India's largest retail broking house",
+    testId: 'broker-tagline-angel',
     icon: 'A',
     color: '#FF6B00',
     gradient: ['#FF6B00', '#CC5500'] as const,
@@ -87,6 +91,7 @@ const BROKERS: BrokerMeta[] = [
     type: 'zerodha',
     label: 'Zerodha',
     tagline: "India's biggest stock broker",
+    testId: 'broker-tagline-zerodha',
     icon: 'Z',
     color: '#2874F0',
     gradient: ['#2874F0', '#1A5FCC'] as const,
@@ -534,7 +539,7 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
                     </View>
 
                     <Text style={styles.brokerLabel}>{broker.label}</Text>
-                    <Text style={styles.brokerTagline} numberOfLines={2}>
+                    <Text style={styles.brokerTagline} numberOfLines={2} testID={broker.testId}>
                       {broker.tagline}
                     </Text>
 

@@ -78,8 +78,11 @@ appId: com.toroloom.app
 - waitForAnimationToEnd
 
 # ── 3. Verify Header (menu label repeats as the screen title) ────────────
-- assertVisible:
-    text: "Behavioural Journal"
+# Both are lazy-chunk renders — the assert can beat the mount, so wait
+- extendedWaitUntil:
+    visible:
+      text: "Behavioural Journal"
+    timeout: 30000
 - assertVisible:
     text: "Track your trading psychology"
 

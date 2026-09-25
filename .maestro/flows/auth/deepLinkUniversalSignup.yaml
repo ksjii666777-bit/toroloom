@@ -119,6 +119,50 @@ appId: com.toroloom.app
     direction: DOWN
     speed: 20
     timeout: 30000
+# If the checkbox is still missing, the extra BACK dismissed the KEYBOARD
+# and then POPPED the Signup screen (pressed the header back-arrow) —
+# reopen the deep link and refill the form.
+- runFlow:
+    when:
+      notVisible:
+        id: "signup-terms-checkbox"
+    commands:
+      - openLink: toroloom://signup?ref=test123
+      - extendedWaitUntil:
+          visible:
+            id: "signup-name-input"
+          timeout: 45000
+      - tapOn:
+          text: "Enter your full name"
+      - inputText: "Priya Patel"
+      - hideKeyboard
+      - evalScript: ${output.SIGNUP_EMAIL2 = "e2e.uni." + Date.now() + "@toroloom-test.com"}
+      - tapOn:
+          id: "signup-email-input"
+      - inputText: ${SIGNUP_EMAIL2}
+      - hideKeyboard
+      - tapOn:
+          text: "Enter your phone number"
+      - inputText: "8765432109"
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - tapOn:
+          text: "Create a strong password"
+      - inputText: "UnivLink@456"
+      - hideKeyboard
+      - tapOn:
+          text: "Re-enter your password"
+      - inputText: "UnivLink@456"
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - scrollUntilVisible:
+          element:
+            id: "signup-terms-checkbox"
+          direction: DOWN
+          speed: 20
+          timeout: 30000
 - tapOn:
     id: "signup-terms-checkbox"
 

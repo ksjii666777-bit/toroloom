@@ -75,8 +75,11 @@ appId: com.toroloom.app
 - tapOn:
     id: "menu-SecuritySettings"
 - waitForAnimationToEnd
-- assertVisible:
-    text: "Security Settings"
+# SecuritySettings is a lazy chunk — the assert can beat the mount
+- extendedWaitUntil:
+    visible:
+      text: "Security Settings"
+    timeout: 30000
 
 # ── 3. Open Two-Factor Authentication ──────────────────────────────────────
 # The 2FA card row shows the TOTP subtitle
@@ -111,8 +114,11 @@ appId: com.toroloom.app
 # backend window can delay it for a while. Give it a long settle window by
 # waiting on a cheap condition, then branch on whichever state is showing
 # (QR ready, or still the setup-entry view). Both leave 2FA disabled.
-- waitForAnimationToEnd:
-    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      text: "Scan with Authenticator App"
+    timeout: 30000
+    optional: true
 
 - runFlow:
     when:

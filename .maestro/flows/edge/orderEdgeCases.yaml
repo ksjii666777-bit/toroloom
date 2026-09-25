@@ -116,14 +116,17 @@ appId: com.toroloom.app
 # Verify the balance indicator ("Available: ₹...") — it sits BELOW the
 # summary rows inside the card, so scroll it into view explicitly (the
 # bottom bar shows "Total" once qty > 0, not "Available")
+# The balance line is "Available: ₹…" when the Max order fits the balance
+# and "Insufficient balance — need ₹… more" when it does not (live backend
+# user balance decides) — scroll once, accept whichever variant rendered.
 - scrollUntilVisible:
     element:
-      text: ".*Available:.*"
+      text: ".*Available:.*|.*Insufficient balance.*"
     direction: DOWN
     speed: 20
     timeout: 20000
 - assertVisible:
-    text: ".*Available:.*"
+    text: ".*Available:.*|.*Insufficient balance.*"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 4. Verify Order Form Shows Order Types

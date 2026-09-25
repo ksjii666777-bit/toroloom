@@ -136,7 +136,23 @@ appId: com.toroloom.app
     timeout: 10000
 
 # Lesson header: "Lesson 1 of N" / "Key Takeaways" / "Summary".
-# LessonView is a lazy chunk — give the navigation a settle window.
+# LessonView is a lazy chunk — give the navigation a settle window. The
+# tap can fire while the lazy CourseDetail chunk is STILL mounting
+# (pressables not yet wired), landing nowhere; detect that and re-tap.
+- runFlow:
+    when:
+      notVisible:
+        text: "Lesson 1 of"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "lesson-card-1"
+          commands:
+            - tapOn:
+                id: "lesson-card-1"
+            - waitForAnimationToEnd:
+                timeout: 5000
 - extendedWaitUntil:
     visible:
       text: "Lesson 1 of"

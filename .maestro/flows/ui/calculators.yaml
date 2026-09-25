@@ -161,7 +161,15 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Monthly Investment (₹)"
 
-# Preset chips render as "₹5K" "₹10K" "₹25K" "₹50K"
+# Preset chips render as "₹5K" "₹10K" "₹25K" "₹50K" — they sit below the
+# first fields, so scroll them into view before tapping (CI run
+# 36129120557: the chip was off-screen and the tap found nothing).
+- scrollUntilVisible:
+    element:
+      text: "₹5K"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - tapOn:
     text: "₹5K"
 - waitForAnimationToEnd

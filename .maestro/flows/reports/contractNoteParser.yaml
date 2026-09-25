@@ -208,9 +208,21 @@ appId: com.toroloom.app
 
 - assertVisible:
     text: "Parsed Trades"
+# Result rows sit below the fold — scroll each into view before asserting
+- scrollUntilVisible:
+    element:
+      text: "RELIANCE"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "RELIANCE"
-
+- scrollUntilVisible:
+    element:
+      text: "Zerodha"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "Zerodha"
 
