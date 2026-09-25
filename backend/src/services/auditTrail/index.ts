@@ -113,6 +113,10 @@ export class AuditTrail {
   private cache: AuditEvent[] = [];
   private readonly storage: StorageEngine;
   private readonly maxMemoryEvents: number;
+  /** Last emitted timestamp (ms) — guarantees strictly increasing event
+   *  times so ORDER BY timestamp is deterministic even when appends land
+   *  within the same millisecond (fast CI machines, local Postgres). */
+  private lastTimestampMs = 0;
 
   /**
    * @param storage    Optional StorageEngine. Defaults to InMemoryStorage.
@@ -134,7 +138,13 @@ export class AuditTrail {
     const previousHash = latestEvent ? latestEvent.hash : 'GENESIS_BLOCK';
 
     const id = randomUUID();
-    const timestamp = new Date().toISOString();
+    // Strictly monotonic timestamp: same/earlier millisecond than the
+    // previous event gets bumped by 1ms. Hash-chain verification only
+    // recomputes over the STORED timestamp, so this stays tamper-evident.
+    let tsMs = Date.now();
+    if (tsMs <= this.lastTimestampMs) tsMs = this.lastTimestampMs + 1;
+    this.lastTimestampMs = tsMs;
+    const timestamp = new Date(tsMs).toISOString();
     const userId = params.userId || 'system';
 
     const event: AuditEvent = {
