@@ -68,7 +68,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Reports ────────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Reports"
@@ -77,7 +78,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Reports"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Reports Screen (Analytics) ──────────────────────────────────────────
 - assertVisible:
@@ -90,7 +92,8 @@ appId: com.toroloom.app
     direction: DOWN
 - tapOn:
     text: "Contract Note Parser"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 4. Verify Parser Screen ────────────────────────────────────────────────
 - assertVisible:
@@ -132,7 +135,8 @@ appId: com.toroloom.app
 # ── 5. Paste Mode: Empty Parse ─────────────────────────────────────────────
 - tapOn:
     text: "Paste Text"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "Paste contract note text here…"
@@ -144,7 +148,8 @@ appId: com.toroloom.app
 # namespace, message "Please paste your contract note text first.")
 - tapOn:
     text: "Parse Text"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - runFlow:
     when:
@@ -236,7 +241,8 @@ appId: com.toroloom.app
 # ── 8. Clear and Verify Reset ──────────────────────────────────────────────
 - tapOn:
     id: "clearBtn"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "Upload PDF"
@@ -256,7 +262,8 @@ appId: com.toroloom.app
 # is covered and the header back icon is custom-positioned. Hardware BACK
 # pops to the underlying tab (Reports came from More).
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "Analytics"

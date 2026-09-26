@@ -48,6 +48,25 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 30000
 
+# If the login POST was swallowed by a rate-limit window the button stays
+# put - wait out the limiter window and resubmit once.
+- runFlow:
+    when:
+      visible:
+        id: "login-btn"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 65000
+      - runFlow:
+          when:
+            visible:
+              id: "login-btn"
+          commands:
+            - tapOn:
+                id: "login-btn"
+            - waitForAnimationToEnd:
+                timeout: 30000
+
 # Fresh installs show the onboarding walkthrough after login — skip it
 # (idempotent: skipped when already completed)
 - runFlow:
@@ -136,12 +155,28 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 5000
 
+# Cold start can relink Home after launchApp - re-anchor before tab taps.
+- runFlow:
+    when:
+      notVisible:
+        id: "home-greeting"
+    commands:
+      - tapOn:
+          id: "tab-home"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
 # ═══════════════════════════════════════════════════════════════════════════
 # 3. Navigate: More → Connect Broker
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "more-title"
+    timeout: 30000
 - scrollUntilVisible:
     element:
       text: "Connect Broker"
@@ -152,6 +187,24 @@ appId: com.toroloom.app
     text: "Connect Broker"
 - waitForAnimationToEnd:
     timeout: 10000  # Allow for session check + animation
+
+# The tap can fire before the More menu wired its pressables (lazy mount)
+# and the screen never changes - detect that and re-tap once.
+- runFlow:
+    when:
+      visible:
+        id: "more-title"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Connect Broker"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+      - tapOn:
+          text: "Connect Broker"
+      - waitForAnimationToEnd:
+          timeout: 10000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 4. Verify Connected or Disconnected State
@@ -187,7 +240,8 @@ appId: com.toroloom.app
       # Disconnect → confirmation alert → confirm
       - tapOn:
           text: "Disconnect"
-      - waitForAnimationToEnd
+      - waitForAnimationToEnd:
+          timeout: 10000
       - assertVisible:
           text: "Disconnect Broker"
       - runFlow:
@@ -215,7 +269,18 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════
 # BrokerConnect is a root-stack screen ABOVE MainTabs — the tab bar is
 # covered there, so tab taps fail. Hardware BACK pops to the More tab.- pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
+# A deep link can relaunch the app and cover the screen - press BACK again
+# to hand control back to the app's UI.
+- runFlow:
+    when:
+      visible:
+        text: "Open with"
+    commands:
+      - pressKey: BACK
+      - waitForAnimationToEnd:
+          timeout: 10000
 - runFlow:
     when:
       notVisible:
@@ -223,6 +288,8 @@ appId: com.toroloom.app
     commands:
       - tapOn:
           id: "tab-more"
+      - waitForAnimationToEnd:
+          timeout: 5000
       - extendedWaitUntil:
           visible:
             id: "more-title"

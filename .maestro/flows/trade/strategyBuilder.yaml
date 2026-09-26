@@ -67,7 +67,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Op. Strategies ────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Op. Strategies"
@@ -76,7 +77,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Op. Strategies"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Strategy Builder Screen ─────────────────────────────────────
 - assertVisible:
@@ -115,7 +117,8 @@ appId: com.toroloom.app
 # strategy legs — assert the legs section that replaces it.
 - tapOn:
     text: "Long Call"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "Strategy Legs (1)"
@@ -124,7 +127,8 @@ appId: com.toroloom.app
 # ── 5. Navigate Back ──────────────────────────────────────────────────────
 # StrategyBuilder is a root-stack screen — hardware BACK pops to More
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

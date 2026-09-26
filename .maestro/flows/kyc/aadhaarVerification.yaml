@@ -68,7 +68,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Profile & KYC → KYC & Banks ───────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Profile & KYC"
@@ -77,11 +78,13 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Profile & KYC"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - tapOn:
     text: "KYC & Banks"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Open Aadhaar eKYC ───────────────────────────────────────────────────
 - assertVisible:
@@ -92,7 +95,8 @@ appId: com.toroloom.app
     direction: DOWN
 - tapOn:
     text: "Aadhaar Verification"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 4. Step 1: Aadhaar + Consent + OTP ─────────────────────────────────────
 - assertVisible:
@@ -142,7 +146,8 @@ appId: com.toroloom.app
     id: "aadhaar-otp-0"
 - inputText: "123456"
 - hideKeyboard
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify button is disabled (dimmed) until all 6 digits are filled — the
 # input above fills all of them, so the button is tappable now. Give the
@@ -169,7 +174,8 @@ appId: com.toroloom.app
 # AadhaarVerification is a root-stack screen ABOVE MainTabs — hardware BACK
 # pops to the underlying tab (More).
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

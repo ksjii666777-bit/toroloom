@@ -68,7 +68,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Messages ──────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Messages"
@@ -77,7 +78,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Messages"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Chat Room List Screen ────────────────────────────────────────
 # Header title is community.chatRooms = "Chat Rooms"
@@ -91,7 +93,8 @@ appId: com.toroloom.app
 # ── 4. Tap on the First Room Card ─────────────────────────────────────────
 - tapOn:
     text: "Trading Discussion"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 5. Verify Chat Room Screen ────────────────────────────────────────────
 # Input bar is rendered on the room screen (placeholder = typeMessage)
@@ -116,7 +119,8 @@ appId: com.toroloom.app
       # Fallback: tap the send icon area (right edge of the input bar)
       - tapOn:
           point: "92%,94%"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 7. Verify Message Appears ─────────────────────────────────────────────
 - assertVisible:
@@ -125,7 +129,8 @@ appId: com.toroloom.app
 # ── 8. Navigate Back to Room List ─────────────────────────────────────────
 # ChatRoom pushes as a root-stack screen — hardware BACK pops to the list
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify back on the room list — lazy chunk + keyboard dismiss settle time
 - extendedWaitUntil:
@@ -143,7 +148,8 @@ appId: com.toroloom.app
 # matches shrinks the list so the header (more-title) is back on screen
 # without any scrolling.
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

@@ -67,7 +67,8 @@ appId: com.toroloom.app
 # ── 2. Navigate to Markets tab ─────────────────────────────────────────────
 - tapOn:
     id: "tab-markets"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "markets-title"
 
@@ -111,7 +112,8 @@ appId: com.toroloom.app
 
 # ── 5. Scroll to verify Sector Context and Peer Comparison ─────────────────
 - scroll
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify sector context section
 - assertVisible:
@@ -119,7 +121,8 @@ appId: com.toroloom.app
     optional: true
 
 - scroll
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify Peer Comparison section
 - assertVisible:
@@ -128,7 +131,8 @@ appId: com.toroloom.app
 
 # ── 6. Verify AI Analysis section ──────────────────────────────────────────
 - scroll
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "AI Analysis"
@@ -137,7 +141,8 @@ appId: com.toroloom.app
 # ── 7. Go back to Markets (Android back — the header back button is
 # scrolled off-screen and its label is "Close", not "Go back") ──────────────
 - back
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Markets restores its previous scroll position — scroll back up to the title
 - scrollUntilVisible:

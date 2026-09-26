@@ -137,7 +137,8 @@ appId: com.toroloom.app
 
 - tapOn:
     id: "home-quick-sipcalculator"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "SIP Calculator"
 
@@ -172,7 +173,8 @@ appId: com.toroloom.app
     timeout: 20000
 - tapOn:
     text: "₹5K"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - scrollUntilVisible:
     element:
@@ -225,7 +227,8 @@ appId: com.toroloom.app
 # covered there, so tap-back/tab-home both fail. Hardware BACK pops to the
 # underlying tab (Home).
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

@@ -72,7 +72,8 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
     id: "tab-markets"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "markets-title"
 
@@ -85,14 +86,16 @@ appId: com.toroloom.app
     timeout: 30000
 - tapOn:
     text: "RELIANCE"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "RELIANCE"
 
 # Tap Buy button in bottom action bar to open PlaceOrderScreen
 - tapOn:
     id: "stock-buy-btn"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 3. Verify PlaceOrder Form — Initial Layout (Buy mode, MARKET, CNC)
@@ -131,7 +134,8 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
     id: "sellToggle"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Header should show "Sell Securities" via testID
 - assertVisible:
@@ -140,7 +144,8 @@ appId: com.toroloom.app
 # Toggle back to Buy for the order placement flow
 - tapOn:
     id: "buyToggle"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "headerTitle"
 
@@ -150,7 +155,8 @@ appId: com.toroloom.app
 # Default is MARKET — tap LIMIT
 - tapOn:
     id: "orderType_LIMIT"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Limit price input should appear
 - assertVisible:
@@ -159,7 +165,8 @@ appId: com.toroloom.app
 # Tap SL (Stop Loss) — adds trigger price field
 - tapOn:
     id: "orderType_SL"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Trigger price input should appear alongside limit price
 - assertVisible:
@@ -168,7 +175,8 @@ appId: com.toroloom.app
 # Tap SL-M (Stop Loss Market) — both price fields stay visible
 - tapOn:
     id: "orderType_SL-M"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "LIMIT PRICE (₹)"
@@ -178,14 +186,16 @@ appId: com.toroloom.app
 # Tap back to MARKET for the actual order placement
 - tapOn:
     id: "orderType_MARKET"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 6. Change Product Type to MIS (Intraday)
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
     id: "productType_MIS"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify the description changed to mention intraday (actual label is
 # "Intraday — square off by EOD" — use a regex prefix match)
@@ -198,7 +208,8 @@ appId: com.toroloom.app
 # Use the "50" quick quantity button
 - tapOn:
     id: "quickQty_50"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 8. Verify Order Summary Card
@@ -271,7 +282,8 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
     id: "doneBtn"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Should navigate back to StockDetail screen
 - assertVisible:

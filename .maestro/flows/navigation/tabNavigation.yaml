@@ -61,7 +61,8 @@ appId: com.toroloom.app
 # ── Step 3: Markets Tab ────────────────────────────────────────────────────
 - tapOn:
     id: "tab-markets"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "markets-title"
 - assertVisible:
@@ -70,7 +71,8 @@ appId: com.toroloom.app
 # ── Step 4: Portfolio Tab ──────────────────────────────────────────────────
 - tapOn:
     id: "tab-portfolio"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "portfolio-title"
 - assertVisible:
@@ -79,7 +81,8 @@ appId: com.toroloom.app
 # ── Step 5: Watchlist Tab ──────────────────────────────────────────────────
 - tapOn:
     id: "tab-watchlist"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "watchlist-title"
 - assertVisible:
@@ -88,7 +91,8 @@ appId: com.toroloom.app
 # ── Step 6: More Tab ───────────────────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "more-title"
 # Menu sections sit below the fold — scroll the target item into view
@@ -105,6 +109,7 @@ appId: com.toroloom.app
 # ── Step 7: Back to Home ───────────────────────────────────────────────────
 - tapOn:
     id: "tab-home"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "home-greeting"

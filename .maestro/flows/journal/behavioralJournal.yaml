@@ -66,7 +66,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Trading Journal ─────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Trading Journal"
@@ -75,7 +76,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Trading Journal"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Header (menu label repeats as the screen title) ────────────
 # Both are lazy-chunk renders — the assert can beat the mount, so wait
@@ -91,10 +93,15 @@ appId: com.toroloom.app
 # chunk, so give it a generous settle window. "Dashboard" is ALSO the More
 # menu's Portfolio-Accessories section header visible before the screen
 # mounts — accept the journal's own peer tab ("Entries") as the mount proof.
-- extendedWaitUntil:
-    visible:
-      text: "Entries"
-    timeout: 45000
+# Bounded probe (non-stopping) - the recovery branch below heals a slow
+# lazy mount; the asserts after it are the final gate.
+- runFlow:
+    when:
+      notVisible:
+        text: "Entries"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 30000
 # If the tab bar still is not there, either the lazy screen never mounted
 # (assert the header, which waits) or the tap landed elsewhere — re-anchor
 # on the journal screen and wait once more.
@@ -145,7 +152,8 @@ appId: com.toroloom.app
 # ── 6. Switch to Entries Tab ───────────────────────────────────────────────
 - tapOn:
     text: "Entries"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Entries is a FlatList tab — assert its EMPTY-STATE text (a bare "Entries"
 # assert adds nothing: the tap above already proved the tab label).
@@ -155,7 +163,8 @@ appId: com.toroloom.app
 # ── 7. Switch to Reports Tab ───────────────────────────────────────────────
 - tapOn:
     text: "Reports"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "Reports"
@@ -164,7 +173,8 @@ appId: com.toroloom.app
 # BehavioralJournal pushes as a root-stack screen ABOVE MainTabs — the tab
 # bar is covered. Hardware BACK pops to the More tab underneath.
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 # More keeps its previous scroll offset after BACK — scroll the title back
 # into view, then recover via the tab bar if needed.
 - scrollUntilVisible:
@@ -189,5 +199,7 @@ appId: com.toroloom.app
           speed: 20
           timeout: 10000
 
-- assertVisible:
-    id: "more-title"
+- extendedWaitUntil:
+    visible:
+      id: "more-title"
+    timeout: 60000

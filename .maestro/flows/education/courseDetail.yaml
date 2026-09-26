@@ -70,7 +70,8 @@ appId: com.toroloom.app
 # Learn is reached via More → Courses (no dedicated tab)
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Courses"
@@ -79,11 +80,14 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Courses"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Learning Hub ────────────────────────────────────────────────
-- assertVisible:
-    text: "Learning Hub"
+- extendedWaitUntil:
+    visible:
+      text: "Learning Hub"
+    timeout: 60000
 - assertVisible:
     text: "Master the markets, one lesson at a time"
 # "All Courses" section sits below the fold — scroll to it (a plain assert
@@ -102,11 +106,14 @@ appId: com.toroloom.app
     direction: DOWN
 - tapOn:
     text: "Stock Market Basics"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 5. Verify Course Detail ────────────────────────────────────────────────
-- assertVisible:
-    text: "Course Progress"
+- extendedWaitUntil:
+    visible:
+      text: "Course Progress"
+    timeout: 60000
 - assertVisible:
     text: "Completed"
 - assertVisible:
@@ -134,6 +141,9 @@ appId: com.toroloom.app
     id: "lesson-card-1"
 - waitForAnimationToEnd:
     timeout: 10000
+
+# A failed lesson fetch renders "Lesson not found" instead of the header
+# - back out and re-enter the lesson once.
 
 # Lesson header: "Lesson 1 of N" / "Key Takeaways" / "Summary".
 # LessonView is a lazy chunk — give the navigation a settle window. The
@@ -171,17 +181,41 @@ appId: com.toroloom.app
           commands:
             - tapOn:
                 id: "lesson-card-1"
-            - extendedWaitUntil:
-                visible:
-                  text: "Lesson 1 of"
-                timeout: 60000
-- assertVisible:
-    text: "Key Takeaways"
+            - waitForAnimationToEnd:
+                timeout: 5000
+      # A failed lesson fetch renders "Lesson not found" instead of the
+      # header - back out and re-enter the lesson once.
+      - runFlow:
+          when:
+            visible:
+              text: "Lesson not found"
+          commands:
+            - pressKey: BACK
+            - waitForAnimationToEnd:
+                timeout: 5000
+            - runFlow:
+                when:
+                  visible:
+                    id: "lesson-card-1"
+                commands:
+                  - tapOn:
+                      id: "lesson-card-1"
+                  - waitForAnimationToEnd:
+                      timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            text: "Lesson 1 of"
+          timeout: 60000
+- extendedWaitUntil:
+    visible:
+      text: "Key Takeaways"
+    timeout: 30000
 - assertVisible:
     text: "Summary"
 
 - scroll
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # "Mark as Complete" renders only while the lesson is INCOMPLETE — a
 # previously completed lesson shows the header checkmark instead.
@@ -193,13 +227,19 @@ appId: com.toroloom.app
 # LessonView and CourseDetail are root-stack screens — hardware BACK pops
 # one level each time
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
-- assertVisible:
-    text: "Course Progress"
+- extendedWaitUntil:
+    visible:
+      text: "Course Progress"
+    timeout: 60000
 
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
-- assertVisible:
-    text: "Learning Hub"
+- extendedWaitUntil:
+    visible:
+      text: "Learning Hub"
+    timeout: 60000

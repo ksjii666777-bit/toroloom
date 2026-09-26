@@ -145,20 +145,23 @@ appId: com.toroloom.app
 # Tap "Learn" quick action to navigate to Learn screen
 - tapOn:
     id: "home-quick-learn"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "learn-title"
 
 # Learn is a stack screen (no tab bar) — use Android back to return
 - back
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "home-greeting"
 
 # ── 3. Markets — Test search ──────────────────────────────────────────────
 - tapOn:
     id: "tab-markets"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "markets-title"
 
@@ -171,7 +174,8 @@ appId: com.toroloom.app
 # ── 4. More Screen — Quick Actions ────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "more-title"
 
@@ -221,7 +225,8 @@ appId: com.toroloom.app
 # ── 5. Portfolio Screen ────────────────────────────────────────────────────
 - tapOn:
     id: "tab-portfolio"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - extendedWaitUntil:
     timeout: 30000
     visible:
@@ -236,7 +241,8 @@ appId: com.toroloom.app
 # ── 6. Logout ──────────────────────────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: "more-logout-btn"

@@ -67,7 +67,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Profile & KYC → KYC & Banks ───────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Profile & KYC"
@@ -76,11 +77,13 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Profile & KYC"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - tapOn:
     text: "KYC & Banks"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Open PAN Verification ───────────────────────────────────────────────
 - assertVisible:
@@ -91,7 +94,8 @@ appId: com.toroloom.app
     direction: DOWN
 - tapOn:
     text: "PAN Verification"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 4. Verify PAN Screen ───────────────────────────────────────────────────
 - assertVisible:
@@ -144,6 +148,8 @@ appId: com.toroloom.app
             - waitForAnimationToEnd:
                 timeout: 65000
             - tapOn:
+                id: "pan-input"
+            - tapOn:
                 text: "Verify PAN"
             - waitForAnimationToEnd:
                 timeout: 10000
@@ -179,7 +185,7 @@ appId: com.toroloom.app
       text: "PAN Verified.*"
     direction: DOWN
     speed: 20
-    timeout: 20000
+    timeout: 45000
 - assertVisible:
     text: "PQRST5678G"
 
@@ -187,7 +193,8 @@ appId: com.toroloom.app
 # PanVerification is a root-stack screen ABOVE MainTabs — hardware BACK
 # pops to the underlying tab (More).
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

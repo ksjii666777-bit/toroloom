@@ -89,7 +89,7 @@ appId: com.toroloom.app
 # pressKey BACK is the reliable dismiss (hideKeyboard can no-op with the
 # keyboard up); the keyboard IS open right after the last input, so BACK
 # closes it instead of popping the screen.
-- pressKey: BACK
+- hideKeyboard
 - waitForAnimationToEnd:
     timeout: 2000
 
@@ -159,7 +159,7 @@ appId: com.toroloom.app
           timeout: 2000
       # The keyboard IS open after the last input — BACK closes the keyboard
       # (not the screen) and frees the scroll area below the form
-      - pressKey: BACK
+      - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 2000
       - scrollUntilVisible:

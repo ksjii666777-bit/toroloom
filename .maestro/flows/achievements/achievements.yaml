@@ -70,7 +70,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Achievements ──────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Achievements"
@@ -79,7 +80,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Achievements"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Header ───────────────────────────────────────────────────────
 - assertVisible:
@@ -128,7 +130,8 @@ appId: com.toroloom.app
 - tapOn:
     text: "First Trade"
     optional: true
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify modal content
 - assertVisible:
@@ -145,7 +148,8 @@ appId: com.toroloom.app
 - tapOn:
     text: "Got it!"
     optional: true
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 10. Navigate back ─────────────────────────────────────────────
 # Achievements pushes as a root-stack screen ABOVE MainTabs — hardware
@@ -157,7 +161,8 @@ appId: com.toroloom.app
 # filter with no matches shrinks the list so the header (more-title) is
 # back on screen without any scrolling.
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

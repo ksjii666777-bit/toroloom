@@ -66,7 +66,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → AI Insights ────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: "menu-AIInsights"
@@ -75,7 +76,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     id: "menu-AIInsights"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Header ───────────────────────────────────────────────────────
 - assertVisible:
@@ -114,7 +116,8 @@ appId: com.toroloom.app
 # matches shrinks the list so the header (more-title) is back on screen
 # without any scrolling.
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

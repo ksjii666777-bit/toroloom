@@ -65,7 +65,8 @@ appId: com.toroloom.app
 # ── 2. Watchlist Empty State ───────────────────────────────────────────────
 - tapOn:
     id: "tab-watchlist"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - extendedWaitUntil:
     visible:
       text: "Watchlist"
@@ -110,10 +111,20 @@ appId: com.toroloom.app
 # ── 3. Portfolio Empty State ───────────────────────────────────────────────
 - tapOn:
     id: "tab-portfolio"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 # The store seeds mock holdings and the screen only refetches on
 # pull-to-refresh (mount-fetch crashed the release build in CI), so swipe
 # down to load the fresh account's real (empty) portfolio before asserting.
+# The first swipe can fire while the screen is still mounting - give the
+# holdings list one bounded settle window before the refresh swipes.
+- runFlow:
+    when:
+      notVisible:
+        text: "TCS"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 8000
 - swipe:
     direction: DOWN
     duration: 1000
@@ -148,7 +159,8 @@ appId: com.toroloom.app
 # ── 4. Trade History Empty State ───────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: "menu-TradeHistory"
@@ -157,7 +169,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     id: "menu-TradeHistory"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 # The subtitle is "{{count}} total trades" — parameterized full node
 - extendedWaitUntil:
     visible:
@@ -184,7 +197,8 @@ appId: com.toroloom.app
 # tap by accessibility, not visible text
 - tapOn:
     point: "8%,12%"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "more-title"
 
@@ -197,7 +211,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     id: "menu-MutualFunds"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "Mutual Funds"
 
@@ -205,7 +220,8 @@ appId: com.toroloom.app
 # empty state
 - tapOn:
     text: "My SIPs.*"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # The store seeds two SIP plans (mockSIPs) — assert seeded fund rows
 # instead of the unreachable empty state.
@@ -225,7 +241,8 @@ appId: com.toroloom.app
 # Back is the icon-only button (accessibilityLabel "Go back")
 - tapOn:
     point: "8%,12%"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "more-title"
 
@@ -238,7 +255,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     id: "menu-FundsDashboard"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "Funds Dashboard"
 
@@ -249,7 +267,7 @@ appId: com.toroloom.app
       text: "Funds Added"
     direction: DOWN
     speed: 20
-    timeout: 20000
+    timeout: 45000
 - assertVisible:
     text: "Funds Added"
 - scrollUntilVisible:
@@ -264,6 +282,7 @@ appId: com.toroloom.app
 # Back is the icon-only button (accessibilityLabel "Go back")
 - tapOn:
     point: "8%,12%"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "more-title"

@@ -76,7 +76,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Advisors ──────────────────────────────────────────
 - tapOn:
     text: "More"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "more-title"
 - scrollUntilVisible:
@@ -87,7 +88,8 @@ appId: com.toroloom.app
     timeout: 30000
 - tapOn:
     id: "menu-AdvisorList"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Advisor List Screen ─────────────────────────────────────────
 - assertVisible:
@@ -108,7 +110,8 @@ appId: com.toroloom.app
     id: "advisory-search"
 - inputText: "khanna"
 - hideKeyboard
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Only the matching advisor remains (list reloads async — wait for it)
 - extendedWaitUntil:
@@ -120,12 +123,14 @@ appId: com.toroloom.app
 
 # Clear the search
 - eraseText
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 5. Filter by type chip (RA) ───────────────────────────────────────────
 - tapOn:
     id: "chip-RA"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # RA advisors (Amit Verma) visible, RIA (Dr. Rajesh Khanna) hidden
 - assertVisible:
@@ -136,14 +141,16 @@ appId: com.toroloom.app
 # Reset back to All
 - tapOn:
     id: "chip-all"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "Dr. Rajesh Khanna"
 
 # ── 6. Open an Advisor Profile ────────────────────────────────────────────
 - tapOn:
     text: "Dr. Rajesh Khanna"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify detail screen (SEBI badge text is "SEBI RIA Reg. · INA000001234")
 - assertVisible:
@@ -171,12 +178,14 @@ appId: com.toroloom.app
     timeout: 15000
 - tapOn:
     text: "Go back"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "Advisors"
 
 - tapOn:
     text: "Go back"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "More"

@@ -69,7 +69,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Profile & KYC ─────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Profile & KYC"
@@ -78,14 +79,16 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Profile & KYC"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Switch to the KYC & Banks Tab ──────────────────────────────────────
 - assertVisible:
     text: "Profile"
 - tapOn:
     text: "KYC & Banks"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 4. Open DigiLocker from the KYC Steps ─────────────────────────────────
 - assertVisible:
@@ -96,7 +99,8 @@ appId: com.toroloom.app
     direction: DOWN
 - tapOn:
     text: "DigiLocker"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 5. Verify DigiLocker Screen ───────────────────────────────────────────
 - assertVisible:
@@ -119,7 +123,8 @@ appId: com.toroloom.app
     text: "Connect DigiLocker"
 - tapOn:
     text: "Connect DigiLocker"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Consent alert: "DigiLocker Consent" with Authorize/Cancel
 - assertVisible:
@@ -153,7 +158,8 @@ appId: com.toroloom.app
 # ── 8. Complete Verification ───────────────────────────────────────────────
 - tapOn:
     text: "Complete Verification"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 9. Verify Back on KYC Screen ───────────────────────────────────────────
 - assertVisible:

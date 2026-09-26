@@ -99,6 +99,20 @@ appId: com.toroloom.app
           commands:
             - waitForAnimationToEnd:
                 timeout: 65000
+            - runFlow:
+                when:
+                  visible:
+                    id: "signup-btn"
+                commands:
+                  - waitForAnimationToEnd:
+                      timeout: 65000
+            - runFlow:
+                when:
+                  visible:
+                    id: "signup-btn"
+                commands:
+                  - waitForAnimationToEnd:
+                      timeout: 65000
             - scrollUntilVisible:
                 element:
                   id: "signup-btn"

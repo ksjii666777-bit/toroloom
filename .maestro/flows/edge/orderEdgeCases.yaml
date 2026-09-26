@@ -65,7 +65,8 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
     id: "tab-markets"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "markets-title"
 
@@ -91,7 +92,8 @@ appId: com.toroloom.app
 # Bottom action bar Buy button (testID stock-buy-btn)
 - tapOn:
     id: "stock-buy-btn"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify the order form screen loaded
 - assertVisible:
@@ -103,7 +105,8 @@ appId: com.toroloom.app
 # Quick quantity chips: 10 / 50 / 100 / Max (testID quickQty_Max)
 - tapOn:
     id: "quickQty_Max"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # The Order Summary card appears when qty is set — scroll to it
 - scrollUntilVisible:
@@ -145,6 +148,7 @@ appId: com.toroloom.app
 # Tap the back button (testID) to return to stock detail
 - tapOn:
     id: "backBtn"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "RELIANCE"

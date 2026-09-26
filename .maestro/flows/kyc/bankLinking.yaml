@@ -65,10 +65,12 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Profile ──────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - tapOn:
     id: "more-profile-card"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 # Profile screen has a Profile/KYC toggle — switch to the KYC tab first
 - scrollUntilVisible:
     element:
@@ -78,7 +80,8 @@ appId: com.toroloom.app
     timeout: 30000
 - tapOn:
     text: "KYC & Banks"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 # KYC card sits below the fold on the Profile screen — scroll it in
 - scrollUntilVisible:
     element:
@@ -96,7 +99,8 @@ appId: com.toroloom.app
     direction: DOWN
 - tapOn:
     id: "kyc-step-bank"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 4. Verify Bank Linking Screen ─────────────────────────────────────────
 - assertVisible:
@@ -111,7 +115,8 @@ appId: com.toroloom.app
     text: "HDFC0001234"
 - inputText: "HDFC0001234"
 - hideKeyboard
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Verify button via testID — i18n-safe (may sit below the fold)
 - scrollUntilVisible:
@@ -175,7 +180,8 @@ appId: com.toroloom.app
     timeout: 30000
 - tapOn:
     id: "bank-set-primary-toggle"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Tap link bank via testID — i18n-safe
 - scrollUntilVisible:
@@ -200,7 +206,8 @@ appId: com.toroloom.app
 # ── 12. Tap Done and navigate back via testID — i18n-safe ─────────────────
 - tapOn:
     id: "bank-done-btn"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - scrollUntilVisible:
     element:

@@ -64,14 +64,16 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → F&O Options Chain ─────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: "menu-FnOOptionsChain"
     direction: DOWN
 - tapOn:
     id: "menu-FnOOptionsChain"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Options Chain Screen ─────────────────────────────────────────
 - assertVisible:
@@ -108,15 +110,18 @@ appId: com.toroloom.app
 # ── 4. Switch symbol ──────────────────────────────────────────────────────
 - tapOn:
     text: "NIFTY"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - tapOn:
     text: "BANKNIFTY"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "BANKNIFTY"
 
 # ── 5. Navigate Back (header back button is icon-only — use system back) ──
 - back
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     id: "more-title"

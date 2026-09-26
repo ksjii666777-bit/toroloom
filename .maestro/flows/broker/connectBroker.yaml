@@ -82,7 +82,12 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "more-title"
+    timeout: 30000
 - scrollUntilVisible:
     element:
       text: "Connect Broker"
@@ -93,6 +98,24 @@ appId: com.toroloom.app
     text: "Connect Broker"
 - waitForAnimationToEnd:
     timeout: 10000
+
+# If the tap fired before the More menu wired its pressables (lazy mount),
+# the screen never changed — detect and re-tap once.
+- runFlow:
+    when:
+      visible:
+        id: "more-title"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Connect Broker"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+      - tapOn:
+          text: "Connect Broker"
+      - waitForAnimationToEnd:
+          timeout: 10000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 3. Verify ConnectBrokerView Renders Correctly
@@ -196,6 +219,10 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 # Since we never completed a real OAuth, no session should be stored and
 # no connection banner should appear.
+- extendedWaitUntil:
+    visible:
+      text: "Choose Your Broker"
+    timeout: 20000
 - assertNotVisible:
     text: "Test API"
 - assertNotVisible:
@@ -209,7 +236,18 @@ appId: com.toroloom.app
 # BrokerConnect is a root-stack screen ABOVE MainTabs — the tab bar is
 # covered there, so tab taps fail. Hardware BACK pops to the More tab.
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
+# A browser opened over the app (OAuth tap) took the foreground —
+# press BACK again to hand control back to the app.
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - pressKey: BACK
+      - waitForAnimationToEnd:
+          timeout: 5000
 # More keeps its previous scroll offset after BACK — scroll the title back
 # into view, then recover via the tab bar if needed.
 - scrollUntilVisible:

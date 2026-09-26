@@ -65,7 +65,8 @@ appId: com.toroloom.app
 # ── 2. More → Security ─────────────────────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: "menu-SecuritySettings"
@@ -74,7 +75,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     id: "menu-SecuritySettings"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 # SecuritySettings is a lazy chunk — the assert can beat the mount
 - extendedWaitUntil:
     visible:
@@ -91,7 +93,8 @@ appId: com.toroloom.app
     timeout: 10000
 - tapOn:
     text: "TOTP-based 2FA via authenticator app"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "Two-Factor Authentication"
@@ -125,6 +128,8 @@ appId: com.toroloom.app
       visible:
         text: "Scan with Authenticator App"
     commands:
+      - waitForAnimationToEnd:
+          timeout: 10000
       - assertVisible:
           text: "Can't scan? Enter key manually"
 
@@ -141,7 +146,8 @@ appId: com.toroloom.app
       - tapOn:
           id: "otp-input"
       - inputText: "123456"
-      - waitForAnimationToEnd
+      - waitForAnimationToEnd:
+          timeout: 10000
 
       # "{{digits}} digits entered" progress line — parameterized full node
       - assertVisible:
@@ -162,7 +168,8 @@ appId: com.toroloom.app
 
 # ── 5. Exit without enabling (BACK pops to Security Settings) ──────────────
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 6. Back on Security Settings ───────────────────────────────────────────
 # The 2FA section was scrolled DOWN to earlier, so the title is above the
@@ -172,6 +179,11 @@ appId: com.toroloom.app
       notVisible:
         text: "Security Settings"
     commands:
+      # BACK may have been eaten closing the keyboard - pop once more, then
+      # scroll the (scrolled-away) title back into view.
+      - pressKey: BACK
+      - waitForAnimationToEnd:
+          timeout: 5000
       - scrollUntilVisible:
           element:
             text: "Security Settings"

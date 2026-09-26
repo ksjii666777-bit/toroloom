@@ -114,7 +114,8 @@ appId: com.toroloom.app
 # ── 2. Navigate: More → Market News ───────────────────────────────────────
 - tapOn:
     id: "tab-more"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - scrollUntilVisible:
     element:
       text: "Market News"
@@ -123,7 +124,8 @@ appId: com.toroloom.app
     timeout: 60000
 - tapOn:
     text: "Market News"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # ── 3. Verify Header + Category Chips ─────────────────────────────────────
 - assertVisible:
@@ -144,14 +146,16 @@ appId: com.toroloom.app
 # ── 4. Switch Category ─────────────────────────────────────────────────────
 - tapOn:
     text: "Corporate"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: "Corporate"
 
 - tapOn:
     text: "All"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
     text: ".*Showing.*article.*"
@@ -166,7 +170,8 @@ appId: com.toroloom.app
 # matches shrinks the list so the header (more-title) is back on screen
 # without any scrolling.
 - pressKey: BACK
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 - runFlow:
     when:
       notVisible:

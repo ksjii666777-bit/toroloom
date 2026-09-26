@@ -23,7 +23,8 @@ appId: com.toroloom.app
 # Tap Log In without entering any credentials
 - tapOn:
     text: "Log In"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Fresh installs show the onboarding walkthrough after login — skip it
 # (idempotent: skipped when already completed)
