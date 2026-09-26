@@ -131,19 +131,24 @@ appId: com.toroloom.app
 # it via its stable testID (the number badge "01" only renders while the
 # lesson is INCOMPLETE; a completed lesson shows a checkmark instead, so
 # text-targeting is state-dependent).
-- scrollUntilVisible:
-    element:
-      id: "lesson-card-1"
-    direction: DOWN
-    speed: 20
-    timeout: 30000
+# The lesson card sits below the fold only sometimes — scroll only when
+# it is not already visible (a bare scroll here races a fast layout and
+# has failed on CI), then tap.
+- runFlow:
+    when:
+      notVisible:
+        id: "lesson-card-1"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "lesson-card-1"
+          direction: DOWN
+          speed: 20
+          timeout: 30000
 - tapOn:
     id: "lesson-card-1"
 - waitForAnimationToEnd:
     timeout: 10000
-
-# A failed lesson fetch renders "Lesson not found" instead of the header
-# - back out and re-enter the lesson once.
 
 # Lesson header: "Lesson 1 of N" / "Key Takeaways" / "Summary".
 # LessonView is a lazy chunk — give the navigation a settle window. The
@@ -202,10 +207,9 @@ appId: com.toroloom.app
                       id: "lesson-card-1"
                   - waitForAnimationToEnd:
                       timeout: 5000
-      - extendedWaitUntil:
-          visible:
-            text: "Lesson 1 of"
-          timeout: 60000
+      # (a fatal extendedWaitUntil here would kill the whole flow when the
+      # re-tap still needs the next gate — run 36221684269's lesson; the
+      # top-level wait below is the final gate)
 - extendedWaitUntil:
     visible:
       text: "Key Takeaways"

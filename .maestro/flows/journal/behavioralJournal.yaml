@@ -68,43 +68,28 @@ appId: com.toroloom.app
     id: "tab-more"
 - waitForAnimationToEnd:
     timeout: 10000
+# Target the AI-section item by its stable testID — the screen's own header
+# repeats the menu label, so text targeting cannot distinguish "navigated"
+# from "still on the More menu".
 - scrollUntilVisible:
     element:
-      text: "Trading Journal"
+      id: "menu-trading-psychology"
     direction: DOWN
     speed: 20
     timeout: 60000
 - tapOn:
-    text: "Trading Journal"
+    id: "menu-trading-psychology"
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 15000
 
-# ── 3. Verify Header (menu label repeats as the screen title) ────────────
-# Both are lazy-chunk renders — the assert can beat the mount, so wait
-- extendedWaitUntil:
-    visible:
-      text: "Behavioural Journal"
-    timeout: 30000
-- assertVisible:
-    text: "Track your trading psychology"
-
-# ── 4. Verify Tab Bar ──────────────────────────────────────────────────────
-# SegmentedTabs labels are plain text nodes; the journal is a lazy-loaded
-# chunk, so give it a generous settle window. "Dashboard" is ALSO the More
-# menu's Portfolio-Accessories section header visible before the screen
-# mounts — accept the journal's own peer tab ("Entries") as the mount proof.
-# Bounded probe (non-stopping) - the recovery branch below heals a slow
-# lazy mount; the asserts after it are the final gate.
-- runFlow:
-    when:
-      notVisible:
-        text: "Entries"
-    commands:
-      - waitForAnimationToEnd:
-          timeout: 30000
-# If the tab bar still is not there, either the lazy screen never mounted
-# (assert the header, which waits) or the tap landed elsewhere — re-anchor
-# on the journal screen and wait once more.
+# ── 3/4. Screen mount proof ──────────────────────────────────────────────
+# The screen is a lazy chunk. Its SegmentedTabs (Dashboard / Entries /
+# Reports) renders unconditionally once mounted, so "Entries" is the one
+# unambiguous mount proof — the header title text repeats the More menu
+# label and cannot tell "journal screen" from "More menu". One guarded
+# re-tap heals a press fired before the lazy chunk wired its pressables;
+# every interior step stays NON-fatal (a failing command inside runFlow
+# kills the whole flow — run 36221684269's lesson).
 - runFlow:
     when:
       notVisible:
@@ -112,19 +97,17 @@ appId: com.toroloom.app
     commands:
       - runFlow:
           when:
-            notVisible:
-              text: "Behavioural Journal"
+            visible:
+              id: "menu-trading-psychology"
           commands:
             - tapOn:
-                text: "Trading Journal"
+                id: "menu-trading-psychology"
             - waitForAnimationToEnd:
-                timeout: 5000
-      - assertVisible:
-          text: "Behavioural Journal"
-      - extendedWaitUntil:
-          visible:
-            text: "Entries"
-          timeout: 45000
+                timeout: 15000
+      - waitForAnimationToEnd:
+          timeout: 10000
+- assertVisible:
+    text: "Entries"
 - assertVisible:
     text: "Dashboard"
 - assertVisible:
@@ -175,14 +158,9 @@ appId: com.toroloom.app
 - pressKey: BACK
 - waitForAnimationToEnd:
     timeout: 10000
-# More keeps its previous scroll offset after BACK — scroll the title back
-# into view, then recover via the tab bar if needed.
-- scrollUntilVisible:
-    element:
-      id: "more-title"
-    direction: UP
-    speed: 20
-    timeout: 10000
+# More keeps its previous scroll offset after BACK (and a re-tap on the
+# active tab does not reset it), so more-title can sit OFF-SCREEN — scroll
+# it back into view, re-anchoring via the tab bar first.
 - runFlow:
     when:
       notVisible:
@@ -197,9 +175,6 @@ appId: com.toroloom.app
             id: "more-title"
           direction: UP
           speed: 20
-          timeout: 10000
-
-- extendedWaitUntil:
-    visible:
-      id: "more-title"
-    timeout: 60000
+          timeout: 15000
+- assertVisible:
+    id: "more-title"

@@ -110,20 +110,9 @@ appId: com.toroloom.app
       - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 2000
-- runFlow:
-    when:
-      notVisible:
-        id: "signup-terms-checkbox"
-    commands:
-      - pressKey: BACK
-      - waitForAnimationToEnd:
-          timeout: 2000
-- scrollUntilVisible:
-    element:
-      id: "signup-terms-checkbox"
-    direction: DOWN
-    speed: 20
-    timeout: 30000
+# NO extra pressKey BACK here — with the keyboard already closed BACK
+# pops the Signup screen (run 11: both deepLink flows died exactly
+# there, hunting the checkbox on the Login screen for 30s).
 # If the checkbox is still missing, the extra BACK dismissed the KEYBOARD
 # and then POPPED the Signup screen (pressed the header back-arrow) —
 # reopen the deep link and refill the form.
@@ -167,6 +156,14 @@ appId: com.toroloom.app
       - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 2000
+# One more bounded scroll attempt if the refill still left the box
+# off-screen (kept OUT of the refill branch — a fatal command inside a
+# runFlow kills the whole flow before this retry could run).
+- runFlow:
+    when:
+      notVisible:
+        id: "signup-terms-checkbox"
+    commands:
       - scrollUntilVisible:
           element:
             id: "signup-terms-checkbox"
@@ -185,30 +182,41 @@ appId: com.toroloom.app
     timeout: 10000
 
 # If the backend rate-limited the POST (the suite logs in ~25+ times from
-# one IP; authLimiter = 10 req / 15 min), the form shows an inline error and
-# stays put. Cool down past the limiter window and resubmit once.
+# one IP; authLimiter = 10 req / 15 min), the form shows an inline error
+# and stays put. waitForAnimationToEnd is NOT a sleep (it returns instantly
+# when no animation runs) — evalScript busy-waits for a real cooldown.
 - runFlow:
     when:
       visible:
         text: "Create Account"
     commands:
-      - runFlow:
-          when:
-            visible:
-              text: "Create Account"
-          commands:
-            - waitForAnimationToEnd:
-                timeout: 65000
-            - scrollUntilVisible:
-                element:
-                  text: "Create Account"
-                direction: DOWN
-                speed: 20
-                timeout: 20000
-            - tapOn:
-                text: "Create Account"
-            - waitForAnimationToEnd:
-                timeout: 10000
+      - evalScript: ${output.DL_COOLDOWN_A = (function(ms){var e=Date.now()+ms;while(Date.now()<e);return 1;})(65000)}
+      - scrollUntilVisible:
+          element:
+            text: "Create Account"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+      - tapOn:
+          text: "Create Account"
+      - waitForAnimationToEnd:
+          timeout: 10000
+- runFlow:
+    when:
+      visible:
+        text: "Create Account"
+    commands:
+      - evalScript: ${output.DL_COOLDOWN_B = (function(ms){var e=Date.now()+ms;while(Date.now()<e);return 1;})(65000)}
+      - scrollUntilVisible:
+          element:
+            text: "Create Account"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+      - tapOn:
+          text: "Create Account"
+      - waitForAnimationToEnd:
+          timeout: 10000
 
 # Fresh installs show the onboarding walkthrough after signup — skip it
 # (idempotent: skipped when already completed)
@@ -231,6 +239,19 @@ appId: com.toroloom.app
     commands:
       - tapOn:
           text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# The onboarding walkthrough can late-mount AFTER the gates above (run 11:
+# signup died exactly here, with Skip covering the landing screen) —
+# handle it once more before the final landing wait.
+- runFlow:
+    when:
+      visible:
+        text: "Skip"
+    commands:
+      - tapOn:
+          text: "Skip"
       - waitForAnimationToEnd:
           timeout: 5000
 

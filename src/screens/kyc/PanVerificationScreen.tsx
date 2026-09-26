@@ -166,6 +166,7 @@ export default function PanVerificationScreen({ navigation }: NativeStackScreenP
             haptic="medium"
             scaleTo={0.97}
             style={{ opacity: isFormatValid && !isVerifying ? 1 : 0.5 }}
+            testID="pan-verify-btn"
           >
             <LinearGradient
               colors={isVerifying ? ['#666', '#888'] : GRADIENTS.primary}

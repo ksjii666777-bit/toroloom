@@ -118,7 +118,7 @@ appId: com.toroloom.app
 - inputText: "PQRST5678G"
 - hideKeyboard
 - tapOn:
-    text: "Verify PAN"
+    id: "pan-verify-btn"
 - waitForAnimationToEnd:
     timeout: 10000
 
@@ -134,7 +134,8 @@ appId: com.toroloom.app
       - assertVisible:
           text: ".*Invalid or unknown PAN.*"
 # The verify POST can be swallowed by a busy window (write limiter / cold
-# backend) — wait out the 1-min limiter window and re-verify once.
+# backend) — wait out the 1-min limiter window and re-verify once. The
+# button flips to a spinner while isVerifying, so probe the testID.
 - runFlow:
     when:
       notVisible:
@@ -143,14 +144,12 @@ appId: com.toroloom.app
       - runFlow:
           when:
             visible:
-              text: "Verify PAN"
+              id: "pan-verify-btn"
           commands:
             - waitForAnimationToEnd:
                 timeout: 65000
             - tapOn:
-                id: "pan-input"
-            - tapOn:
-                text: "Verify PAN"
+                id: "pan-verify-btn"
             - waitForAnimationToEnd:
                 timeout: 10000
 - extendedWaitUntil:
@@ -166,23 +165,21 @@ appId: com.toroloom.app
       - runFlow:
           when:
             visible:
-              text: "Verify PAN"
+              id: "pan-verify-btn"
           commands:
-            - scrollUntilVisible:
-                element:
-                  text: "Verify PAN"
-                direction: DOWN
-                speed: 20
-                timeout: 20000
             - tapOn:
-                text: "Verify PAN"
+                id: "pan-verify-btn"
             - extendedWaitUntil:
                 visible:
                   text: "PAN Verified.*"
                 timeout: 90000
+- extendedWaitUntil:
+    visible:
+      text: "PAN Verified.*"
+    timeout: 90000
 - scrollUntilVisible:
     element:
-      text: "PAN Verified.*"
+      text: "PQRST5678G"
     direction: DOWN
     speed: 20
     timeout: 45000

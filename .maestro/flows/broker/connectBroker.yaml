@@ -214,6 +214,39 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 3000
 
+# If the tap opened the DEVICE BROWSER (a real oauthUrl), it now covers
+# the app — BACK out of it and re-enter Connect Broker from More.
+- runFlow:
+    when:
+      notVisible:
+        text: "Choose Your Broker"
+    commands:
+      - pressKey: BACK
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - runFlow:
+          when:
+            notVisible:
+              text: "Choose Your Broker"
+          commands:
+            - pressKey: BACK
+            - waitForAnimationToEnd:
+                timeout: 5000
+            - tapOn:
+                id: "tab-more"
+            - waitForAnimationToEnd:
+                timeout: 5000
+            - scrollUntilVisible:
+                element:
+                  text: "Connect Broker"
+                direction: DOWN
+                speed: 20
+                timeout: 30000
+            - tapOn:
+                text: "Connect Broker"
+            - waitForAnimationToEnd:
+                timeout: 10000
+
 # ═══════════════════════════════════════════════════════════════════════════
 # 5. Verify No Connected State
 # ═══════════════════════════════════════════════════════════════════════════
@@ -248,14 +281,9 @@ appId: com.toroloom.app
       - pressKey: BACK
       - waitForAnimationToEnd:
           timeout: 5000
-# More keeps its previous scroll offset after BACK — scroll the title back
-# into view, then recover via the tab bar if needed.
-- scrollUntilVisible:
-    element:
-      id: "more-title"
-    direction: UP
-    speed: 20
-    timeout: 10000
+# Re-anchor FIRST (re-tapping the active tab is harmless and re-mounts
+# More fresh), THEN heal the retained scroll offset — re-tap alone does
+# not scroll more-title back into view (run 11 lesson).
 - runFlow:
     when:
       notVisible:
@@ -270,7 +298,7 @@ appId: com.toroloom.app
             id: "more-title"
           direction: UP
           speed: 20
-          timeout: 10000
+          timeout: 15000
 
 # Confirm we're back on the More screen
 - assertVisible:

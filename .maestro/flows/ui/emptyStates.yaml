@@ -113,25 +113,12 @@ appId: com.toroloom.app
     id: "tab-portfolio"
 - waitForAnimationToEnd:
     timeout: 10000
-# The store seeds mock holdings and the screen only refetches on
-# pull-to-refresh (mount-fetch crashed the release build in CI), so swipe
-# down to load the fresh account's real (empty) portfolio before asserting.
-# The first swipe can fire while the screen is still mounting - give the
-# holdings list one bounded settle window before the refresh swipes.
-- runFlow:
-    when:
-      notVisible:
-        text: "TCS"
-    commands:
-      - waitForAnimationToEnd:
-          timeout: 8000
-- swipe:
-    direction: DOWN
-    duration: 1000
-- waitForAnimationToEnd:
-    timeout: 5000
-# One fling may release above the RefreshControl threshold — retry while
-# the empty state has not appeared yet (capped so the flow cannot hang).
+# The store seeds mock holdings, but pull-to-refresh replaces them with
+# the test account's REAL backend portfolio — which is NON-deterministic
+# in CI (placeOrder creates real orders; the backend may also return an
+# empty list for a fresh account). Accept either state:
+#   populated → TCS card visible (scroll it into view)
+#   empty     → "No Holdings Yet" + "Explore Markets" empty state
 - runFlow:
     when:
       notVisible:
@@ -139,23 +126,51 @@ appId: com.toroloom.app
     commands:
       - swipe:
           direction: DOWN
-          duration: 1200
+          duration: 1000
       - waitForAnimationToEnd:
           timeout: 5000
-# The backend mock broker ALWAYS returns 5 seeded holdings and the store
-# itself seeds mockHoldings — a populated portfolio is the only reachable
-# state in CI. TCS is present in BOTH the store seed and the backend mock,
-# whichever data source won the refresh.
-# With 5 seeded holdings the TCS card (third) sits below the fold —
-# scroll it into view before asserting.
-- scrollUntilVisible:
-    element:
-      text: "TCS"
-    direction: DOWN
-    speed: 20
-    timeout: 30000
-- assertVisible:
-    text: "TCS"
+      # One fling can release above the RefreshControl threshold —
+      # retry while NEITHER the empty state NOR holdings have appeared.
+      - runFlow:
+          when:
+            notVisible:
+              text: "No Holdings Yet"
+          commands:
+            - runFlow:
+                when:
+                  notVisible:
+                    text: "TCS"
+                commands:
+                  - swipe:
+                      direction: DOWN
+                      duration: 1200
+                  - waitForAnimationToEnd:
+                      timeout: 5000
+- runFlow:
+    when:
+      visible:
+        text: "No Holdings Yet"
+    commands:
+      - assertVisible:
+          text: "Explore Markets"
+- runFlow:
+    when:
+      notVisible:
+        text: "No Holdings Yet"
+    commands:
+      - runFlow:
+          when:
+            notVisible:
+              text: "TCS"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  text: "TCS"
+                direction: DOWN
+                speed: 20
+                timeout: 30000
+      - assertVisible:
+          text: "TCS"
 # ── 4. Trade History Empty State ───────────────────────────────────────────
 - tapOn:
     id: "tab-more"

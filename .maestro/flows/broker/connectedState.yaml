@@ -268,7 +268,8 @@ appId: com.toroloom.app
 # 5. Navigate Back to More
 # ═══════════════════════════════════════════════════════════════════════
 # BrokerConnect is a root-stack screen ABOVE MainTabs — the tab bar is
-# covered there, so tab taps fail. Hardware BACK pops to the More tab.- pressKey: BACK
+# covered there, so tab taps fail. Hardware BACK pops to the More tab.
+- pressKey: BACK
 - waitForAnimationToEnd:
     timeout: 10000
 # A deep link can relaunch the app and cover the screen - press BACK again
@@ -281,6 +282,10 @@ appId: com.toroloom.app
       - pressKey: BACK
       - waitForAnimationToEnd:
           timeout: 10000
+# Re-anchor FIRST (re-tapping the active tab is harmless and re-mounts
+# More fresh), THEN heal the retained scroll offset — re-tap alone does
+# not scroll more-title back into view. A failing command inside runFlow
+# kills the whole flow (run 36221684269), so no fatal waits in here.
 - runFlow:
     when:
       notVisible:
@@ -290,10 +295,27 @@ appId: com.toroloom.app
           id: "tab-more"
       - waitForAnimationToEnd:
           timeout: 5000
-      - extendedWaitUntil:
-          visible:
+      - scrollUntilVisible:
+          element:
             id: "more-title"
-          timeout: 60000
+          direction: UP
+          speed: 20
+          timeout: 15000
+      - runFlow:
+          when:
+            notVisible:
+              id: "more-title"
+          commands:
+            - tapOn:
+                id: "tab-more"
+            - waitForAnimationToEnd:
+                timeout: 5000
+            - scrollUntilVisible:
+                element:
+                  id: "more-title"
+                direction: UP
+                speed: 20
+                timeout: 15000
 
 - assertVisible:
     id: "more-title"

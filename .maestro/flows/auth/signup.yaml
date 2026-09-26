@@ -86,43 +86,60 @@ appId: com.toroloom.app
 
 # If the backend rate-limited the POST (the whole suite logs in ~25+ times
 # from one IP; authLimiter = 10 req / 15 min), the form shows an inline
-# error and stays put. Cool down past the limiter window and resubmit once.
+# error and stays put. Cool down past the limiter window and resubmit.
+# NOTE: waitForAnimationToEnd returns INSTANTLY when no animation is
+# running — it is not a sleep. evalScript busy-waits for a real cooldown.
+# Each retry is a separate top-level runFlow so a failing step can never
+# abort the remaining retries (a fatal command inside runFlow kills the
+# whole flow — run 36221684269's lesson).
 - runFlow:
     when:
       visible:
         id: "signup-btn"
     commands:
-      - runFlow:
-          when:
-            visible:
-              id: "signup-btn"
-          commands:
-            - waitForAnimationToEnd:
-                timeout: 65000
-            - runFlow:
-                when:
-                  visible:
-                    id: "signup-btn"
-                commands:
-                  - waitForAnimationToEnd:
-                      timeout: 65000
-            - runFlow:
-                when:
-                  visible:
-                    id: "signup-btn"
-                commands:
-                  - waitForAnimationToEnd:
-                      timeout: 65000
-            - scrollUntilVisible:
-                element:
-                  id: "signup-btn"
-                direction: DOWN
-                speed: 20
-                timeout: 20000
-            - tapOn:
-                id: "signup-btn"
-            - waitForAnimationToEnd:
-                timeout: 10000
+      - evalScript: ${output.COOLDOWN_A = (function(ms){var e=Date.now()+ms;while(Date.now()<e);return 1;})(65000)}
+      - scrollUntilVisible:
+          element:
+            id: "signup-btn"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+      - tapOn:
+          id: "signup-btn"
+      - waitForAnimationToEnd:
+          timeout: 10000
+- runFlow:
+    when:
+      visible:
+        id: "signup-btn"
+    commands:
+      - evalScript: ${output.COOLDOWN_B = (function(ms){var e=Date.now()+ms;while(Date.now()<e);return 1;})(65000)}
+      - scrollUntilVisible:
+          element:
+            id: "signup-btn"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+      - tapOn:
+          id: "signup-btn"
+      - waitForAnimationToEnd:
+          timeout: 10000
+- runFlow:
+    when:
+      visible:
+        id: "signup-btn"
+    commands:
+      - evalScript: ${output.COOLDOWN_C = (function(ms){var e=Date.now()+ms;while(Date.now()<e);return 1;})(65000)}
+      - scrollUntilVisible:
+          element:
+            id: "signup-btn"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+      - tapOn:
+          id: "signup-btn"
+      - waitForAnimationToEnd:
+          timeout: 10000
 
 # Fresh installs show the onboarding walkthrough after signup — skip it
 # (idempotent: skipped when already completed)
