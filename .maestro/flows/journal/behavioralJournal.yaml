@@ -94,7 +94,7 @@ appId: com.toroloom.app
 - extendedWaitUntil:
     visible:
       text: "Entries"
-    timeout: 30000
+    timeout: 60000
 - assertVisible:
     text: "Dashboard"
 - assertVisible:

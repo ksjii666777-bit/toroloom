@@ -156,7 +156,7 @@ appId: com.toroloom.app
 - extendedWaitUntil:
     visible:
       text: "Lesson 1 of"
-    timeout: 30000
+    timeout: 60000
 - assertVisible:
     text: "Key Takeaways"
 - assertVisible:

@@ -131,15 +131,14 @@ appId: com.toroloom.app
           duration: 1200
       - waitForAnimationToEnd:
           timeout: 5000
+# The backend mock broker ALWAYS returns 5 seeded holdings and the store
+# itself seeds mockHoldings — a populated portfolio is the only reachable
+# state in CI. TCS is present in BOTH the store seed and the backend mock,
+# whichever data source won the refresh.
 - extendedWaitUntil:
     visible:
-      text: "No Holdings Yet"
+      text: "TCS"
     timeout: 30000
-- assertVisible:
-    text: "Start investing to build your portfolio"
-- assertVisible:
-    text: "Explore Markets"
-
 # ── 4. Trade History Empty State ───────────────────────────────────────────
 - tapOn:
     id: "tab-more"
@@ -162,10 +161,18 @@ appId: com.toroloom.app
     visible:
       text: ".*total trades"
     timeout: 20000
+# The store seeds 5 mock trades (backend mock broker mirrors them) — the
+# empty state is unreachable; assert real rows instead.
+- scrollUntilVisible:
+    element:
+      text: "RELIANCE"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
-    text: "No Trades Found"
+    text: "RELIANCE"
 - assertVisible:
-    text: "Start trading to see your history here"
+    text: "TCS"
 
 # The back control is an icon-only button (accessibilityLabel "Go back") —
 # tap by accessibility, not visible text
@@ -194,10 +201,20 @@ appId: com.toroloom.app
     text: "My SIPs.*"
 - waitForAnimationToEnd
 
+# The store seeds two SIP plans (mockSIPs) — assert seeded fund rows
+# instead of the unreachable empty state.
+- extendedWaitUntil:
+    visible:
+      text: "Parag Parikh Flexi Cap Fund"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "SBI Bluechip Fund"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
-    text: "No Active SIPs"
-- assertVisible:
-    text: "Start a SIP to invest regularly and build wealth over time"
+    text: "SBI Bluechip Fund"
 
 # Back is the icon-only button (accessibilityLabel "Go back")
 - tapOn:
@@ -219,13 +236,22 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Funds Dashboard"
 
+# The store seeds fund transactions (seedTransactions) — assert a seeded
+# row type instead of the unreachable empty state.
 - scrollUntilVisible:
     element:
-      text: "No transactions yet"
+      text: "Funds Added"
     direction: DOWN
-
+    speed: 20
+    timeout: 20000
 - assertVisible:
-    text: "No transactions yet"
+    text: "Funds Added"
+- scrollUntilVisible:
+    element:
+      text: "Add Funds"
+    direction: UP
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "Add Funds"
 

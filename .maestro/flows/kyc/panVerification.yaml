@@ -129,6 +129,24 @@ appId: com.toroloom.app
     commands:
       - assertVisible:
           text: ".*Invalid or unknown PAN.*"
+# The verify POST can be swallowed by a busy window (write limiter / cold
+# backend) — wait out the 1-min limiter window and re-verify once.
+- runFlow:
+    when:
+      notVisible:
+        text: "PAN Verified.*"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              text: "Verify PAN"
+          commands:
+            - waitForAnimationToEnd:
+                timeout: 65000
+            - tapOn:
+                text: "Verify PAN"
+            - waitForAnimationToEnd:
+                timeout: 10000
 - extendedWaitUntil:
     visible:
       text: "PAN Verified.*"

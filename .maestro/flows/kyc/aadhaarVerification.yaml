@@ -158,8 +158,10 @@ appId: com.toroloom.app
 
 # ── 6. Verify Result ───────────────────────────────────────────────────
 # Result title is "Aadhaar Verified ✓" (one node with the checkmark) — regex
-- assertVisible:
-    text: "Aadhaar Verified.*"
+- extendedWaitUntil:
+    visible:
+      text: "Aadhaar Verified.*"
+    timeout: 60000
 - assertVisible:
     text: "Your Aadhaar has been verified successfully via UIDAI"
 

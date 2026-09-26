@@ -131,7 +131,14 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 # 4. Verify Order Form Shows Order Types
 # ═══════════════════════════════════════════════════════════════════════════
-# Market order type chip (orderType_market)
+# Market order type chip (orderType_market) — the balance scroll moved it
+# ABOVE the viewport, so scroll back UP before asserting.
+- scrollUntilVisible:
+    element:
+      text: "Market"
+    direction: UP
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "Market"
 

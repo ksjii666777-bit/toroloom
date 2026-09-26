@@ -222,9 +222,7 @@ appId: com.toroloom.app
         id: "more-title"
     commands:
       - tapOn:
-          id: "more-search-input"
-      - inputText: "zzz"
-      - hideKeyboard
+          id: "tab-more"
       - waitForAnimationToEnd:
           timeout: 5000
 

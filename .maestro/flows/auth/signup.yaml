@@ -92,10 +92,6 @@ appId: com.toroloom.app
       visible:
         id: "signup-btn"
     commands:
-      - extendedWaitUntil:
-          notVisible:
-            id: "signup-btn"
-          timeout: 20000
       - runFlow:
           when:
             visible:

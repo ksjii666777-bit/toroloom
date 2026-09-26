@@ -211,6 +211,12 @@ appId: com.toroloom.app
     timeout: 30000
 - assertVisible:
     text: "Quick Summary"
+- scrollUntilVisible:
+    element:
+      text: "Returns / Invested Ratio"
+    direction: DOWN
+    speed: 20
+    timeout: 20000
 - assertVisible:
     text: "Returns / Invested Ratio"
 

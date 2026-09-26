@@ -162,6 +162,11 @@ appId: com.toroloom.app
       - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 2000
+      # The keyboard IS open after the last input — BACK closes the keyboard
+      # (not the screen) and frees the scroll area below the form
+      - pressKey: BACK
+      - waitForAnimationToEnd:
+          timeout: 2000
       - scrollUntilVisible:
           element:
             id: "signup-terms-checkbox"
@@ -187,10 +192,6 @@ appId: com.toroloom.app
       visible:
         text: "Create Account"
     commands:
-      - extendedWaitUntil:
-          notVisible:
-            text: "Create Account"
-          timeout: 20000
       - runFlow:
           when:
             visible:

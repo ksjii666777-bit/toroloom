@@ -539,9 +539,14 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
                     </View>
 
                     <Text style={styles.brokerLabel}>{broker.label}</Text>
-                    <Text style={styles.brokerTagline} numberOfLines={2} testID={broker.testId}>
-                      {broker.tagline}
-                    </Text>
+                    {/* testID on a wrapper View: the Text clips under
+                        numberOfLines={2}, and Maestro cannot match a
+                        partially-clipped text node */}
+                    <View testID={broker.testId}>
+                      <Text style={styles.brokerTagline} numberOfLines={2}>
+                        {broker.tagline}
+                      </Text>
+                    </View>
 
                     {/* Sync Method Badge */}
                     <View style={styles.syncMethodBadge}>
