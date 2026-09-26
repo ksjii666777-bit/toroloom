@@ -157,6 +157,24 @@ appId: com.toroloom.app
     visible:
       text: "Lesson 1 of"
     timeout: 60000
+# Still on the course page = the lazy LessonView chunk never mounted —
+# re-tap the lesson card once and wait again.
+- runFlow:
+    when:
+      notVisible:
+        text: "Lesson 1 of"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "lesson-card-1"
+          commands:
+            - tapOn:
+                id: "lesson-card-1"
+            - extendedWaitUntil:
+                visible:
+                  text: "Lesson 1 of"
+                timeout: 60000
 - assertVisible:
     text: "Key Takeaways"
 - assertVisible:

@@ -135,10 +135,16 @@ appId: com.toroloom.app
 # itself seeds mockHoldings — a populated portfolio is the only reachable
 # state in CI. TCS is present in BOTH the store seed and the backend mock,
 # whichever data source won the refresh.
-- extendedWaitUntil:
-    visible:
+# With 5 seeded holdings the TCS card (third) sits below the fold —
+# scroll it into view before asserting.
+- scrollUntilVisible:
+    element:
       text: "TCS"
+    direction: DOWN
+    speed: 20
     timeout: 30000
+- assertVisible:
+    text: "TCS"
 # ── 4. Trade History Empty State ───────────────────────────────────────────
 - tapOn:
     id: "tab-more"

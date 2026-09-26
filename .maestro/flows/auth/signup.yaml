@@ -140,4 +140,22 @@ appId: com.toroloom.app
     visible:
       id: "home-greeting"
     timeout: 60000
+# A lazy tab can hide Home behind another tab on a cold emulator — tap the
+# Home tab explicitly and wait once more.
+- runFlow:
+    when:
+      notVisible:
+        id: "home-greeting"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "tab-home"
+          commands:
+            - tapOn:
+                id: "tab-home"
+            - extendedWaitUntil:
+                visible:
+                  id: "home-greeting"
+                timeout: 60000
     timeout: 45000

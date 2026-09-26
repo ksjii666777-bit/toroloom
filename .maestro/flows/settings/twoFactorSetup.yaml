@@ -167,11 +167,18 @@ appId: com.toroloom.app
 # ── 6. Back on Security Settings ───────────────────────────────────────────
 # The 2FA section was scrolled DOWN to earlier, so the title is above the
 # viewport after BACK — scroll it back into view before asserting.
-- scrollUntilVisible:
-    element:
+- runFlow:
+    when:
+      notVisible:
+        text: "Security Settings"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Security Settings"
+          direction: UP
+          speed: 20
+          timeout: 30000
+- extendedWaitUntil:
+    visible:
       text: "Security Settings"
-    direction: UP
-    speed: 20
-    timeout: 30000
-- assertVisible:
-    text: "Security Settings"
+    timeout: 60000

@@ -94,7 +94,30 @@ appId: com.toroloom.app
 - extendedWaitUntil:
     visible:
       text: "Entries"
-    timeout: 60000
+    timeout: 45000
+# If the tab bar still is not there, either the lazy screen never mounted
+# (assert the header, which waits) or the tap landed elsewhere — re-anchor
+# on the journal screen and wait once more.
+- runFlow:
+    when:
+      notVisible:
+        text: "Entries"
+    commands:
+      - runFlow:
+          when:
+            notVisible:
+              text: "Behavioural Journal"
+          commands:
+            - tapOn:
+                text: "Trading Journal"
+            - waitForAnimationToEnd:
+                timeout: 5000
+      - assertVisible:
+          text: "Behavioural Journal"
+      - extendedWaitUntil:
+          visible:
+            text: "Entries"
+          timeout: 45000
 - assertVisible:
     text: "Dashboard"
 - assertVisible:

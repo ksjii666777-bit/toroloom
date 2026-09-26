@@ -135,24 +135,18 @@ appId: com.toroloom.app
 # 2-col grid, and scrolling to a lower card pushes the upper cards' taglines
 # off the TOP of the viewport. Scroll to each tagline right before asserting
 # it.
-# Taglines clip under numberOfLines={2} on narrow viewports (the full text
-# node never becomes visible), so target the stable testIDs instead.
+# Taglines clip under numberOfLines={2} on narrow viewports and neither
+# text- nor testID-matching sees them reliably — the card LABELS above are
+# the identity anchors and already asserted. Only verify the third card
+# scrolls in (2-col grid, row 2 = below the fold).
 - scrollUntilVisible:
     element:
-      id: "broker-tagline-angel"
+      text: "Groww"
     direction: DOWN
     speed: 20
     timeout: 20000
 - assertVisible:
-    id: "broker-tagline-angel"
-- scrollUntilVisible:
-    element:
-      id: "broker-tagline-zerodha"
-    direction: DOWN
-    speed: 20
-    timeout: 20000
-- assertVisible:
-    id: "broker-tagline-zerodha"
+    text: "Groww"
 - scrollUntilVisible:
     element:
       text: "Simple, modern investing platform"

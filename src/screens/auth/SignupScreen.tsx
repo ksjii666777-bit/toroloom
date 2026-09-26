@@ -70,11 +70,21 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Back Button */}
+        {/* Back Button — dismisses the KEYBOARD first if it is open: with
+            the soft keyboard up, hardware BACK also dismisses it, so the
+            E2E flows' BACK-presses must not pop the screen from under the
+            form (CI run 36211576190: checkbox became unreachable because
+            the second BACK popped Signup) */}
         <TouchableOpacity
           accessibilityLabel={t('app.goBack')}
           style={styles.backBtn}
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            if (Keyboard.isVisible()) {
+              Keyboard.dismiss();
+              return;
+            }
+            navigation.goBack();
+          }}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>

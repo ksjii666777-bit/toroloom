@@ -151,6 +151,29 @@ appId: com.toroloom.app
     visible:
       text: "PAN Verified.*"
     timeout: 90000
+# Still nothing = the re-tap above also got swallowed; one last attempt
+- runFlow:
+    when:
+      notVisible:
+        text: "PAN Verified.*"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              text: "Verify PAN"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  text: "Verify PAN"
+                direction: DOWN
+                speed: 20
+                timeout: 20000
+            - tapOn:
+                text: "Verify PAN"
+            - extendedWaitUntil:
+                visible:
+                  text: "PAN Verified.*"
+                timeout: 90000
 - scrollUntilVisible:
     element:
       text: "PAN Verified.*"

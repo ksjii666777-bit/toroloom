@@ -223,8 +223,10 @@ appId: com.toroloom.app
     commands:
       - tapOn:
           id: "tab-more"
-      - waitForAnimationToEnd:
-          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "more-title"
+          timeout: 60000
 
 - assertVisible:
     id: "more-title"
