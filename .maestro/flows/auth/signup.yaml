@@ -158,4 +158,3 @@ appId: com.toroloom.app
                 visible:
                   id: "home-greeting"
                 timeout: 60000
-    timeout: 45000
