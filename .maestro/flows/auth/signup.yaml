@@ -274,6 +274,14 @@ appId: com.toroloom.app
             visible:
               id: "login-email-input"
           commands:
+            # Run-15 evidence: the re-login guard probed BEFORE the late
+            # logout landed (dump: login screen AFTER all guards ran
+            # SKIPPED) — so first WAIT for the Login screen to actually
+            # appear, then fill it.
+            - extendedWaitUntil:
+                visible:
+                  id: "login-welcome-back"
+                timeout: 90000
             - tapOn:
                 id: "login-email-input"
             - inputText: ${SIGNUP_EMAIL}

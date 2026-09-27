@@ -39,6 +39,24 @@ export default function LessonViewScreen({ route, navigation }: NativeStackScree
 
   const [courseLessons, setCourseLessons] = useState<any[]>([]);
   const lesson = currentLesson?.id === lessonId ? currentLesson : null;
+  // Self-heal: a transient fetch failure (timeout/abort/rate-limit window)
+  // used to strand the screen on the static "Lesson not found" dead-end
+  // forever (run-14/15 CI evidence — both attempts ended there). Retry the
+  // fetch once after a short delay; the store's mock fallback covers the
+  // rest.
+  const [lessonRetried, setLessonRetried] = useState(false);
+  useEffect(() => {
+    setLessonRetried(false);
+  }, [lessonId]);
+  useEffect(() => {
+    if (!lesson && !lessonRetried) {
+      const id = setTimeout(() => {
+        setLessonRetried(true);
+        fetchLesson(lessonId);
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [lesson, lessonRetried, lessonId, fetchLesson]);
   const isCompleted = lessonProgress[lessonId] || lesson?.completed || false;
   const hasVideo = !!lesson?.videoUrl;
   const lessonVideoProgress = videoProgress[lessonId];

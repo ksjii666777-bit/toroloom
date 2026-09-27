@@ -123,6 +123,12 @@ run_suite_per_flow() {
         echo "[Failed] $(basename "$flow" .yaml) (maestro exit $flow_rc)"
       fi
       echo "::group::Failure diagnosis — $flow (screen state at failure)"
+      # Several run-14/15 failures dumped the device LAUNCHER — the app
+      # process died mid-flow. Capture the native crash buffer right here
+      # (nothing else has restarted the app yet) so the actual stack lands
+      # in the job log instead of another blind fix cycle.
+      echo "---- CRASH buffer (logcat -b crash, last 60) ----"
+      adb logcat -b crash -d 2>/dev/null | tail -60 || true
       adb shell uiautomator dump /sdcard/e2e_fail.xml >/dev/null 2>&1 || true
       adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
         | grep -oE '(text|resource-id)="[^"]+"' \

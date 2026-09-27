@@ -1008,7 +1008,7 @@ jobs:
             # Boot tuning: smaller 'pixel' AVD, -accel auto (falls back if KVM
             # unavailable), -gpu auto (swiftshader on headless), -no-metrics.
             emulator-boot-timeout: 900
-            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
+            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 2048 -cores 2 -no-metrics
             disable-animations: true
             # Boot/Maestro logic lives in .github/scripts/e2e-boot.sh
             # (standalone file) — inline multi-line scripts with embedded
@@ -1184,7 +1184,7 @@ jobs:
             # Boot tuning: smaller 'pixel' AVD, -accel auto (falls back if KVM
             # unavailable), -gpu auto (swiftshader on headless), -no-metrics.
             emulator-boot-timeout: 900
-            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
+            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 2048 -cores 2 -no-metrics
             disable-animations: true
             # Boot/Maestro logic lives in .github/scripts/e2e-boot.sh
             # (standalone file) — inline multi-line scripts with embedded
