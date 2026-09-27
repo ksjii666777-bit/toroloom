@@ -239,7 +239,7 @@ appId: com.toroloom.app
             - tapOn:
                 id: "lesson-card-1"
             - waitForAnimationToEnd:
-              timeout: 5000
+                timeout: 5000
 - extendedWaitUntil:
     visible:
       text: "Key Takeaways"

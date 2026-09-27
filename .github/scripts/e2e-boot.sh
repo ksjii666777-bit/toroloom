@@ -89,7 +89,23 @@ trap diag_on_fail EXIT
 FLOW_TIMEOUT_SECS=420
 run_suite_per_flow() {
   local rc=0 failed=0 passed=0
-  for flow in "$@"; do
+  # The e2e-pr job passes explicit .yaml paths, the full-suite job passes
+  # the .maestro DIRECTORY (config.yaml's flows glob only matches when
+  # maestro receives the directory) — expand directories to flow files.
+  local -a flows=()
+  local target
+  for target in "$@"; do
+    if [ -d "$target" ]; then
+      while IFS= read -r f; do flows+=("$f"); done < <(find "$target" -name '*.yaml' ! -name 'config.yaml' | sort)
+    else
+      flows+=("$target")
+    fi
+  done
+  if [ "${#flows[@]}" -eq 0 ]; then
+    echo "::error::No flow files found in: $*"
+    return 1
+  fi
+  for flow in "${flows[@]}"; do
     echo ""
     echo "==== FLOW START: $flow ===="
     local flow_rc=0
@@ -118,7 +134,7 @@ run_suite_per_flow() {
     echo "==== FLOW END: $flow ===="
   done
   echo ""
-  echo "${passed}/${#} Flows Passed, ${failed} Failed"
+  echo "${passed}/${#flows[@]} Flows Passed, ${failed} Failed"
   return "$rc"
 }
 
