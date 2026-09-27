@@ -226,12 +226,39 @@ appId: com.toroloom.app
 # Verify Order Summary section via testIDs — i18n-safe. The card is tall —
 # scroll the BOTTOM row (Estimated Total) into view so the clipped rows
 # (inverted/negative bounds when below the fold) are fully visible.
-- scrollUntilVisible:
-    element:
-      text: "Estimated Total"
-    direction: DOWN
-    speed: 20
-    timeout: 30000
+# Run-14: this scroll FAILED once while the screen was alive (market-data
+# re-render froze layout mid-scroll) and its fatality ended the flow. The
+# scroll is guarded (skipped when the row is already visible) and a visible
+# retry gives the layout one more chance before the hard assert below.
+- runFlow:
+    when:
+      notVisible:
+        id: "order-summary-est-total"
+    commands:
+      - runFlow:
+          when:
+            notVisible:
+              text: "Estimated Total"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  text: "Estimated Total"
+                direction: DOWN
+                speed: 20
+                timeout: 30000
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - runFlow:
+          when:
+            notVisible:
+              text: "Estimated Total"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  text: "Estimated Total"
+                direction: DOWN
+                speed: 20
+                timeout: 30000
 - assertVisible:
     id: "order-summary-title"
 - assertVisible:

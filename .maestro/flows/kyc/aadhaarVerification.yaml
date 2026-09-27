@@ -161,6 +161,25 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
+# (Run-14 evidence: the tap can land on the dimmed button — the digit fill
+# race — so the verify POST never fires and the result never appears. The
+# OTP screen has no full-node "Aadhaar Verified" duplicate, so a bare text
+# probe here is safe; re-tap once when the result still isn't there.)
+- runFlow:
+    when:
+      notVisible:
+        text: "Aadhaar Verified.*"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              text: "Verify OTP"
+          commands:
+            - tapOn:
+                text: "Verify OTP"
+            - waitForAnimationToEnd:
+                timeout: 10000
+
 # ── 6. Verify Result ───────────────────────────────────────────────────
 # Result title is "Aadhaar Verified ✓" (one node with the checkmark) — regex
 - extendedWaitUntil:

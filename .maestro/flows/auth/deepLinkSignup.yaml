@@ -162,20 +162,12 @@ appId: com.toroloom.app
       - pressKey: BACK
       - waitForAnimationToEnd:
           timeout: 2000
-# One more bounded scroll attempt if the refill still left the box
-# off-screen (kept OUT of the refill branch — a fatal command inside a
-# runFlow kills the whole flow before this retry could run).
-- runFlow:
-    when:
-      notVisible:
-        id: "signup-terms-checkbox"
-    commands:
-      - scrollUntilVisible:
-          element:
-            id: "signup-terms-checkbox"
-          direction: DOWN
-          speed: 20
-          timeout: 30000
+# (Run-14 evidence: the scroll-when-still-missing recovery here was a
+# top-level FATAL scroll — when the app process died mid-form, it turned
+# a recoverable launchApp restart into an instant flow kill before any
+# retry could run, and the flow ended on the device launcher. Recovery
+# now lives entirely in the keyboard-guard above; the tapOn below with
+# its built-in wait is the final gate.)
 - tapOn:
     id: "signup-terms-checkbox"
 

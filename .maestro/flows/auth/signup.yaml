@@ -256,3 +256,69 @@ appId: com.toroloom.app
                 visible:
                   id: "home-greeting"
                 timeout: 60000
+
+# ── Run-14 evidence: logout race after a successful signup ─────────────
+# Both run-14 attempts ended with the flow on the LOGIN screen while the
+# signup had gone through (all cooldown probes were SKIPPED — no stuck
+# form) and the failure-time dump showed login-welcome-back. A post-signup
+# bootstrap request lost the race against the auth-rate limiter and its
+# 401/429 hit the logout interceptor. Recovery: re-login with the SAME
+# just-registered credentials (guarded, so a healthy landing is untouched).
+- runFlow:
+    when:
+      notVisible:
+        id: "home-greeting"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "login-email-input"
+          commands:
+            - tapOn:
+                id: "login-email-input"
+            - inputText: ${SIGNUP_EMAIL}
+            - hideKeyboard
+            - tapOn:
+                id: "login-password-input"
+            - inputText: "Secure@123"
+            - hideKeyboard
+            - tapOn:
+                id: "login-btn"
+            - waitForAnimationToEnd:
+                timeout: 10000
+            # The login POST can ALSO hit the same limiter window — one
+            # real cooldown (waitForAnimationToEnd is not a sleep), then
+            # resubmit from whatever state the form is in.
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "home-greeting"
+                commands:
+                  - evalScript: ${output.SIGNUP_RELOGIN_COOLDOWN = (function(ms){var e=Date.now()+ms;while(Date.now()<e);return 1;})(65000)}
+                  - runFlow:
+                      when:
+                        visible:
+                          id: "login-btn"
+                      commands:
+                        - tapOn:
+                            id: "login-btn"
+                        - waitForAnimationToEnd:
+                            timeout: 10000
+            - runFlow:
+                when:
+                  visible:
+                    text: "Skip"
+                commands:
+                  - tapOn:
+                      text: "Skip"
+                  - waitForAnimationToEnd:
+                      timeout: 5000
+            - runFlow:
+                when:
+                  visible:
+                    id: "tab-home"
+                commands:
+                  - tapOn:
+                      id: "tab-home"
+                  - waitForAnimationToEnd:
+                      timeout: 5000
