@@ -173,7 +173,10 @@ appId: com.toroloom.app
       text: "Lesson 1 of"
     timeout: 60000
 # Still on the course page = the lazy LessonView chunk never mounted —
-# re-tap the lesson card once and wait again.
+# re-tap the lesson card once and wait again. Run-12: both attempts died
+# AFTER the header showed (lesson was open) but takeaways were missing →
+# the 'Lesson not found' lazy-fetch branch. Guarded BACK + re-entry heals
+# it; the re-tap here targets the testID, not dead text coordinates.
 - runFlow:
     when:
       notVisible:
@@ -210,10 +213,37 @@ appId: com.toroloom.app
       # (a fatal extendedWaitUntil here would kill the whole flow when the
       # re-tap still needs the next gate — run 36221684269's lesson; the
       # top-level wait below is the final gate)
+# Header visible but "Key Takeaways" never rendered = 'Lesson not found'
+# (a failed lazy lesson fetch on the cold backend window, run-12 ×2).
+# Guarded BACK + re-entry — the re-tap below targets the CARD testID (the
+# run-12 pattern: text taps fired into dead coordinates after the FAILED
+# lesson mount, so the second re-entry never fired).
+- runFlow:
+    when:
+      notVisible:
+        text: "Key Takeaways"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              text: "Lesson not found"
+          commands:
+            - pressKey: BACK
+            - waitForAnimationToEnd:
+                timeout: 5000
+      - runFlow:
+          when:
+            visible:
+              id: "lesson-card-1"
+          commands:
+            - tapOn:
+                id: "lesson-card-1"
+            - waitForAnimationToEnd:
+              timeout: 5000
 - extendedWaitUntil:
     visible:
       text: "Key Takeaways"
-    timeout: 30000
+    timeout: 60000
 - assertVisible:
     text: "Summary"
 

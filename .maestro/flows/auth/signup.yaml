@@ -5,6 +5,12 @@
 # fields (including the mandatory Terms acceptance), taps "Create Account",
 # and verifies the user lands on the Home screen.
 #
+# Run-12 evidence: keyboard-dismissal strategy is load-bearing. pressKey
+# BACK (with the keyboard up) worked in both attempts, while the hideKeyboard
+# flows (deepLink x2) died at "No visible element found: signup-terms-checkbox"
+# — hideKeyboard no-ops after number-pad inputs and leaves the row scrolled
+# under the keyboard. Use BACK here and in every runFlow-refill below.
+#
 # Uses testID-based targeting for i18n-independent robustness. The signup
 # email is made unique at runtime via evalScript so re-runs don't collide
 # with an account persisted by a previous run.
@@ -62,10 +68,15 @@ appId: com.toroloom.app
 # pressKey BACK is the reliable dismiss (hideKeyboard can no-op with the
 # keyboard up and its swallow leaves scroll gestures dead); the keyboard IS
 # open right after the last input, so BACK closes it instead of popping the
-# screen.
+# screen. BACK (keyboard-up) is the ONLY dismissal that ever worked here —
+# see the run-12 evidence note in the header.
 - pressKey: BACK
 - waitForAnimationToEnd:
     timeout: 2000
+
+# Defensive: if BACK no-oped (keyboard already dismissed), hideKeyboard
+# catches the fallthrough. NEVER add a bare pressKey BACK beyond this —
+# with the keyboard closed it pops the Signup screen (run-11 lesson).
 
 # ── Mandatory Terms acceptance (added in the legal-consent release) ─────
 # The checkbox sits below the form; scroll to it explicitly
@@ -92,6 +103,62 @@ appId: com.toroloom.app
 # Each retry is a separate top-level runFlow so a failing step can never
 # abort the remaining retries (a fatal command inside runFlow kills the
 # whole flow — run 36221684269's lesson).
+# ── Terminal landing recovery (2 run-12 attempts died here) ─────────────
+# If the home-greeting never appeared (signup 5m15s both attempts), the
+# user IS registered (every POST got through) but the app failed to land:
+# re-launch once, dismiss the possible late onboarding walkthrough, and
+# tap the Home tab. Everything is guarded so this can never make things
+# worse (a fatal command inside runFlow kills the whole flow).
+- runFlow:
+    when:
+      notVisible:
+        id: "home-greeting"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              text: "Skip"
+          commands:
+            - tapOn:
+                text: "Skip"
+            - waitForAnimationToEnd:
+                timeout: 5000
+      - runFlow:
+          when:
+            visible:
+              id: "tab-home"
+          commands:
+            - tapOn:
+                id: "tab-home"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - runFlow:
+          when:
+            notVisible:
+              id: "home-greeting"
+          commands:
+            - launchApp
+            - waitForAnimationToEnd:
+                timeout: 15000
+            - runFlow:
+                when:
+                  visible:
+                    text: "Skip"
+                commands:
+                  - tapOn:
+                      text: "Skip"
+                  - waitForAnimationToEnd:
+                      timeout: 5000
+      - runFlow:
+          when:
+            visible:
+              id: "tab-home"
+          commands:
+            - tapOn:
+                id: "tab-home"
+            - waitForAnimationToEnd:
+                timeout: 5000
+
 - runFlow:
     when:
       visible:

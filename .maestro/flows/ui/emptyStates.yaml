@@ -117,7 +117,7 @@ appId: com.toroloom.app
 # the test account's REAL backend portfolio — which is NON-deterministic
 # in CI (placeOrder creates real orders; the backend may also return an
 # empty list for a fresh account). Accept either state:
-#   populated → TCS card visible (scroll it into view)
+#   populated → RELIANCE card visible (scroll it into view)
 #   empty     → "No Holdings Yet" + "Explore Markets" empty state
 - runFlow:
     when:
@@ -139,7 +139,7 @@ appId: com.toroloom.app
             - runFlow:
                 when:
                   notVisible:
-                    text: "TCS"
+                    text: "RELIANCE"
                 commands:
                   - swipe:
                       direction: DOWN
@@ -161,16 +161,16 @@ appId: com.toroloom.app
       - runFlow:
           when:
             notVisible:
-              text: "TCS"
+              text: "RELIANCE"
           commands:
             - scrollUntilVisible:
                 element:
-                  text: "TCS"
+                  text: "RELIANCE"
                 direction: DOWN
                 speed: 20
                 timeout: 30000
       - assertVisible:
-          text: "TCS"
+          text: "RELIANCE"
 # ── 4. Trade History Empty State ───────────────────────────────────────────
 - tapOn:
     id: "tab-more"
@@ -196,7 +196,9 @@ appId: com.toroloom.app
       text: ".*total trades"
     timeout: 20000
 # The store seeds 5 mock trades (backend mock broker mirrors them) — the
-# empty state is unreachable; assert real rows instead.
+# empty state is unreachable; assert real rows instead. Run-12: TCS
+# never appeared — the live account's ledger (probed 2026-09-27) holds
+# RELIANCE +100 and HDFCBANK +100 entries, so RELIANCE is the row.
 - scrollUntilVisible:
     element:
       text: "RELIANCE"
@@ -206,7 +208,7 @@ appId: com.toroloom.app
 - assertVisible:
     text: "RELIANCE"
 - assertVisible:
-    text: "TCS"
+    text: "HDFCBANK"
 
 # The back control is an icon-only button (accessibilityLabel "Go back") —
 # tap by accessibility, not visible text

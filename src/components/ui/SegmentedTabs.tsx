@@ -26,6 +26,8 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 export type SegmentedTabItem<T extends string> = {
   key: T;
   label: string;
+  /** Optional testID for E2E targeting — forwarded to the segment Pressable. */
+  testID?: string;
 };
 
 type SegmentedTabsProps<T extends string> = {
@@ -45,6 +47,7 @@ export function SegmentedTabs<T extends string>({ tabs, active, onChange }: Segm
         return (
           <Pressable
             key={tab.key}
+            testID={tab.testID}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
             onPress={() => onChange(tab.key)}

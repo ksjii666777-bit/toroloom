@@ -74,6 +74,54 @@ diag_on_fail() {
 }
 trap diag_on_fail EXIT
 
+# ── 0c. Per-flow runner: full step logs + failure-time UI dump ──────────
+# Runs #360+ lesson: `maestro test <all-flows>` prints ONE summary line per
+# flow ("[Passed] name (dur)" / "[Failed] name (dur) (reason)") and swallows
+# every per-step line — a failing flow cost another blind 2.5-hour suite
+# cycle because the evidence (which step, what was on screen) never reached
+# the job log. Running each flow in its own `maestro test` invocation:
+#   * streams EVERY step line ("Tap on id: ... COMPLETED/FAILED")
+#   * dumps the UI hierarchy + screenshot right after a failure, while the
+#     failing screen is still foregrounded
+#   * bounds one hung flow with `timeout` instead of stalling the suite
+# The per-flow header/summary lines keep the exact format the workflow's
+# result-collection steps already parse.
+FLOW_TIMEOUT_SECS=420
+run_suite_per_flow() {
+  local rc=0 failed=0 passed=0
+  for flow in "$@"; do
+    echo ""
+    echo "==== FLOW START: $flow ===="
+    local flow_rc=0
+    timeout "$FLOW_TIMEOUT_SECS" maestro test "$flow" \
+      --env "TEST_EMAIL=${TEST_EMAIL}" \
+      --env "TEST_PASSWORD=${TEST_PASSWORD}" || flow_rc=$?
+    if [ "$flow_rc" -eq 0 ]; then
+      passed=$((passed + 1))
+      echo "[Passed] $(basename "$flow" .yaml)"
+    else
+      failed=$((failed + 1))
+      if [ "$flow_rc" -eq 124 ]; then
+        echo "[Failed] $(basename "$flow" .yaml) (timed out after ${FLOW_TIMEOUT_SECS}s)"
+      else
+        echo "[Failed] $(basename "$flow" .yaml) (maestro exit $flow_rc)"
+      fi
+      echo "::group::Failure diagnosis — $flow (screen state at failure)"
+      adb shell uiautomator dump /sdcard/e2e_fail.xml >/dev/null 2>&1 || true
+      adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
+        | grep -oE '(text|resource-id)="[^"]+"' \
+        | tee "e2e-failure-${flow//\//_}-hierarchy.txt" | head -80 || true
+      adb exec-out screencap -p > "e2e-failure-${flow//\//_}.png" 2>/dev/null || true
+      echo "::endgroup::"
+      rc=1
+    fi
+    echo "==== FLOW END: $flow ===="
+  done
+  echo ""
+  echo "${passed}/${#} Flows Passed, ${failed} Failed"
+  return "$rc"
+}
+
 # ── 1. Wait for the device to appear (max 120s — do NOT hang forever) ───────
 # The android-emulator-runner action boots the emulator asynchronously; if
 # the adb daemon cannot connect ("Unable to connect to adb daemon on port
@@ -308,6 +356,7 @@ else
 fi
 
 # ── 7b. Full suite ──────────────────────────────────────────────────────────
-maestro test "$@" \
-  --env "TEST_EMAIL=${TEST_EMAIL}" \
-  --env "TEST_PASSWORD=${TEST_PASSWORD}"
+# Per-flow execution (see run_suite_per_flow above): full step logs in the
+# job log, failure-time hierarchy dumps per flow, per-flow timeout so a
+# single hung flow cannot eat the whole job budget.
+run_suite_per_flow "$@"

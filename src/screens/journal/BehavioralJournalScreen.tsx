@@ -90,6 +90,13 @@ export default function BehavioralJournalScreen({ navigation }: NativeStackScree
     Entries: t('journal.tabEntries'),
     Reports: t('journal.tabReports'),
   };
+  // Maestro E2E re-tap anchors (run-12: text taps on the Entries tab raced
+  // the tab-strip re-render and fired into the content area below).
+  const tabTestIds: Record<TabKey, string> = {
+    Dashboard: 'journal-tab-dashboard',
+    Entries: 'journal-tab-entries',
+    Reports: 'journal-tab-reports',
+  };
 
   const renderDashboard = () => (
     <>
@@ -271,7 +278,7 @@ export default function BehavioralJournalScreen({ navigation }: NativeStackScree
         {/* Segmented control — zero extra margins so content starts immediately */}
         <View style={[styles.tabBar, { backgroundColor: colors.bgSecondary }]}>
           <SegmentedTabs
-            tabs={tabs.map(tab => ({ key: tab, label: tabLabels[tab] }))}
+            tabs={tabs.map(tab => ({ key: tab, label: tabLabels[tab], testID: tabTestIds[tab] }))}
             active={activeTab}
             onChange={setActiveTab}
           />

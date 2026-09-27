@@ -825,12 +825,13 @@ jobs:
     # Override via repo variable, e.g. [self-hosted, linux, kvm] for stable
     # hardware KVM. Falls back to the GitHub-hosted runner when unset.
     runs-on: ${{ vars.E2E_RUNNER_LABELS || 'ubuntu-latest' }}
-    # 150 min: post-fix the E2E job genuinely runs its full budget — gradle
-    # build ~25 min (warm cache) + boot ~4 + smoke gate ~2 + 31 flows ~50 min.
-    # The old 90-min cap cancelled the suite mid-run twice (runs #337 rerun
-    # and its retry) at exactly T+90, right after the smoke gate had passed
-    # for the first time. Headroom for a cold-cache build: 2x the warm path.
-    timeout-minutes: 150
+    # 240 min: run 12 (36257836871) proved the structural trap — attempt 1
+    # finished ~97 min, so ANY single flow failure triggers attempt 2, and
+    # 2x(warm build + boot + 31 flows) overruns 150 min: the job was
+    # CANCELLED mid-attempt-2 and even the passing flows' results were
+    # discarded. 240 covers the full two-attempt worst case with headroom
+    # for a cold-cache build.
+    timeout-minutes: 240
     continue-on-error: true
     env:
       MAESTRO_CLOUD_API_KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY || '' }}
@@ -1028,8 +1029,8 @@ jobs:
         with:
           name: e2e-failure-diagnosis-${{ github.run_id }}
           path: |
-            e2e-failure.png
-            e2e-failure-hierarchy.txt
+            e2e-failure*.png
+            e2e-failure*.txt
           if-no-files-found: ignore
           retention-days: 7
 

@@ -140,8 +140,27 @@ appId: com.toroloom.app
 
 # Entries is a FlatList tab — assert its EMPTY-STATE text (a bare "Entries"
 # assert adds nothing: the tap above already proved the tab label).
-- assertVisible:
-    text: "No journal entries yet"
+# Run-12: both attempts failed 1-2min in, on this tab switch. The switch
+# + empty-state check is guarded re-entry (courseDetail's proven pattern):
+# re-tap via the SegmentedTabs testID when the list never renders.
+- runFlow:
+    when:
+      notVisible:
+        text: "No journal entries yet"
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "journal-tab-entries"
+          commands:
+            - tapOn:
+                id: "journal-tab-entries"
+            - waitForAnimationToEnd:
+                timeout: 5000
+- extendedWaitUntil:
+    visible:
+      text: "No journal entries yet"
+    timeout: 60000
 
 # ── 7. Switch to Reports Tab ───────────────────────────────────────────────
 - tapOn:
