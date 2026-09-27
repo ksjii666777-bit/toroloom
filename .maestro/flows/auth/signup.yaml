@@ -140,6 +140,12 @@ appId: com.toroloom.app
             - launchApp
             - waitForAnimationToEnd:
                 timeout: 15000
+            # Run-16 att1: this relaunch once hung the rest of the 420s
+            # flow budget. Add ONE more bounded settle so a cold relaunch
+            # gets a fair window but can never eat the whole budget — the
+            # re-login guard below handles whatever state we landed on.
+            - waitForAnimationToEnd:
+                timeout: 20000
             - runFlow:
                 when:
                   visible:
@@ -330,3 +336,30 @@ appId: com.toroloom.app
                       id: "tab-home"
                   - waitForAnimationToEnd:
                       timeout: 5000
+            # Run-16 att2: the re-login POST itself raced the auth limiter
+            # and the app was still on the login form at the final assert.
+            # One bounded cooldown + resubmit before the fatal gate below.
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "home-greeting"
+                commands:
+                  - runFlow:
+                      when:
+                        visible:
+                          id: "login-btn"
+                      commands:
+                        - evalScript: ${output.SIGNUP_RELOGIN_COOLDOWN2 = (function(ms){var e=Date.now()+ms;while(Date.now()<e);return 1;})(65000)}
+                        - tapOn:
+                            id: "login-btn"
+                        - waitForAnimationToEnd:
+                            timeout: 15000
+                  - runFlow:
+                      when:
+                        visible:
+                          id: "tab-home"
+                      commands:
+                        - tapOn:
+                            id: "tab-home"
+                        - waitForAnimationToEnd:
+                            timeout: 5000

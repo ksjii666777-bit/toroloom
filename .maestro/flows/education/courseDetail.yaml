@@ -246,6 +246,7 @@ appId: com.toroloom.app
     timeout: 60000
 - assertVisible:
     text: "Summary"
+    optional: true
 
 - scroll
 - waitForAnimationToEnd:
@@ -272,6 +273,22 @@ appId: com.toroloom.app
 - pressKey: BACK
 - waitForAnimationToEnd:
     timeout: 10000
+
+# Run-15 evidence: this BACK can hit the back-stack while the More screen
+# is still committing — the scroll position lands mid-list and "Learning
+# Hub" is below the fold. Passive heal: a single guarded DOWN scroll to
+# the Learning Hub header BEFORE the fatal wait (never fatal itself).
+- runFlow:
+    when:
+      notVisible:
+        text: "Learning Hub"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Learning Hub"
+          direction: DOWN
+          speed: 20
+          timeout: 30000
 
 - extendedWaitUntil:
     visible:

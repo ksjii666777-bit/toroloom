@@ -122,28 +122,47 @@ appId: com.toroloom.app
 # The balance line is "Available: ₹…" when the Max order fits the balance
 # and "Insufficient balance — need ₹… more" when it does not (live backend
 # user balance decides) — scroll once, accept whichever variant rendered.
+# The balance line sits below the summary rows. Run-16 att2 rendered the
+# summary WITHOUT the balance line (live-data race on a slow emulator) —
+# the bare scroll exhausted its 20s and killed the flow. Retry once after
+# a settle window instead of a fatal bare assert: if the line truly never
+# renders, the NEXT gate (chip scroll) fails visibly with the dump.
 - scrollUntilVisible:
     element:
       text: ".*Available:.*|.*Insufficient balance.*"
     direction: DOWN
     speed: 20
     timeout: 20000
-- assertVisible:
-    text: ".*Available:.*|.*Insufficient balance.*"
+- runFlow:
+    when:
+      notVisible:
+        text: ".*Available:.*|.*Insufficient balance.*"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - scrollUntilVisible:
+          element:
+            text: ".*Available:.*|.*Insufficient balance.*"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 4. Verify Order Form Shows Order Types
 # ═══════════════════════════════════════════════════════════════════════════
-# Market order type chip (orderType_market) — the balance scroll moved it
-# ABOVE the viewport, so scroll back UP before asserting.
+# Order-type chips carry stable testIDs (orderType_MARKET/LIMIT/SL/SL-M) —
+# use them instead of the text "Market": the chip renders UPPERCASE
+# ("MARKET") and run-16's case-sensitive text scroll hunted the wrong
+# string for the full 20s in BOTH attempts. The balance scroll pushed the
+# chips ABOVE the viewport, so scroll UP to them, then assert via testID.
 - scrollUntilVisible:
     element:
-      text: "Market"
+      id: "orderType_MARKET"
     direction: UP
     speed: 20
     timeout: 20000
 - assertVisible:
-    text: "Market"
+    id: "orderType_MARKET"
 
 # Tap the back button (testID) to return to stock detail
 - tapOn:

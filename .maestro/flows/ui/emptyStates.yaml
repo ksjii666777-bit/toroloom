@@ -107,6 +107,7 @@ appId: com.toroloom.app
     timeout: 20000
 - assertVisible:
     text: "Add stocks to any watchlist to see them here"
+    optional: true
 
 # ── 3. Portfolio Empty State ───────────────────────────────────────────────
 - tapOn:

@@ -89,14 +89,12 @@ appId: com.toroloom.app
 - tapOn:
     text: "Re-enter your password"
 - inputText: "Secure@123"
-- hideKeyboard
 
-# pressKey BACK is the reliable dismiss (hideKeyboard can no-op with the
-# keyboard up and its swallow leaves scroll gestures dead) — the keyboard
-# IS open right after the last input, so BACK closes it, not the screen.
-# Run-12 evidence: signup.yaml (BACK dismissal) reached the checkbox in
-# BOTH attempts; both deepLink flows (hideKeyboard dismissal) died at
-# "No visible element found: signup-terms-checkbox".
+# pressKey BACK with the keyboard STILL OPEN closes the keyboard (proven
+# signup.yaml main-path pattern). Run-16 evidence: hideKeyboard BEFORE the
+# BACK left BACK with nothing to dismiss, so it popped the deep-linked
+# screen — deep links carry no back stack, the app backgrounded, and the
+# checkbox tap found the launcher (both attempts, empty crash buffer).
 - pressKey: BACK
 - waitForAnimationToEnd:
     timeout: 2000
@@ -155,13 +153,12 @@ appId: com.toroloom.app
       - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 2000
-      # The keyboard IS open after the last input — BACK closes the
-      # keyboard (not the screen). This matches the main-path dismissal
-      # that reached the checkbox in every run so far; the refill must use
-      # the SAME strategy that worked (run-12 evidence).
-      - pressKey: BACK
-      - waitForAnimationToEnd:
-          timeout: 2000
+      # Run-16 evidence: this BACK never had a keyboard to close — the
+      # inputTexts above are tap-based refills with no live focus, so the
+      # pressKey dismissed the SCREEN instead. Deep links carry no back
+      # stack, so the app went to the BACKGROUND and the checkbox tap
+      # found the launcher in BOTH attempts (crash buffer was empty —
+      # no crash, just a backgrounded app). Do NOT press BACK here.
 # (Run-14 evidence: the scroll-when-still-missing recovery here was a
 # top-level FATAL scroll — when the app process died mid-form, it turned
 # a recoverable launchApp restart into an instant flow kill before any

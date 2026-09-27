@@ -43,6 +43,43 @@ interface PortfolioState {
   syncOfflineMutations: () => Promise<void>;
 }
 
+type RawHolding = Partial<Holding> & { symbol?: string };
+
+/** Map a raw backend holdings row (symbol/quantity/buyPrice/currentPrice/
+ * pnl/pnlPercent) onto the app's full Holding shape. Run-16 CI evidence:
+ * the deployed /portfolio/holdings rows lack id/stockId/name/totalInvested/
+ * currentValue — rendering them raw crashed HomeScreen's TopHoldingsSection
+ * inside formatLargeCurrency(undefined) and killed the whole app
+ * (logcat crash buffer: formatLargeCurrency@ → TopHoldingsSection). */
+export function normalizeHolding(row: RawHolding, index: number): Holding {
+  const quantity = Number(row.quantity ?? 0);
+  const buyPrice = Number(row.buyPrice ?? 0);
+  const currentPrice = Number(row.currentPrice ?? buyPrice);
+  const totalInvested = Number(row.totalInvested ?? quantity * buyPrice);
+  const currentValue = Number(row.currentValue ?? quantity * currentPrice);
+  const pnl = Number(row.pnl ?? currentValue - totalInvested);
+  const pnlPercent = Number(
+    row.pnlPercent ?? (totalInvested > 0 ? (pnl / totalInvested) * 100 : 0),
+  );
+  const symbol = row.symbol ?? row.stockId ?? `H${index + 1}`;
+  return {
+    ...(row as Holding),
+    id: row.id ?? `backend-${symbol}-${index}`,
+    stockId: row.stockId ?? symbol,
+    symbol,
+    name: row.name ?? symbol,
+    quantity,
+    buyPrice,
+    currentPrice,
+    totalInvested,
+    currentValue,
+    pnl,
+    pnlPercent,
+    dayChange: Number(row.dayChange ?? 0),
+    dayChangePercent: Number(row.dayChangePercent ?? 0),
+  };
+}
+
 export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   holdings: mockHoldings,
   trades: mockTrades,
@@ -65,9 +102,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
         portfolioApi.getHoldings(),
         portfolioApi.getTrades(),
       ]);
+      // Normalise backend rows to the full Holding shape (see normalizeHolding
+      // — raw rows crashed the Home screen, run-16 CI evidence)
+      const normalized = holdings.map((row: any, i: number) =>
+        normalizeHolding(row, i),
+      );
       // Cache on successful fetch
-      await offlineCache.save('portfolio', { holdings, trades });
-      set({ holdings, trades, isLoading: false });
+      await offlineCache.save('portfolio', { holdings: normalized, trades });
+      set({ holdings: normalized, trades, isLoading: false });
     } catch {
       // Backend unavailable — try serving stale cache only if current holdings are empty
       const current = get();

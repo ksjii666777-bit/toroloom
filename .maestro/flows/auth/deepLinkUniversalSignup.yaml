@@ -150,13 +150,12 @@ appId: com.toroloom.app
       - hideKeyboard
       - waitForAnimationToEnd:
           timeout: 2000
-      # The keyboard IS open after the last input — BACK closes the
-      # keyboard (not the screen). This matches the main-path dismissal
-      # that reached the checkbox in every run so far; the refill must use
-      # the SAME strategy that worked (run-12 evidence).
-      - pressKey: BACK
-      - waitForAnimationToEnd:
-          timeout: 2000
+      # Run-16 evidence: this BACK never had a keyboard to close — the
+      # inputTexts above are tap-based refills with no live focus, so the
+      # pressKey dismissed the SCREEN instead. Deep links carry no back
+      # stack, so the app went to the BACKGROUND and the checkbox tap
+      # found the launcher in BOTH attempts (crash buffer was empty —
+      # no crash, just a backgrounded app). Do NOT press BACK here.
 # (Run-14 evidence: the scroll-when-still-missing recovery here was a
 # top-level FATAL scroll — when the app process died mid-form, it turned
 # a recoverable launchApp restart into an instant flow kill before any
