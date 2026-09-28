@@ -212,27 +212,23 @@ appId: com.toroloom.app
     text: "HDFCBANK"
     optional: true
 
-# The back control is an icon-only button (accessibilityLabel "Go back") —
-# tap by accessibility, not visible text
-- tapOn:
-    point: "8%,12%"
-- waitForAnimationToEnd:
-    timeout: 10000
-# Run-18 att2: the back-tap can land before the pop animation finishes and
-# stay on the pushed screen — heal with one retry instead of dying on a
-# strict assert (the Trade History title was still in the dump).
+# The back control is an icon-only button (accessibilityLabel "Go back").
+# Run-19: the coordinate tap (8%,12%) did NOT pop Trade History in either
+# attempt (both dumps still showed it) — hardware BACK pops the pushed
+# screen reliably, with a bounded wait and one guarded re-press.
+- pressKey: BACK
+- extendedWaitUntil:
+    visible:
+      id: "more-title"
+    timeout: 20000
 - runFlow:
     when:
       notVisible:
         id: "more-title"
     commands:
-      - tapOn:
-          point: "8%,12%"
+      - pressKey: BACK
       - waitForAnimationToEnd:
           timeout: 5000
-- assertVisible:
-    id: "more-title"
-    optional: true
 
 # ── 5. Mutual Funds → My SIPs Empty State ──────────────────────────────────
 - scrollUntilVisible:
@@ -270,23 +266,21 @@ appId: com.toroloom.app
 - assertVisible:
     text: "SBI Bluechip Fund"
 
-# Back is the icon-only button (accessibilityLabel "Go back")
-- tapOn:
-    point: "8%,12%"
-- waitForAnimationToEnd:
-    timeout: 10000
+# Back is the icon-only button (accessibilityLabel "Go back") — hardware
+# BACK (see the Trade History exit note above).
+- pressKey: BACK
+- extendedWaitUntil:
+    visible:
+      id: "more-title"
+    timeout: 20000
 - runFlow:
     when:
       notVisible:
         id: "more-title"
     commands:
-      - tapOn:
-          point: "8%,12%"
+      - pressKey: BACK
       - waitForAnimationToEnd:
           timeout: 5000
-- assertVisible:
-    id: "more-title"
-    optional: true
 
 # ── 6. Funds Dashboard Empty State ─────────────────────────────────────────
 - scrollUntilVisible:

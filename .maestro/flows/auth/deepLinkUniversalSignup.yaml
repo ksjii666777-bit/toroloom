@@ -127,15 +127,65 @@ appId: com.toroloom.app
       notVisible:
         id: "signup-terms-checkbox"
     commands:
-      - launchApp
-      - waitForAnimationToEnd:
-          timeout: 10000
-      # Run-16 evidence: this BACK never had a keyboard to close — the
+      # Run-19 evidence: launchApp here is DESTRUCTIVE — att2 relaunch
+      # killed the UNSENT form (fresh launch showed Login → the trailing
+      # checkbox tap died) and att1's relaunch hung 7 min into the 420s
+      # flow budget. Disambiguate the two known states instead:
+      #   • Login screen visible → BACK already popped Signup and the
+      #     signup POST never fired → re-open the deep link (SAFE: not
+      #     logged in, so no Referral-Alert race — run-18's lesson) and
+      #     refill the whole form.
+      #   • Still on the Signup form → the checkbox is merely below the
+      #     fold → scroll to it (signup.yaml's proven pattern).
+      - runFlow:
+          when:
+            visible:
+              id: "login-welcome-back"
+          commands:
+            - openLink: toroloom://signup?ref=test123
+            - extendedWaitUntil:
+                visible:
+                  id: "signup-name-input"
+                timeout: 45000
+            - tapOn:
+                id: "signup-name-input"
+            - inputText: "Priya Patel"
+            - hideKeyboard
+            - evalScript: ${output.SIGNUP_EMAIL2 = "e2e.uni." + Date.now() + "@toroloom-test.com"}
+            - tapOn:
+                id: "signup-email-input"
+            - inputText: ${output.SIGNUP_EMAIL2}
+            - hideKeyboard
+            - tapOn:
+                text: "Enter your phone number"
+            - inputText: "8765432109"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - tapOn:
+                text: "Create a strong password"
+            - inputText: "UnivLink@456"
+            - hideKeyboard
+            - tapOn:
+                text: "Re-enter your password"
+            - inputText: "UnivLink@456"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
+      - runFlow:
+          when:
+            visible:
+              id: "signup-name-input"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: "signup-terms-checkbox"
+                direction: DOWN
+                speed: 20
+                timeout: 20000
+      # Run-16 evidence: a BACK here never had a keyboard to close — the
       # inputTexts above are tap-based refills with no live focus, so the
-      # pressKey dismissed the SCREEN instead. Deep links carry no back
-      # stack, so the app went to the BACKGROUND and the checkbox tap
-      # found the launcher in BOTH attempts (crash buffer was empty —
-      # no crash, just a backgrounded app). Do NOT press BACK here.
+      # pressKey dismissed the SCREEN instead. Do NOT press BACK here.
 # (Run-14 evidence: the scroll-when-still-missing recovery here was a
 # top-level FATAL scroll — when the app process died mid-form, it turned
 # a recoverable launchApp restart into an instant flow kill before any

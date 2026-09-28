@@ -127,9 +127,58 @@ appId: com.toroloom.app
       notVisible:
         id: "signup-terms-checkbox"
     commands:
-      - launchApp
-      - waitForAnimationToEnd:
-          timeout: 10000
+      # Run-19 evidence (from the universal flow): launchApp here is
+      # DESTRUCTIVE — a relaunch kills the UNSENT form and lands on
+      # Login, and a cold relaunch can hang for minutes. Disambiguate
+      # instead: Login visible → BACK popped Signup and the POST never
+      # fired → re-open the deep link (SAFE while logged out) and refill;
+      # form still present → just scroll the checkbox into view.
+      - runFlow:
+          when:
+            visible:
+              id: "login-welcome-back"
+          commands:
+            - openLink: toroloom://signup?ref=test123
+            - extendedWaitUntil:
+                visible:
+                  id: "signup-name-input"
+                timeout: 45000
+            - tapOn:
+                id: "signup-name-input"
+            - inputText: "Rahul Sharma"
+            - hideKeyboard
+            - evalScript: ${output.SIGNUP_EMAIL2 = "e2e.dl." + Date.now() + "@toroloom-test.com"}
+            - tapOn:
+                id: "signup-email-input"
+            - inputText: ${output.SIGNUP_EMAIL2}
+            - hideKeyboard
+            - tapOn:
+                text: "Enter your phone number"
+            - inputText: "9876543210"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - tapOn:
+                text: "Create a strong password"
+            - inputText: "Secure@123"
+            - hideKeyboard
+            - tapOn:
+                text: "Re-enter your password"
+            - inputText: "Secure@123"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
+      - runFlow:
+          when:
+            visible:
+              id: "signup-name-input"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: "signup-terms-checkbox"
+                direction: DOWN
+                speed: 20
+                timeout: 20000
       # Run-16 evidence: this BACK never had a keyboard to close — the
       # inputTexts above are tap-based refills with no live focus, so the
       # pressKey dismissed the SCREEN instead. Deep links carry no back

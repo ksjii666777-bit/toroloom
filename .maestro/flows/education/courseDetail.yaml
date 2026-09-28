@@ -157,7 +157,7 @@ appId: com.toroloom.app
 - runFlow:
     when:
       notVisible:
-        text: "Lesson 1 of"
+        text: "Lesson 1 of.*"
     commands:
       - runFlow:
           when:
@@ -219,15 +219,18 @@ appId: com.toroloom.app
             - waitForAnimationToEnd:
                 timeout: 5000
 # Bounded fatal gates — AFTER all heals, so only a genuinely broken
-# lesson mount fails the flow.
+# lesson mount fails the flow. Run-19: the header can take >60s when the
+# fallback lesson mounts the video player on a cold emulator — 120s.
+# Regex form: Maestro text matching is full-match ("Lesson 1 of" does
+# not match the rendered "Lesson 1 of 8").
 - extendedWaitUntil:
     visible:
-      text: "Lesson 1 of"
-    timeout: 60000
+      text: "Lesson 1 of.*"
+    timeout: 120000
 - extendedWaitUntil:
     visible:
       text: "Key Takeaways"
-    timeout: 60000
+    timeout: 120000
 - assertVisible:
     text: "Summary"
     optional: true
