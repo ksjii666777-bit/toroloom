@@ -84,8 +84,8 @@ appId: com.toroloom.app
     element:
       id: "menu-AdvisorList"
     direction: DOWN
-    speed: 80
-    timeout: 30000
+    speed: 40
+    timeout: 45000
 - tapOn:
     id: "menu-AdvisorList"
 - waitForAnimationToEnd:

@@ -80,6 +80,26 @@ export async function saveToken(token: string): Promise<void> {
     return;
   }
   await secureSet(TOKEN_KEY, token);
+  // ── Silent-null keystore mirror (CI run 36329315900 root cause) ────
+  // Some emulator images accept SecureStore.set WITHOUT throwing yet
+  // return null on every subsequent read (silent-null mode). secureSet
+  // then wrote nothing anywhere, so relaunches booted logged-out —
+  // deterministic signup-flow failure (both run-17 attempts) while login
+  // flows passed only because they log in within the same process.
+  // Verify the write actually landed; if not, mirror to AsyncStorage
+  // (secureGet already reads that mirror on a null/throwing read).
+  try {
+    const check = await SecureStore.getItemAsync(TOKEN_KEY);
+    if (check === token) {
+      // Enclave really persisted — keep the mirror clean
+      await AsyncStorage.removeItem(`fallback:${TOKEN_KEY}`).catch(() => {});
+      return;
+    }
+  } catch {
+    // Read failed (throwing mode) — secureSet's own fallback copy may
+    // already exist; add the mirror anyway for consistency.
+  }
+  await AsyncStorage.setItem(`fallback:${TOKEN_KEY}`, token).catch(() => {});
 }
 
 export async function loadToken(): Promise<string | null> {

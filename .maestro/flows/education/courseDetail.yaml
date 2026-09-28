@@ -168,31 +168,12 @@ appId: com.toroloom.app
                 id: "lesson-card-1"
             - waitForAnimationToEnd:
                 timeout: 5000
-- extendedWaitUntil:
-    visible:
-      text: "Lesson 1 of"
-    timeout: 60000
-# Still on the course page = the lazy LessonView chunk never mounted —
-# re-tap the lesson card once and wait again. Run-12: both attempts died
-# AFTER the header showed (lesson was open) but takeaways were missing →
-# the 'Lesson not found' lazy-fetch branch. Guarded BACK + re-entry heals
-# it; the re-tap here targets the testID, not dead text coordinates.
-- runFlow:
-    when:
-      notVisible:
-        text: "Lesson 1 of"
-    commands:
-      - runFlow:
-          when:
-            visible:
-              id: "lesson-card-1"
-          commands:
-            - tapOn:
-                id: "lesson-card-1"
-            - waitForAnimationToEnd:
-                timeout: 5000
       # A failed lesson fetch renders "Lesson not found" instead of the
-      # header - back out and re-enter the lesson once.
+      # header — back out and re-enter the lesson. GUARDED heals run
+      # BEFORE any fatal wait: run-17 (36329315900) proved the old fatal
+      # extendedWaitUntil sat above these heals and aborted the whole
+      # flow the instant the lesson mount failed ("Lesson not found" was
+      # the failure-time dump in every affected run).
       - runFlow:
           when:
             visible:
@@ -210,19 +191,7 @@ appId: com.toroloom.app
                       id: "lesson-card-1"
                   - waitForAnimationToEnd:
                       timeout: 5000
-      # (a fatal extendedWaitUntil here would kill the whole flow when the
-      # re-tap still needs the next gate — run 36221684269's lesson; the
-      # top-level wait below is the final gate)
-# Header visible but "Key Takeaways" never rendered = 'Lesson not found'
-# (a failed lazy lesson fetch on the cold backend window, run-12 ×2).
-# Guarded BACK + re-entry — the re-tap below targets the CARD testID (the
-# run-12 pattern: text taps fired into dead coordinates after the FAILED
-# lesson mount, so the second re-entry never fired).
-- runFlow:
-    when:
-      notVisible:
-        text: "Key Takeaways"
-    commands:
+      # One more heal round for a second consecutive fetch miss.
       - runFlow:
           when:
             visible:
@@ -231,6 +200,15 @@ appId: com.toroloom.app
             - pressKey: BACK
             - waitForAnimationToEnd:
                 timeout: 5000
+            - runFlow:
+                when:
+                  visible:
+                    id: "lesson-card-1"
+                commands:
+                  - tapOn:
+                      id: "lesson-card-1"
+                  - waitForAnimationToEnd:
+                      timeout: 5000
       - runFlow:
           when:
             visible:
@@ -240,6 +218,12 @@ appId: com.toroloom.app
                 id: "lesson-card-1"
             - waitForAnimationToEnd:
                 timeout: 5000
+# Bounded fatal gates — AFTER all heals, so only a genuinely broken
+# lesson mount fails the flow.
+- extendedWaitUntil:
+    visible:
+      text: "Lesson 1 of"
+    timeout: 60000
 - extendedWaitUntil:
     visible:
       text: "Key Takeaways"

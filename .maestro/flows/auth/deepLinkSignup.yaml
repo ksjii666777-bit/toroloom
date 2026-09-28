@@ -67,7 +67,7 @@ appId: com.toroloom.app
 # testID-based fill (placeholder taps race the keyboard on cloud emulators)
 - tapOn:
     id: "signup-email-input"
-- inputText: ${SIGNUP_EMAIL}
+- inputText: ${output.SIGNUP_EMAIL}
 - hideKeyboard
 
 # ── 7. Fill in Phone ──────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ appId: com.toroloom.app
       - evalScript: ${output.SIGNUP_EMAIL2 = "e2e.dl." + Date.now() + "@toroloom-test.com"}
       - tapOn:
           id: "signup-email-input"
-      - inputText: ${SIGNUP_EMAIL2}
+      - inputText: ${output.SIGNUP_EMAIL2}
       - hideKeyboard
       - tapOn:
           text: "Enter your phone number"

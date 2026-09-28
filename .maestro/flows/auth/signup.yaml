@@ -44,7 +44,11 @@ appId: com.toroloom.app
 # Fill in Email
 - tapOn:
     id: "signup-email-input"
-- inputText: ${SIGNUP_EMAIL}
+# Reference MUST be ${output.SIGNUP_EMAIL}: bare ${SIGNUP_EMAIL} does not
+# resolve evalScript output in this Maestro version and literally typed
+# "undefined" → backend 400 → no account → relaunch landed on Login
+# (run-17 root cause; live-probed: email="undefined" ⇒ 400 invalid email).
+- inputText: ${output.SIGNUP_EMAIL}
 - hideKeyboard
 
 # Fill in Phone
@@ -238,19 +242,20 @@ appId: com.toroloom.app
       - waitForAnimationToEnd:
           timeout: 5000
 
-# After successful signup, the user is logged in and sees the Home screen
-# (the signup POST can be slow on a cold backend — wait generously)
-- extendedWaitUntil:
-    visible:
-      id: "home-greeting"
-    timeout: 60000
-# A lazy tab can hide Home behind another tab on a cold emulator — tap the
-# Home tab explicitly and wait once more.
+# After successful signup, the user is logged in and sees the Home screen.
+# NOTE: this is a GUARDED settle, NOT a fatal extendedWaitUntil — run-17
+# (36329315900) proved a fatal wait here aborts the whole flow the moment
+# the app lands anywhere else (att2: token never persisted on the
+# emulator's silent-null keystore → relaunch showed Login) and the
+# re-login heal below was NEVER reached. This lattice owns recovery; the
+# bounded final gate at the bottom is the only pass/fail decision.
 - runFlow:
     when:
       notVisible:
         id: "home-greeting"
     commands:
+      - waitForAnimationToEnd:
+          timeout: 15000
       - runFlow:
           when:
             visible:
@@ -258,10 +263,8 @@ appId: com.toroloom.app
           commands:
             - tapOn:
                 id: "tab-home"
-            - extendedWaitUntil:
-                visible:
-                  id: "home-greeting"
-                timeout: 60000
+            - waitForAnimationToEnd:
+                timeout: 5000
 
 # ── Run-14 evidence: logout race after a successful signup ─────────────
 # Both run-14 attempts ended with the flow on the LOGIN screen while the
@@ -290,7 +293,7 @@ appId: com.toroloom.app
                 timeout: 90000
             - tapOn:
                 id: "login-email-input"
-            - inputText: ${SIGNUP_EMAIL}
+            - inputText: ${output.SIGNUP_EMAIL}
             - hideKeyboard
             - tapOn:
                 id: "login-password-input"
@@ -363,3 +366,19 @@ appId: com.toroloom.app
                             id: "tab-home"
                         - waitForAnimationToEnd:
                             timeout: 5000
+
+# ── Bounded final gate (run-17 restructure) ─────────────────────────────
+# Everything above is guarded healing; this is the single fatal check so a
+# genuine failure still FAILS instead of silently passing. One settle first
+# gives a slow bootstrap a fair window.
+- runFlow:
+    when:
+      notVisible:
+        id: "home-greeting"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 60000

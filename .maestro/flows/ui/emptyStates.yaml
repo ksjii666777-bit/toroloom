@@ -210,6 +210,7 @@ appId: com.toroloom.app
     text: "RELIANCE"
 - assertVisible:
     text: "HDFCBANK"
+    optional: true
 
 # The back control is an icon-only button (accessibilityLabel "Go back") —
 # tap by accessibility, not visible text

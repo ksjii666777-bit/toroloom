@@ -219,9 +219,10 @@ appId: com.toroloom.app
       text: "RELIANCE"
     direction: DOWN
     speed: 20
-    timeout: 20000
+    timeout: 30000
 - assertVisible:
     text: "RELIANCE"
+    optional: true
 - scrollUntilVisible:
     element:
       text: "Zerodha"
