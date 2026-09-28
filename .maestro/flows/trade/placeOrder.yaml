@@ -235,6 +235,13 @@ appId: com.toroloom.app
       notVisible:
         id: "order-summary-est-total"
     commands:
+      # Run-18 att1: scrollUntilVisible FAILED while the dump showed the
+      # row fully rendered — its 100% visibilityPercentage criterion can
+      # reject a partially-clipped (yet visible) row forever. First try a
+      # plain scroll, re-check, and only then the strict scroll.
+      - scroll
+      - waitForAnimationToEnd:
+          timeout: 3000
       - runFlow:
           when:
             notVisible:

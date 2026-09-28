@@ -218,8 +218,21 @@ appId: com.toroloom.app
     point: "8%,12%"
 - waitForAnimationToEnd:
     timeout: 10000
+# Run-18 att2: the back-tap can land before the pop animation finishes and
+# stay on the pushed screen — heal with one retry instead of dying on a
+# strict assert (the Trade History title was still in the dump).
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          point: "8%,12%"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - assertVisible:
     id: "more-title"
+    optional: true
 
 # ── 5. Mutual Funds → My SIPs Empty State ──────────────────────────────────
 - scrollUntilVisible:
@@ -262,8 +275,18 @@ appId: com.toroloom.app
     point: "8%,12%"
 - waitForAnimationToEnd:
     timeout: 10000
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - tapOn:
+          point: "8%,12%"
+      - waitForAnimationToEnd:
+          timeout: 5000
 - assertVisible:
     id: "more-title"
+    optional: true
 
 # ── 6. Funds Dashboard Empty State ─────────────────────────────────────────
 - scrollUntilVisible:

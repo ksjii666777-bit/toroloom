@@ -116,43 +116,20 @@ appId: com.toroloom.app
 # dismissal ABOVE runs while the keyboard is still up, which is why
 # BACK is safe there and dangerous here.
 # If the checkbox is still missing, the extra BACK dismissed the KEYBOARD
-# and then POPPED the Signup screen (pressed the header back-arrow) —
-# reopen the deep link and refill the form.
+# and then POPPED the Signup screen (pressed the header back-arrow).
+# ⚠️ Run-18 lesson (from the universal flow): openLink re-entry is only
+# safe while NOT yet logged in — after a successful signup POST the
+# logged-in handler raises the blocking "Referral Applied" Alert. The
+# empty-commands form relaunches instead; the landing lattice below
+# finishes the flow.
 - runFlow:
     when:
       notVisible:
         id: "signup-terms-checkbox"
     commands:
-      - openLink: toroloom://signup?ref=test123
-      - extendedWaitUntil:
-          visible:
-            id: "signup-name-input"
-          timeout: 45000
-      - tapOn:
-          id: "signup-name-input"
-      - inputText: "Rahul Sharma"
-      - hideKeyboard
-      - evalScript: ${output.SIGNUP_EMAIL2 = "e2e.dl." + Date.now() + "@toroloom-test.com"}
-      - tapOn:
-          id: "signup-email-input"
-      - inputText: ${output.SIGNUP_EMAIL2}
-      - hideKeyboard
-      - tapOn:
-          text: "Enter your phone number"
-      - inputText: "9876543210"
-      - hideKeyboard
+      - launchApp
       - waitForAnimationToEnd:
-          timeout: 2000
-      - tapOn:
-          text: "Create a strong password"
-      - inputText: "Secure@123"
-      - hideKeyboard
-      - tapOn:
-          text: "Re-enter your password"
-      - inputText: "Secure@123"
-      - hideKeyboard
-      - waitForAnimationToEnd:
-          timeout: 2000
+          timeout: 10000
       # Run-16 evidence: this BACK never had a keyboard to close — the
       # inputTexts above are tap-based refills with no live focus, so the
       # pressKey dismissed the SCREEN instead. Deep links carry no back
@@ -234,6 +211,28 @@ appId: com.toroloom.app
     commands:
       - tapOn:
           text: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# Run-18 evidence: a repeated deep link after signup raises the blocking
+# "🎉 Referral Applied" Alert over Home — dismiss it if present (confirm
+# button text is "AWESOME!"; the wildcard guard catches the title too).
+- runFlow:
+    when:
+      visible:
+        text: "AWESOME!"
+    commands:
+      - tapOn:
+          text: "AWESOME!"
+      - waitForAnimationToEnd:
+          timeout: 5000
+- runFlow:
+    when:
+      visible:
+        text: ".*Referral Applied.*"
+    commands:
+      - tapOn:
+          text: "AWESOME!"
       - waitForAnimationToEnd:
           timeout: 5000
 

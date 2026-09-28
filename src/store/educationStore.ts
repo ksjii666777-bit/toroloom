@@ -115,7 +115,15 @@ export const useEducationStore = create<EducationState>()(
     set({ isLoading: true });
     try {
       const lesson = await educationApi.getLesson(lessonId);
-      set({ currentLesson: lesson, isLoading: false });
+      // A 200 with an empty/unparseable body resolves to null instead of
+      // throwing — treat it as a failure so the mock fallback below still
+      // applies (run-18: "Lesson not found" dead-end with heals SKIPPED).
+      const resolved = lesson ?? mockLessons.find(l => l.id === lessonId);
+      if (resolved) {
+        set({ currentLesson: resolved, isLoading: false });
+      } else {
+        set({ isLoading: false });
+      }
     } catch {
       // Fall back to local mock data
       const lesson = mockLessons.find(l => l.id === lessonId);

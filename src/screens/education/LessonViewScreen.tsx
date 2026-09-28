@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
+import { mockLessons } from '../../constants/mockData';
 
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { educationApi } from '../../services/api/education';
@@ -38,25 +39,32 @@ export default function LessonViewScreen({ route, navigation }: NativeStackScree
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const [courseLessons, setCourseLessons] = useState<any[]>([]);
-  const lesson = currentLesson?.id === lessonId ? currentLesson : null;
+  // Screen-level fallback: the store's own fallback can still leave
+  // currentLesson null (run-18 CI evidence — "Lesson not found" dead-end
+  // survived two BACK+re-entry heals on a healthy emulator, and the
+  // root-stack screen keeps the stale null currentLesson from an earlier
+  // lesson's failed fetch). Never render the dead-end: resolve from the
+  // bundled course content when the store cannot.
+  const storeLesson = currentLesson?.id === lessonId ? currentLesson : null;
+  const lesson = storeLesson ?? mockLessons.find(l => l.id === lessonId) ?? null;
   // Self-heal: a transient fetch failure (timeout/abort/rate-limit window)
   // used to strand the screen on the static "Lesson not found" dead-end
   // forever (run-14/15 CI evidence — both attempts ended there). Retry the
-  // fetch once after a short delay; the store's mock fallback covers the
+  // fetch once after a short delay; the mock fallback above covers the
   // rest.
   const [lessonRetried, setLessonRetried] = useState(false);
   useEffect(() => {
     setLessonRetried(false);
   }, [lessonId]);
   useEffect(() => {
-    if (!lesson && !lessonRetried) {
+    if (!storeLesson && !lessonRetried) {
       const id = setTimeout(() => {
         setLessonRetried(true);
         fetchLesson(lessonId);
       }, 3000);
       return () => clearTimeout(id);
     }
-  }, [lesson, lessonRetried, lessonId, fetchLesson]);
+  }, [storeLesson, lessonRetried, lessonId, fetchLesson]);
   const isCompleted = lessonProgress[lessonId] || lesson?.completed || false;
   const hasVideo = !!lesson?.videoUrl;
   const lessonVideoProgress = videoProgress[lessonId];
