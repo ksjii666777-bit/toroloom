@@ -315,10 +315,19 @@ appId: com.toroloom.app
 - assertVisible:
     text: "Add Funds"
 
-# Back is the icon-only button (accessibilityLabel "Go back")
-- tapOn:
-    point: "8%,12%"
-- waitForAnimationToEnd:
-    timeout: 10000
-- assertVisible:
-    id: "more-title"
+# Back is the icon-only button (accessibilityLabel "Go back") — hardware
+# BACK (see the Trade History exit note above; run-20: the coordinate tap
+# here ALSO failed to pop Funds Dashboard — both dumps still showed it).
+- pressKey: BACK
+- extendedWaitUntil:
+    visible:
+      id: "more-title"
+    timeout: 20000
+- runFlow:
+    when:
+      notVisible:
+        id: "more-title"
+    commands:
+      - pressKey: BACK
+      - waitForAnimationToEnd:
+          timeout: 5000

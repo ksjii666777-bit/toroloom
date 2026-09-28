@@ -198,6 +198,60 @@ appId: com.toroloom.app
 # ── 12. Submit the form ──────────────────────────────────────────────────
 # Subtitle "{{count}} digits entered 6/6" on this screen is parameterized
 # elsewhere — the button text itself is static, so plain-text is safe.
+# Run-20: when NEITHER the Login screen NOR the Signup form is on screen
+# (the recovery relaunch left the app on the launcher / splash), the bare
+# tapOn below died with "Element not found". Before submitting, verify the
+# form is actually there; if not, one last cold relaunch + deep link + a
+# SHORT refill of the fields the fresh form still needs (name is usually
+# pre-filled from the deep link params; email/phone/password are not).
+- runFlow:
+    when:
+      notVisible:
+        id: "signup-terms-checkbox"
+    commands:
+      - launchApp
+      - extendedWaitUntil:
+          visible:
+            id: "signup-name-input"
+          timeout: 45000
+      - openLink: toroloom://signup?ref=test123
+      - extendedWaitUntil:
+          visible:
+            id: "signup-name-input"
+          timeout: 45000
+      - tapOn:
+          id: "signup-name-input"
+      - inputText: "Priya Patel"
+      - hideKeyboard
+      - evalScript: ${output.SIGNUP_EMAIL3 = "e2e.uni." + Date.now() + "@toroloom-test.com"}
+      - tapOn:
+          id: "signup-email-input"
+      - inputText: ${output.SIGNUP_EMAIL3}
+      - hideKeyboard
+      - tapOn:
+          text: "Enter your phone number"
+      - inputText: "8765432109"
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - tapOn:
+          text: "Create a strong password"
+      - inputText: "UnivLink@456"
+      - hideKeyboard
+      - tapOn:
+          text: "Re-enter your password"
+      - inputText: "UnivLink@456"
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - scrollUntilVisible:
+          element:
+            id: "signup-terms-checkbox"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
+- tapOn:
+    id: "signup-terms-checkbox"
 - tapOn:
     text: "Create Account"
 

@@ -160,7 +160,23 @@ appId: com.toroloom.app
       id: "orderType_MARKET"
     direction: UP
     speed: 20
-    timeout: 20000
+    timeout: 30000
+# Run-20: the single UP-scroll exhausted its budget in both attempts while
+# the dump showed the order form alive — one guarded retry after a settle
+# window instead of dying straight into the assert.
+- runFlow:
+    when:
+      notVisible:
+        id: "orderType_MARKET"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - scrollUntilVisible:
+          element:
+            id: "orderType_MARKET"
+          direction: UP
+          speed: 20
+          timeout: 20000
 - assertVisible:
     id: "orderType_MARKET"
 

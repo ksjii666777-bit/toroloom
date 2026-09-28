@@ -227,10 +227,25 @@ appId: com.toroloom.app
     visible:
       text: "Lesson 1 of.*"
     timeout: 120000
+# "Key Takeaways" sits BELOW the video player + transcript — off-screen on
+# the tall fallback-lesson layout (run-20: the 120s EWU expired while the
+# failure dump showed the section fully rendered below the fold). Scroll
+# first, then the bounded gate.
+- runFlow:
+    when:
+      notVisible:
+        text: "Key Takeaways"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Key Takeaways"
+          direction: DOWN
+          speed: 20
+          timeout: 45000
 - extendedWaitUntil:
     visible:
       text: "Key Takeaways"
-    timeout: 120000
+    timeout: 45000
 - assertVisible:
     text: "Summary"
     optional: true
