@@ -108,34 +108,64 @@ appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 10000
 
-# The Order Summary card appears when qty is set — scroll to it
-- scrollUntilVisible:
-    element:
+# The Order Summary card appears when qty is set — bring it in with a
+# bare scroll (can never fail) and gate on the card; this was the LAST
+# fatal-first scrollUntilVisible left in the flow.
+- scroll
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
       text: "Order Summary"
-    direction: DOWN
+    timeout: 30000
 - assertVisible:
     text: "Order Summary"
 
-# Verify the balance indicator ("Available: ₹...") — it sits BELOW the
-# summary rows inside the card, so scroll it into view explicitly (the
-# bottom bar shows "Total" once qty > 0, not "Available")
-# The balance line is "Available: ₹…" when the Max order fits the balance
-# and "Insufficient balance — need ₹… more" when it does not (live backend
-# user balance decides) — scroll once, accept whichever variant rendered.
-# The balance line sits below the summary rows. Run-16 att2 rendered the
-# summary WITHOUT the balance line (live-data race on a slow emulator) —
-# the bare scroll exhausted its 20s and killed the flow. Retry once after
-# a settle window instead of a fatal bare assert: if the line truly never
-# renders, the NEXT gate (chip scroll) fails visibly with the dump.
-# Run-22 (36546192421) att1 evidence: the FIRST scrollUntilVisible here
-# was TOP-LEVEL FATAL — its 20s exhaustion killed the flow instantly and
-# the "retry" below never ran (log shows the failure right after Order
-# Summary with no retry attempt; att2 passed, so the line does render —
-# it is a slow-scroll race, not a missing element). Non-fatal lattice,
-# same shape as placeOrder's proven one: plain scrolls to move the list,
-# settle, then ONE guarded scroll for the still-missing case. The balance
-# gate becomes the bounded EWU further down; a persistent miss now fails
-# visibly at the next gate (chip scroll) with the dump.
+# (Balance verification moved AFTER the order-type chips — run-24 att2
+# evidence: downward scrolls virtualize the ORDER TYPE section away;
+# see section 5.)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. Verify Order Form Shows Order Types (BEFORE the balance scrolls)
+# ═══════════════════════════════════════════════════════════════════════════
+# Order-type chips carry stable testIDs (orderType_MARKET/LIMIT/SL/SL-M) —
+# use them instead of the text "Market": the chip renders UPPERCASE
+# ("MARKET") and run-16's case-sensitive text scroll hunted the wrong
+# string for the full 20s in BOTH attempts.
+# Run-23 att1: the first UP-scroll here was top-level fatal (heal below it
+# never ran) — fixed with a guarded lattice. Run-24 att2 (109462685063)
+# exposed two more traps: (a) runFlow.when guards only the CONDITION — a
+# scrollUntilVisible failing INSIDE the guard still kills the flow (the
+# guarded 20s UP-scroll FAILED and took the whole flow with it); (b) after
+# the DOWN-scrolls to the balance line the dump showed the order form alive
+# but the ORDER TYPE section gone — the list virtualized it away. Chips are
+# always mounted at FORM-TOP (att1 asserted them instantly), so assert them
+# FIRST, before any downward scroll. Heal is a bare swipe (a downward drag
+# reveals content above the viewport and can never fail); the bounded EWU
+# is the only fatal step.
+- runFlow:
+    when:
+      notVisible:
+        id: "orderType_MARKET"
+    commands:
+      - swipe:
+          start: "50%, 40%"
+          end: "50%, 80%"
+      - waitForAnimationToEnd:
+          timeout: 3000
+- extendedWaitUntil:
+    visible:
+      id: "orderType_MARKET"
+    timeout: 30000
+- assertVisible:
+    id: "orderType_MARKET"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. Balance line (AFTER the chips — plain-scroll heals only)
+# ═══════════════════════════════════════════════════════════════════════════
+# Run-24 att2 lesson: never put a scrollUntilVisible inside a runFlow
+# guard — its failure propagates and kills the flow. Plain scrolls move
+# the list and can never fail; the EWU below is the single fatal gate.
 - scroll
 - waitForAnimationToEnd:
     timeout: 5000
@@ -147,78 +177,10 @@ appId: com.toroloom.app
       - scroll
       - waitForAnimationToEnd:
           timeout: 5000
-- runFlow:
-    when:
-      notVisible:
-        text: ".*Available:.*|.*Insufficient balance.*"
-    commands:
-      - scrollUntilVisible:
-          element:
-            text: ".*Available:.*|.*Insufficient balance.*"
-          direction: DOWN
-          speed: 20
-          timeout: 20000
-# Bounded fatal gate AFTER all heals: a persistently missing balance line
-# is a real regression and must fail — but only here, never inside a heal.
 - extendedWaitUntil:
     visible:
       text: ".*Available:.*|.*Insufficient balance.*"
     timeout: 45000
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 4. Verify Order Form Shows Order Types
-# ═══════════════════════════════════════════════════════════════════════════
-# Order-type chips carry stable testIDs (orderType_MARKET/LIMIT/SL/SL-M) —
-# use them instead of the text "Market": the chip renders UPPERCASE
-# ("MARKET") and run-16's case-sensitive text scroll hunted the wrong
-# string for the full 20s in BOTH attempts. The balance scroll pushed the
-# chips ABOVE the viewport, so scroll UP to them, then assert via testID.
-# Run-23 (109398415444) att1 evidence: the FIRST UP-scroll here is
-# top-level FATAL — its 30s exhaustion killed the flow instantly and the
-# run-20 guarded retry below never ran (same trap run-22 proved for the
-# balance line: a fatal first attempt turns every later heal into dead
-# code). att2 passed, so the chips DO render — the 100%-visibility
-# criterion flakes against the form layout. Non-fatal lattice: two
-# guarded swipe-heals first (a downward drag reveals content ABOVE the
-# viewport and, being a bare gesture, can never fail), then ONE guarded
-# scroll, then a bounded gate before the honest assert.
-- runFlow:
-    when:
-      notVisible:
-        id: "orderType_MARKET"
-    commands:
-      - swipe:
-          start: "50%, 40%"
-          end: "50%, 80%"
-      - waitForAnimationToEnd:
-          timeout: 3000
-- runFlow:
-    when:
-      notVisible:
-        id: "orderType_MARKET"
-    commands:
-      - swipe:
-          start: "50%, 40%"
-          end: "50%, 80%"
-      - waitForAnimationToEnd:
-          timeout: 3000
-- runFlow:
-    when:
-      notVisible:
-        id: "orderType_MARKET"
-    commands:
-      - scrollUntilVisible:
-          element:
-            id: "orderType_MARKET"
-          direction: UP
-          speed: 20
-          timeout: 20000
-- extendedWaitUntil:
-    visible:
-      id: "orderType_MARKET"
-    timeout: 30000
-- assertVisible:
-    id: "orderType_MARKET"
 
 # Tap the back button (testID) to return to stock detail
 - tapOn:

@@ -109,9 +109,14 @@ run_suite_per_flow() {
     echo ""
     echo "==== FLOW START: $flow ===="
     local flow_rc=0
+    local flow_out
+    flow_out="$(mktemp)"
+    # Capture the flow's output so the retry heuristics below can tell
+    # WHICH death class occurred, while tee keeps streaming every step
+    # line into the job log.
     timeout "$FLOW_TIMEOUT_SECS" maestro test "$flow" \
       --env "TEST_EMAIL=${TEST_EMAIL}" \
-      --env "TEST_PASSWORD=${TEST_PASSWORD}" || flow_rc=$?
+      --env "TEST_PASSWORD=${TEST_PASSWORD}" > >(tee "$flow_out") 2>&1 || flow_rc=$?
     # Run-22 (36546192421) evidence: two flows (aiInsights att1,
     # contractNoteParser att2) hung INSIDE the very first `clearState` —
     # the emulator/adb stall class that also produced run-21's
@@ -120,13 +125,25 @@ run_suite_per_flow() {
     # cheap targeted fix: maestro clears state and relaunches cold, so
     # no step-level state leaks into the retry. Real failures (non-124)
     # are NOT retried — their diagnosis dump must stay untouched.
+    # Run-24 (109462685063) att1 evidence: bankLinking died with maestro
+    # exit 1 BEFORE running a single step ("> Flow bankLinking" then the
+    # debug-artifact block directly — the run-8 maestro cold-start crash
+    # class). Retry once when a flow produced no COMPLETED step line at
+    # all; anything that got as far as executing steps keeps its dump.
+    local retry_reason=""
     if [ "$flow_rc" -eq 124 ]; then
-      echo "::warning::$flow timed out after ${FLOW_TIMEOUT_SECS}s (device/app stall class) - retrying once."
+      retry_reason="timed out after ${FLOW_TIMEOUT_SECS}s (device/app stall class)"
+    elif [ "$flow_rc" -ne 0 ] && ! grep -q "COMPLETED" "$flow_out"; then
+      retry_reason="died before running any step (maestro cold-start crash class)"
+    fi
+    if [ -n "$retry_reason" ]; then
+      echo "::warning::$flow $retry_reason - retrying once."
       flow_rc=0
       timeout "$FLOW_TIMEOUT_SECS" maestro test "$flow" \
         --env "TEST_EMAIL=${TEST_EMAIL}" \
-        --env "TEST_PASSWORD=${TEST_PASSWORD}" || flow_rc=$?
+        --env "TEST_PASSWORD=${TEST_PASSWORD}" > >(tee "$flow_out") 2>&1 || flow_rc=$?
     fi
+    rm -f "$flow_out"
     if [ "$flow_rc" -eq 0 ]; then
       passed=$((passed + 1))
       echo "[Passed] $(basename "$flow" .yaml)"
