@@ -173,6 +173,74 @@ appId: com.toroloom.app
             visible:
               id: "signup-name-input"
           commands:
+            # Plain scroll first: scrollUntilVisible's 100%-visibility
+            # criterion can reject a partially clipped bottom row.
+            - scroll
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - scrollUntilVisible:
+                element:
+                  id: "signup-terms-checkbox"
+                direction: DOWN
+                speed: 20
+                timeout: 20000
+      # Run-21 evidence (universal flow, 36448830643): the keyboard-guard
+      # BACK above can run with the keyboard ALREADY closed — it pops the
+      # Signup screen and the app falls to the LAUNCHER (no Login, no
+      # signup form; both recovery branches above skip and the fatal
+      # checkbox tap dies). Relaunch the IDLE app, reopen the link (SAFE:
+      # the signup POST never fired, so no run-18 Referral-Alert race) and
+      # refill the fresh form. Handles both relaunch outcomes: resumed
+      # onto the old form (openLink skipped) or fresh Login.
+      - runFlow:
+          when:
+            notVisible:
+              id: "signup-name-input"
+          commands:
+            - launchApp
+            - waitForAnimationToEnd:
+                timeout: 10000
+            - runFlow:
+                when:
+                  visible:
+                    id: "login-welcome-back"
+                commands:
+                  - openLink: toroloom://signup?ref=test123
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "signup-name-input"
+                commands:
+                  - openLink: toroloom://signup?ref=test123
+            - extendedWaitUntil:
+                visible:
+                  id: "signup-name-input"
+                timeout: 45000
+            - tapOn:
+                id: "signup-name-input"
+            - inputText: "Rahul Sharma"
+            - hideKeyboard
+            - evalScript: ${output.SIGNUP_EMAIL4 = "e2e.dl." + Date.now() + "@toroloom-test.com"}
+            - tapOn:
+                id: "signup-email-input"
+            - inputText: ${output.SIGNUP_EMAIL4}
+            - hideKeyboard
+            - tapOn:
+                text: "Enter your phone number"
+            - inputText: "9876543210"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - tapOn:
+                text: "Create a strong password"
+            - inputText: "Secure@123"
+            - hideKeyboard
+            - tapOn:
+                text: "Re-enter your password"
+            - inputText: "Secure@123"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
             - scrollUntilVisible:
                 element:
                   id: "signup-terms-checkbox"
@@ -189,12 +257,78 @@ appId: com.toroloom.app
 # top-level FATAL scroll — when the app process died mid-form, it turned
 # a recoverable launchApp restart into an instant flow kill before any
 # retry could run, and the flow ended on the device launcher. Recovery
-# now lives entirely in the keyboard-guard above; the tapOn below with
-# its built-in wait is the final gate.)
+# lives in the keyboard-guard above AND in the guarded pre-submit block
+# below; the tapOn after that block is the final gate.)
+# Run-21 (universal flow): the bare tapOn used to run BEFORE any
+# third-state recovery — with Signup already popped to the launcher it
+# died with "Element not found". The guarded recovery below comes FIRST:
+# a no-op whenever the checkbox is already on screen; otherwise it
+# relaunches the IDLE app (nothing being typed — the run-19
+# mid-typing-relaunch hang does not apply), reopens the link (SAFE: the
+# signup POST never fired, so no run-18 Referral-Alert race) and refills
+# the fresh form, handling both relaunch outcomes (resumed old form vs
+# fresh Login).
+- runFlow:
+    when:
+      notVisible:
+        id: "signup-terms-checkbox"
+    commands:
+      - launchApp
+      - waitForAnimationToEnd:
+          timeout: 10000
+      - runFlow:
+          when:
+            visible:
+              id: "login-welcome-back"
+          commands:
+            - openLink: toroloom://signup?ref=test123
+      - runFlow:
+          when:
+            notVisible:
+              id: "signup-name-input"
+          commands:
+            - openLink: toroloom://signup?ref=test123
+      - extendedWaitUntil:
+          visible:
+            id: "signup-name-input"
+          timeout: 45000
+      - tapOn:
+          id: "signup-name-input"
+      - inputText: "Rahul Sharma"
+      - hideKeyboard
+      - evalScript: ${output.SIGNUP_EMAIL3 = "e2e.dl." + Date.now() + "@toroloom-test.com"}
+      - tapOn:
+          id: "signup-email-input"
+      - inputText: ${output.SIGNUP_EMAIL3}
+      - hideKeyboard
+      - tapOn:
+          text: "Enter your phone number"
+      - inputText: "9876543210"
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - tapOn:
+          text: "Create a strong password"
+      - inputText: "Secure@123"
+      - hideKeyboard
+      - tapOn:
+          text: "Re-enter your password"
+      - inputText: "Secure@123"
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - scrollUntilVisible:
+          element:
+            id: "signup-terms-checkbox"
+          direction: DOWN
+          speed: 20
+          timeout: 20000
 - tapOn:
     id: "signup-terms-checkbox"
 
 # ── 12. Submit the form ────────────────────────────────────────────────────
+# (Run-21: the guarded third-state recovery now runs ABOVE this fatal tap
+# instead of after it.)
 - tapOn:
     text: "Create Account"
 

@@ -278,8 +278,23 @@ appId: com.toroloom.app
 
 # Run-15 evidence: this BACK can hit the back-stack while the More screen
 # is still committing — the scroll position lands mid-list and "Learning
-# Hub" is below the fold. Passive heal: a single guarded DOWN scroll to
-# the Learning Hub header BEFORE the fatal wait (never fatal itself).
+# Hub" is below the fold. Run-21 evidence (36448830643, both attempts):
+# the list was scrolled DEEP to reach "Stock Market Basics", so after the
+# pop "Learning Hub" sits ABOVE the viewport (failure dump showed the All
+# Courses cards with the header scrolled off the top) — a DOWN scroll can
+# never reach it. Heal UP first (toward the header), then fall back DOWN
+# for the rare committed-mid-list case. Never fatal itself.
+- runFlow:
+    when:
+      notVisible:
+        text: "Learning Hub"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Learning Hub"
+          direction: UP
+          speed: 20
+          timeout: 30000
 - runFlow:
     when:
       notVisible:

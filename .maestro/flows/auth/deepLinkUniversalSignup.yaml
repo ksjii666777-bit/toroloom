@@ -177,6 +177,77 @@ appId: com.toroloom.app
             visible:
               id: "signup-name-input"
           commands:
+            # Plain scroll first: scrollUntilVisible's 100%-visibility
+            # criterion can reject a partially clipped bottom row.
+            - scroll
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - scrollUntilVisible:
+                element:
+                  id: "signup-terms-checkbox"
+                direction: DOWN
+                speed: 20
+                timeout: 20000
+      # Run-21 evidence (36448830643, both attempts): the keyboard-guard
+      # BACK above ran with the keyboard ALREADY closed — it popped the
+      # Signup screen, and a deep-link screen carries no back stack, so
+      # the app fell to the LAUNCHER (failure dump = home launcher; no
+      # Login, no signup form). Both branches above skipped and the fatal
+      # checkbox tap killed the flow. Relaunch (the app is idle here —
+      # nothing being typed, so the run-19 mid-typing-relaunch hang does
+      # not apply), then reopen the link (SAFE: the signup POST never
+      # fired, so no run-18 Referral-Alert race) and refill the fresh
+      # form. Handles BOTH relaunch outcomes: resumed onto the old form
+      # (name-input already visible → openLink skipped) or fresh Login.
+      - runFlow:
+          when:
+            notVisible:
+              id: "signup-name-input"
+          commands:
+            - launchApp
+            - waitForAnimationToEnd:
+                timeout: 10000
+            - runFlow:
+                when:
+                  visible:
+                    id: "login-welcome-back"
+                commands:
+                  - openLink: toroloom://signup?ref=test123
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "signup-name-input"
+                commands:
+                  - openLink: toroloom://signup?ref=test123
+            - extendedWaitUntil:
+                visible:
+                  id: "signup-name-input"
+                timeout: 45000
+            - tapOn:
+                id: "signup-name-input"
+            - inputText: "Priya Patel"
+            - hideKeyboard
+            - evalScript: ${output.SIGNUP_EMAIL4 = "e2e.uni." + Date.now() + "@toroloom-test.com"}
+            - tapOn:
+                id: "signup-email-input"
+            - inputText: ${output.SIGNUP_EMAIL4}
+            - hideKeyboard
+            - tapOn:
+                text: "Enter your phone number"
+            - inputText: "8765432109"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - tapOn:
+                text: "Create a strong password"
+            - inputText: "UnivLink@456"
+            - hideKeyboard
+            - tapOn:
+                text: "Re-enter your password"
+            - inputText: "UnivLink@456"
+            - hideKeyboard
+            - waitForAnimationToEnd:
+                timeout: 2000
             - scrollUntilVisible:
                 element:
                   id: "signup-terms-checkbox"
@@ -190,31 +261,37 @@ appId: com.toroloom.app
 # top-level FATAL scroll — when the app process died mid-form, it turned
 # a recoverable launchApp restart into an instant flow kill before any
 # retry could run, and the flow ended on the device launcher. Recovery
-# now lives entirely in the keyboard-guard above; the tapOn below with
-# its built-in wait is the final gate.)
-- tapOn:
-    id: "signup-terms-checkbox"
-
-# ── 12. Submit the form ──────────────────────────────────────────────────
-# Subtitle "{{count}} digits entered 6/6" on this screen is parameterized
-# elsewhere — the button text itself is static, so plain-text is safe.
-# Run-20: when NEITHER the Login screen NOR the Signup form is on screen
-# (the recovery relaunch left the app on the launcher / splash), the bare
-# tapOn below died with "Element not found". Before submitting, verify the
-# form is actually there; if not, one last cold relaunch + deep link + a
-# SHORT refill of the fields the fresh form still needs (name is usually
-# pre-filled from the deep link params; email/phone/password are not).
+# lives in the keyboard-guard above AND in the guarded pre-submit block
+# below; the tapOn after that block is the final gate.)
+# Run-21 (36448830643, both attempts): the bare tapOn used to run BEFORE
+# the third-state recovery — with Signup already popped to the launcher
+# it died with "Element not found" and the recovery never executed. The
+# guarded recovery now comes FIRST: a no-op whenever the checkbox is
+# already on screen; otherwise it relaunches the IDLE app (nothing being
+# typed — the run-19 mid-typing-relaunch hang does not apply here),
+# reopens the link (SAFE: the signup POST never fired, so no run-18
+# Referral-Alert race) and refills the fresh form, handling both relaunch
+# outcomes (resumed onto the old form vs fresh Login).
 - runFlow:
     when:
       notVisible:
         id: "signup-terms-checkbox"
     commands:
       - launchApp
-      - extendedWaitUntil:
-          visible:
-            id: "signup-name-input"
-          timeout: 45000
-      - openLink: toroloom://signup?ref=test123
+      - waitForAnimationToEnd:
+          timeout: 10000
+      - runFlow:
+          when:
+            visible:
+              id: "login-welcome-back"
+          commands:
+            - openLink: toroloom://signup?ref=test123
+      - runFlow:
+          when:
+            notVisible:
+              id: "signup-name-input"
+          commands:
+            - openLink: toroloom://signup?ref=test123
       - extendedWaitUntil:
           visible:
             id: "signup-name-input"
@@ -252,6 +329,12 @@ appId: com.toroloom.app
           timeout: 20000
 - tapOn:
     id: "signup-terms-checkbox"
+
+# ── 12. Submit the form ──────────────────────────────────────────────────
+# Subtitle "{{count}} digits entered 6/6" on this screen is parameterized
+# elsewhere — the button text itself is static, so plain-text is safe.
+# (Run-21 moved the third-state pre-submit recovery ABOVE the fatal tap;
+# see the guarded block before it.)
 - tapOn:
     text: "Create Account"
 
