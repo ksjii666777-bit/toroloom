@@ -127,25 +127,43 @@ appId: com.toroloom.app
 # the bare scroll exhausted its 20s and killed the flow. Retry once after
 # a settle window instead of a fatal bare assert: if the line truly never
 # renders, the NEXT gate (chip scroll) fails visibly with the dump.
-- scrollUntilVisible:
-    element:
-      text: ".*Available:.*|.*Insufficient balance.*"
-    direction: DOWN
-    speed: 20
-    timeout: 20000
+# Run-22 (36546192421) att1 evidence: the FIRST scrollUntilVisible here
+# was TOP-LEVEL FATAL — its 20s exhaustion killed the flow instantly and
+# the "retry" below never ran (log shows the failure right after Order
+# Summary with no retry attempt; att2 passed, so the line does render —
+# it is a slow-scroll race, not a missing element). Non-fatal lattice,
+# same shape as placeOrder's proven one: plain scrolls to move the list,
+# settle, then ONE guarded scroll for the still-missing case. The balance
+# gate becomes the bounded EWU further down; a persistent miss now fails
+# visibly at the next gate (chip scroll) with the dump.
+- scroll
+- waitForAnimationToEnd:
+    timeout: 5000
 - runFlow:
     when:
       notVisible:
         text: ".*Available:.*|.*Insufficient balance.*"
     commands:
+      - scroll
       - waitForAnimationToEnd:
           timeout: 5000
+- runFlow:
+    when:
+      notVisible:
+        text: ".*Available:.*|.*Insufficient balance.*"
+    commands:
       - scrollUntilVisible:
           element:
             text: ".*Available:.*|.*Insufficient balance.*"
           direction: DOWN
           speed: 20
           timeout: 20000
+# Bounded fatal gate AFTER all heals: a persistently missing balance line
+# is a real regression and must fail — but only here, never inside a heal.
+- extendedWaitUntil:
+    visible:
+      text: ".*Available:.*|.*Insufficient balance.*"
+    timeout: 45000
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 4. Verify Order Form Shows Order Types

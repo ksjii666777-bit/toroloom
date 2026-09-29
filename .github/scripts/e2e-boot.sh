@@ -112,6 +112,21 @@ run_suite_per_flow() {
     timeout "$FLOW_TIMEOUT_SECS" maestro test "$flow" \
       --env "TEST_EMAIL=${TEST_EMAIL}" \
       --env "TEST_PASSWORD=${TEST_PASSWORD}" || flow_rc=$?
+    # Run-22 (36546192421) evidence: two flows (aiInsights att1,
+    # contractNoteParser att2) hung INSIDE the very first `clearState` —
+    # the emulator/adb stall class that also produced run-21's
+    # aadhaar/pan launch-timeout one-offs. Every affected flow passed
+    # its OTHER attempt, so one immediate retry of a TIMEOUT death is a
+    # cheap targeted fix: maestro clears state and relaunches cold, so
+    # no step-level state leaks into the retry. Real failures (non-124)
+    # are NOT retried — their diagnosis dump must stay untouched.
+    if [ "$flow_rc" -eq 124 ]; then
+      echo "::warning::$flow timed out after ${FLOW_TIMEOUT_SECS}s (device/app stall class) - retrying once."
+      flow_rc=0
+      timeout "$FLOW_TIMEOUT_SECS" maestro test "$flow" \
+        --env "TEST_EMAIL=${TEST_EMAIL}" \
+        --env "TEST_PASSWORD=${TEST_PASSWORD}" || flow_rc=$?
+    fi
     if [ "$flow_rc" -eq 0 ]; then
       passed=$((passed + 1))
       echo "[Passed] $(basename "$flow" .yaml)"
