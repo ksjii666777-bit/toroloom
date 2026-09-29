@@ -173,28 +173,50 @@ appId: com.toroloom.app
 # ("MARKET") and run-16's case-sensitive text scroll hunted the wrong
 # string for the full 20s in BOTH attempts. The balance scroll pushed the
 # chips ABOVE the viewport, so scroll UP to them, then assert via testID.
-- scrollUntilVisible:
-    element:
-      id: "orderType_MARKET"
-    direction: UP
-    speed: 20
-    timeout: 30000
-# Run-20: the single UP-scroll exhausted its budget in both attempts while
-# the dump showed the order form alive — one guarded retry after a settle
-# window instead of dying straight into the assert.
+# Run-23 (109398415444) att1 evidence: the FIRST UP-scroll here is
+# top-level FATAL — its 30s exhaustion killed the flow instantly and the
+# run-20 guarded retry below never ran (same trap run-22 proved for the
+# balance line: a fatal first attempt turns every later heal into dead
+# code). att2 passed, so the chips DO render — the 100%-visibility
+# criterion flakes against the form layout. Non-fatal lattice: two
+# guarded swipe-heals first (a downward drag reveals content ABOVE the
+# viewport and, being a bare gesture, can never fail), then ONE guarded
+# scroll, then a bounded gate before the honest assert.
 - runFlow:
     when:
       notVisible:
         id: "orderType_MARKET"
     commands:
+      - swipe:
+          start: "50%, 40%"
+          end: "50%, 80%"
       - waitForAnimationToEnd:
           timeout: 3000
+- runFlow:
+    when:
+      notVisible:
+        id: "orderType_MARKET"
+    commands:
+      - swipe:
+          start: "50%, 40%"
+          end: "50%, 80%"
+      - waitForAnimationToEnd:
+          timeout: 3000
+- runFlow:
+    when:
+      notVisible:
+        id: "orderType_MARKET"
+    commands:
       - scrollUntilVisible:
           element:
             id: "orderType_MARKET"
           direction: UP
           speed: 20
           timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "orderType_MARKET"
+    timeout: 30000
 - assertVisible:
     id: "orderType_MARKET"
 
