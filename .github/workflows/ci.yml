@@ -800,10 +800,11 @@ jobs:
   #   npx expo run:android && maestro test .maestro/flows
   #
   # ── E2E — Maestro (Android) Full Suite (master/main only) ────────────────
-  # Runs ALL 12 Maestro flows on the default branch for comprehensive coverage.
-  # Uses `continue-on-error: true` because full E2E is flaky in CI; failures
-  # are logged but don't block the build. For fast PR-level feedback, see the
-  # e2e-pr job below.
+  # Runs ALL Maestro flows on the default branch for comprehensive coverage.
+  # BLOCKING since run-28 (Sep 2026): three consecutive att1 30/30 passes
+  # (runs 26-28) proved the suite stable after the fatal-first-scroll,
+  # guard-propagation, virtualization and stall-retry fixes. Failures now
+  # fail the job; for fast PR-level feedback, see the e2e-pr job below.
   #
   # Uses ubuntu-latest with KVM hardware acceleration (GitHub has supported
   # hardware-accelerated Android virtualization on standard Linux runners
@@ -832,7 +833,7 @@ jobs:
     # discarded. 240 covers the full two-attempt worst case with headroom
     # for a cold-cache build.
     timeout-minutes: 240
-    continue-on-error: true
+    continue-on-error: false
     env:
       MAESTRO_CLOUD_API_KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY || '' }}
     strategy:
@@ -1051,8 +1052,8 @@ jobs:
             MODE="Maestro Cloud (soft-fail, non-blocking)"
           fi
           if [ "$RESULT" = "failure" ]; then
-            echo "::warning::E2E full suite FAILED (soft-fail, non-blocking) — mode: $MODE. See job logs."
-            echo "| E2E Full Suite | ❌ failed (soft-fail) | $MODE |" >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::E2E full suite FAILED (BLOCKING) — mode: $MODE. See job logs and the failure diagnosis groups."
+            echo "| E2E Full Suite | ❌ failed (BLOCKING) | $MODE |" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "| E2E Full Suite | ✅ $RESULT | $MODE |" >> "$GITHUB_STEP_SUMMARY"
           fi
