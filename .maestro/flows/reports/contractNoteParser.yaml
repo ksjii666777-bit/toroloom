@@ -213,22 +213,60 @@ appId: com.toroloom.app
 
 - assertVisible:
     text: "Parsed Trades"
-# Result rows sit below the fold — scroll each into view before asserting
+# Result rows sit below the fold — bring them in before asserting.
+# Run-29 (109850376496) evidence: BOTH attempts failed here. The failure
+# hierarchy stopped at the "Parsed Trades" title (rows below the fold) and
+# 31s of `scrollUntilVisible ... direction: DOWN` never moved the page:
+# that command (and plain `scroll`) swipes from the SCREEN CENTRE, which on
+# this screen is inside the big paste TextInput — an EditText consumes the
+# vertical drag, so the outer ScrollView never scrolls (Maestro docs: "the
+# swipe may miss the scrollable region"). Fix: an explicit slow drag that
+# starts BELOW the paste box (y=72%), plus a guarded second drag (swipes can
+# never fail) for the case where the first one is dropped. The step is kept
+# SHORT (15% of the screen ≈ the row height) so the summary card's Zerodha /
+# Export CSV rows stay on screen for the asserts below. The fatal gate then
+# still does its own fine-tuning, now accepting a partially visible row.
+- swipe:
+    start: "50%, 72%"
+    end: "50%, 57%"
+    duration: 700
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      notVisible:
+        text: "RELIANCE"
+    commands:
+      - swipe:
+          start: "50%, 72%"
+          end: "50%, 57%"
+          duration: 700
+      - waitForAnimationToEnd:
+          timeout: 3000
 - scrollUntilVisible:
     element:
       text: "RELIANCE"
     direction: DOWN
     speed: 20
     timeout: 30000
+    visibilityPercentage: 50
 - assertVisible:
     text: "RELIANCE"
     optional: true
-- scrollUntilVisible:
-    element:
-      text: "Zerodha"
-    direction: DOWN
-    speed: 20
-    timeout: 20000
+# Zerodha lives in the summary card ABOVE the trades table, so the nudge
+# above moves it UP: search UP (only when it is off screen) instead of the
+# old blind DOWN search, which would scroll away from it.
+- runFlow:
+    when:
+      notVisible:
+        text: "Zerodha"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Zerodha"
+          direction: UP
+          speed: 20
+          timeout: 20000
 - assertVisible:
     text: "Zerodha"
 

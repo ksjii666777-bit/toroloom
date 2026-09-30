@@ -153,27 +153,35 @@ appId: com.toroloom.app
     text: "Order Summary"
 
 # Balance line ("Available: ₹…" / "Insufficient balance — need ₹… more")
-# sits below the summary rows. Run-25 att2 evidence: if the form scrolled
-# back to the top the summary card UNMOUNTS (virtualized) and plain
-# scrolls then move nothing — the heal re-taps Max (no-op on qty, forces
-# the card to re-mount) and scrolls once more. Every heal action here is
-# unfailable; the EWU is the single fatal gate.
-- scroll
+# is the LAST row of the summary card, just below the grand total.
+# Run-29 (109850376496) evidence: BOTH attempts died here while the failure
+# hierarchy/screenshot showed the page still at form-top (the order-type
+# chips were on screen) — the two plain `scroll`s moved NOTHING, so the
+# row never entered the viewport and the 45s EWU expired. Maestro's `scroll`
+# and `scrollUntilVisible` both swipe from the SCREEN CENTRE (docs: "the
+# swipe may miss the scrollable region"), a fling the RN ScrollView can
+# simply drop. Fix: an explicit SLOW drag that starts in the empty right
+# gutter (x=90% is past the chips, y=50% is empty space) so the gesture
+# lands on the scroll container itself, then a guarded second drag (swipes
+# can never fail) in case the first one was dropped. The EWU stays the
+# single fatal gate.
+- swipe:
+    start: "90%, 50%"
+    end: "90%, 15%"
+    duration: 700
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 3000
 - runFlow:
     when:
       notVisible:
         text: ".*Available:.*|.*Insufficient balance.*"
     commands:
-      - tapOn:
-          id: "quickQty_Max"
-          optional: true
+      - swipe:
+          start: "90%, 50%"
+          end: "90%, 15%"
+          duration: 700
       - waitForAnimationToEnd:
-          timeout: 5000
-      - scroll
-      - waitForAnimationToEnd:
-          timeout: 5000
+          timeout: 3000
 - extendedWaitUntil:
     visible:
       text: ".*Available:.*|.*Insufficient balance.*"

@@ -64,9 +64,14 @@ diag_on_fail() {
   if [ "$rc" -ne 0 ]; then
     echo "::group::E2E failure diagnosis — visible texts & ids at failure time"
     adb shell uiautomator dump /sdcard/e2e_fail.xml >/dev/null 2>&1 || true
+    echo "---- scrollable containers (bounds) ----"
     adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
-      | grep -oE '(text|resource-id)="[^"]+"' \
-      | tee e2e-failure-hierarchy.txt | head -80 || true
+      | grep -oE '<node[^>]*scrollable="true"[^>]*>' \
+      | grep -oE 'bounds="[^"]+"' || true
+    echo "---- hierarchy (text/id/bounds) ----"
+    adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
+      | grep -oE '(text|resource-id)="[^"]+"|bounds="[^"]+"' \
+      | tee e2e-failure-hierarchy.txt | head -160 || true
     adb exec-out screencap -p > e2e-failure.png 2>/dev/null || true
     echo "::endgroup::"
   fi
@@ -162,9 +167,19 @@ run_suite_per_flow() {
       echo "---- CRASH buffer (logcat -b crash, last 60) ----"
       adb logcat -b crash -d 2>/dev/null | tail -60 || true
       adb shell uiautomator dump /sdcard/e2e_fail.xml >/dev/null 2>&1 || true
+      # Run-29 (109850376496) lesson: text+id alone cannot tell a target that
+      # is merely BELOW the fold from one that is not mounted at all — the
+      # orderEdgeCases/contractNoteParser failures needed the scroll geometry.
+      # Dump the scrollable containers (with bounds) first, then the whole
+      # hierarchy with bounds so the next failure is decidable offline.
+      echo "---- scrollable containers (bounds) ----"
       adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
-        | grep -oE '(text|resource-id)="[^"]+"' \
-        | tee "e2e-failure-${flow//\//_}-hierarchy.txt" | head -80 || true
+        | grep -oE '<node[^>]*scrollable="true"[^>]*>' \
+        | grep -oE 'bounds="[^"]+"' || true
+      echo "---- hierarchy (text/id/bounds) ----"
+      adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
+        | grep -oE '(text|resource-id)="[^"]+"|bounds="[^"]+"' \
+        | tee "e2e-failure-${flow//\//_}-hierarchy.txt" | head -160 || true
       adb exec-out screencap -p > "e2e-failure-${flow//\//_}.png" 2>/dev/null || true
       echo "::endgroup::"
       rc=1
