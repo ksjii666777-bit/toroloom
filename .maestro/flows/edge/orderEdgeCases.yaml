@@ -100,49 +100,17 @@ appId: com.toroloom.app
     text: "Buy Securities"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 3. Test Max Quantity Button
+# 3. Verify Order-Type Chips FIRST (form-top, before ANY scroll)
 # ═══════════════════════════════════════════════════════════════════════════
-# Quick quantity chips: 10 / 50 / 100 / Max (testID quickQty_Max)
-- tapOn:
-    id: "quickQty_Max"
-- waitForAnimationToEnd:
-    timeout: 10000
-
-# The Order Summary card appears when qty is set — bring it in with a
-# bare scroll (can never fail) and gate on the card; this was the LAST
-# fatal-first scrollUntilVisible left in the flow.
-- scroll
-- waitForAnimationToEnd:
-    timeout: 5000
-- extendedWaitUntil:
-    visible:
-      text: "Order Summary"
-    timeout: 30000
-- assertVisible:
-    text: "Order Summary"
-
-# (Balance verification moved AFTER the order-type chips — run-24 att2
-# evidence: downward scrolls virtualize the ORDER TYPE section away;
-# see section 5.)
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 4. Verify Order Form Shows Order Types (BEFORE the balance scrolls)
-# ═══════════════════════════════════════════════════════════════════════════
-# Order-type chips carry stable testIDs (orderType_MARKET/LIMIT/SL/SL-M) —
-# use them instead of the text "Market": the chip renders UPPERCASE
-# ("MARKET") and run-16's case-sensitive text scroll hunted the wrong
-# string for the full 20s in BOTH attempts.
-# Run-23 att1: the first UP-scroll here was top-level fatal (heal below it
-# never ran) — fixed with a guarded lattice. Run-24 att2 (109462685063)
-# exposed two more traps: (a) runFlow.when guards only the CONDITION — a
-# scrollUntilVisible failing INSIDE the guard still kills the flow (the
-# guarded 20s UP-scroll FAILED and took the whole flow with it); (b) after
-# the DOWN-scrolls to the balance line the dump showed the order form alive
-# but the ORDER TYPE section gone — the list virtualized it away. Chips are
-# always mounted at FORM-TOP (att1 asserted them instantly), so assert them
-# FIRST, before any downward scroll. Heal is a bare swipe (a downward drag
-# reveals content above the viewport and can never fail); the bounded EWU
-# is the only fatal step.
+# Order-type chips carry stable testIDs (orderType_MARKET/LIMIT/SL/SL-M).
+# Run-24/25 dumps proved the form VIRTUALIZES sections away: scrolled
+# down, the chips vanish (run-24 att2, run-25 att1); scrolled back up,
+# the Order Summary card vanishes (run-25 att2 — hierarchy showed NO
+# order-summary-title at all, so a bare scroll then moved nothing). The
+# chips are always mounted at FORM-TOP, so assert them here, before any
+# scrolling has happened. Heal is a bare swipe (a downward drag reveals
+# content above the viewport and can never fail); the bounded EWU is the
+# only fatal step.
 - runFlow:
     when:
       notVisible:
@@ -161,11 +129,35 @@ appId: com.toroloom.app
     id: "orderType_MARKET"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 5. Balance line (AFTER the chips — plain-scroll heals only)
+# 4. Max quantity → Order Summary → balance line (one downward pass)
 # ═══════════════════════════════════════════════════════════════════════════
-# Run-24 att2 lesson: never put a scrollUntilVisible inside a runFlow
-# guard — its failure propagates and kills the flow. Plain scrolls move
-# the list and can never fail; the EWU below is the single fatal gate.
+# Quick quantity chips: 10 / 50 / 100 / Max (testID quickQty_Max)
+- tapOn:
+    id: "quickQty_Max"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# The Order Summary card appears when qty is set — one bare scroll (can
+# never fail), then the bounded gate. scrollUntilVisible is banned in
+# this flow: run-22/23 proved a fatal first scroll turns every later
+# heal into dead code, and run-24 proved its failure propagates out of
+# runFlow guards.
+- scroll
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      text: "Order Summary"
+    timeout: 30000
+- assertVisible:
+    text: "Order Summary"
+
+# Balance line ("Available: ₹…" / "Insufficient balance — need ₹… more")
+# sits below the summary rows. Run-25 att2 evidence: if the form scrolled
+# back to the top the summary card UNMOUNTS (virtualized) and plain
+# scrolls then move nothing — the heal re-taps Max (no-op on qty, forces
+# the card to re-mount) and scrolls once more. Every heal action here is
+# unfailable; the EWU is the single fatal gate.
 - scroll
 - waitForAnimationToEnd:
     timeout: 5000
@@ -174,6 +166,11 @@ appId: com.toroloom.app
       notVisible:
         text: ".*Available:.*|.*Insufficient balance.*"
     commands:
+      - tapOn:
+          id: "quickQty_Max"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 5000
       - scroll
       - waitForAnimationToEnd:
           timeout: 5000
