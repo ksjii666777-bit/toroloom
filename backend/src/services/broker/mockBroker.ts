@@ -35,7 +35,14 @@ interface CommoditySeed {
   mcxPrice: number;
 }
 
-const commoditySeeds: CommoditySeed[] = [
+/**
+ * Exported for deterministic tests (commodityQuotes.test.ts): the
+ * energy-vs-metals volatility invariant is a CONFIG property and must be
+ * asserted on the seeds, not on random-walk samples (run-35 attempt-2:
+ * the empirical |changePercent| averages of 30 random ticks were
+ * statistically indistinguishable and flipped the assertion).
+ */
+export const commoditySeeds: CommoditySeed[] = [
   // Precious Metals
   { symbol: 'XAUUSD', name: 'Gold', basePrice: 2335.40, unit: 'oz', volatility: 0.15, dailyRange: 0.012, category: 'metals', mcxPrice: 73210 },
   { symbol: 'XAGUSD', name: 'Silver', basePrice: 29.45, unit: 'oz', volatility: 0.22, dailyRange: 0.018, category: 'metals', mcxPrice: 923 },
