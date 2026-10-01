@@ -872,6 +872,15 @@ jobs:
       - name: Verify install-script allowlist (supply-chain)
         run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
+      # Skia ships its prebuilt Android binaries via a postinstall script,
+      # but node_modules installs run with --ignore-scripts (supply-chain
+      # hardening) and the node_modules CACHE was populated under the old
+      # lockfile that bundled libs/. Run-34 (job 110378328011) missed them
+      # after the grpc-js lockfile bump invalidated the cache key — CMake
+      # died with "Skia prebuilt binaries not found". Idempotent: a no-op
+      # once the cache is warm again.
+      - name: Ensure Skia prebuilt binaries (postinstall skipped by --ignore-scripts)
+        run: npx install-skia
 
       - name: Install Maestro CLI
         run: |
@@ -1118,6 +1127,15 @@ jobs:
       - name: Verify install-script allowlist (supply-chain)
         run: node "$GITHUB_WORKSPACE/scripts/install-scripts-allowlist.mjs"
 
+      # Skia ships its prebuilt Android binaries via a postinstall script,
+      # but node_modules installs run with --ignore-scripts (supply-chain
+      # hardening) and the node_modules CACHE was populated under the old
+      # lockfile that bundled libs/. Run-34 (job 110378328011) missed them
+      # after the grpc-js lockfile bump invalidated the cache key — CMake
+      # died with "Skia prebuilt binaries not found". Idempotent: a no-op
+      # once the cache is warm again.
+      - name: Ensure Skia prebuilt binaries (postinstall skipped by --ignore-scripts)
+        run: npx install-skia
 
       - name: Install Maestro CLI
         run: |
