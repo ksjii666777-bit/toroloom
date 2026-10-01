@@ -94,6 +94,8 @@ trap diag_on_fail EXIT
 FLOW_TIMEOUT_SECS=420
 run_suite_per_flow() {
   local rc=0 failed=0 passed=0
+  # Per-run native-crash tally (Hermes SIGSEGV watch).
+  local crashes=0 flow_crashes=0
   # The e2e-pr job passes explicit .yaml paths, the full-suite job passes
   # the .maestro DIRECTORY (config.yaml's flows glob only matches when
   # maestro receives the directory) — expand directories to flow files.
@@ -110,6 +112,9 @@ run_suite_per_flow() {
     echo "::error::No flow files found in: $*"
     return 1
   fi
+  # Fresh per-run crash tally: clear stale boot-time entries so each flow's
+  # count reflects only this run's events.
+  adb logcat -b crash -c 2>/dev/null || true
   for flow in "${flows[@]}"; do
     echo ""
     echo "==== FLOW START: $flow ===="
@@ -184,10 +189,28 @@ run_suite_per_flow() {
       echo "::endgroup::"
       rc=1
     fi
+    # Hermes SIGSEGV watch (runs 18/20/21/31 — see docs/e2e-stabilization.md):
+    # app process dies ~2s after launch, SEGV_ACCERR in libhermesvm.so via
+    # gwp_asan, flow-independent. Tally from the device crash buffer, warn
+    # per flow, then clear the buffer so the next flow counts only its own
+    # events. Retry already absorbs these; this makes frequency creep visible.
+    flow_crashes=$(adb logcat -b crash -d 2>/dev/null | grep -cE "Fatal signal.*toroloom") || true
+    if [ "$flow_crashes" -gt 0 ]; then
+      crashes=$((crashes + flow_crashes))
+      echo "::warning::$flow: ${flow_crashes} native crash(es) (Fatal signal, app process) — Hermes/libhermesvm SIGSEGV class; per-flow retry absorbs these."
+      adb logcat -b crash -c 2>/dev/null || true
+    fi
     echo "==== FLOW END: $flow ===="
   done
   echo ""
   echo "${passed}/${#flows[@]} Flows Passed, ${failed} Failed"
+  # Run-level crash tally as an Actions annotation — no log-grepping needed
+  # to spot a rising Hermes-crash frequency (>=2 per run = investigate).
+  if [ "$crashes" -gt 0 ]; then
+    echo "::warning::Native app crashes (Fatal signal) this run: ${crashes} — Hermes/libhermesvm SIGSEGV pattern (docs/e2e-stabilization.md). At >=2 per run, investigate upstream."
+  else
+    echo "Native crashes (Fatal signal): 0"
+  fi
   return "$rc"
 }
 
