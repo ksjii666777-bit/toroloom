@@ -111,7 +111,7 @@ appId: com.toroloom.app
             text: "Connect Broker"
           direction: DOWN
           speed: 20
-          timeout: 20000
+          timeout: 60000
       - tapOn:
           text: "Connect Broker"
       - waitForAnimationToEnd:
@@ -236,12 +236,15 @@ appId: com.toroloom.app
                 id: "tab-more"
             - waitForAnimationToEnd:
                 timeout: 5000
+            # Run-30 att1 lesson: this same scroll took ~27s at speed 20 in
+            # the primary nav — a 30s budget here flaked (exit at 31s wall).
+            # Match the primary nav's 60s budget.
             - scrollUntilVisible:
                 element:
                   text: "Connect Broker"
                 direction: DOWN
                 speed: 20
-                timeout: 30000
+                timeout: 60000
             - tapOn:
                 text: "Connect Broker"
             - waitForAnimationToEnd:
