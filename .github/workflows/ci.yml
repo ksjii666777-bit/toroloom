@@ -16,6 +16,13 @@ name: CI
 on:
   push:
     branches: ['**']   # every branch push — e2e/coverage-badge jobs self-guard to master/main
+    # Docs-only pushes skip the entire workflow — no point burning a ~2h E2E
+    # emulator run for markdown. Mixed pushes (docs + any other file) still run.
+    # CAVEAT: if "E2E — Full Suite (master)" later becomes a REQUIRED status
+    # check, a skipped run reports no check at all — pair this with a branch
+    # protection rule that tolerates skipped checks.
+    paths-ignore:
+      - 'docs/**'
   pull_request:
     branches: [master, main]
   workflow_dispatch:           # Allow manual trigger from the Actions tab
