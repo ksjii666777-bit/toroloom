@@ -63,6 +63,19 @@ const ALLOW_HIGH = {
     'nanoid',               // id generation in metro (build-time)
     'shell-quote',          // metro command parsing (build-time)
     '@xmldom/xmldom',       // expo config-plugin XML parsing (build-time)
+    // Firebase family — "unknown advisory" batch published 2026-09-30/10-01
+    // (CI first tripped on 77dc49b, 2026-10-01). Advisory titles/metadata
+    // are unresolved in the GHSA DB and the vulnerable ranges span EVERY
+    // modern release (>=17.4.3 / >=20.2.0) — no fixed version exists to
+    // upgrade to. NOT build-time-only: re-review these entries monthly and
+    // drop them as soon as patched releases land (also re-check the
+    // @grpc/grpc-js override in package.json — CVE-2026-101916, fixed there
+    // via ^1.13.6, GHSA-m9gg-hp2v-232j).
+    'firebase',                        // transitive via @react-native-firebase
+    '@firebase/firestore',             // transitive via @react-native-firebase/app
+    '@firebase/firestore-compat',      // transitive via @react-native-firebase/app
+    '@react-native-firebase/app',      // direct dep ^24.1.1
+    '@react-native-firebase/analytics',// direct dep ^24.1.1
   ]),
   backend: new Set([]), // backend currently has ZERO prod high/critical — keep it that way
 };
