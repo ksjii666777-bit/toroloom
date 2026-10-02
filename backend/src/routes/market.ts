@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getBroker } from '../services/broker';
+import { getBroker, resetBroker } from '../services/broker';
 import { marketCache, CACHE_TTL } from '../services/cache';
 import type { StockInfo } from '../services/broker/interface';
 
@@ -29,17 +29,35 @@ router.get('/indices', async (_req: Request, res: Response) => {
 let lastGoodStocks: StockInfo[] | null = null;
 
 router.get('/stocks', async (_req: Request, res: Response) => {
-  try {
+  const fetchStocks = async (): Promise<StockInfo[]> => {
     const broker = await getBroker();
-    const stocks = await marketCache.getOrSet(
+    return marketCache.getOrSet(
       'stocks',
       () => broker.getStocks(),
       CACHE_TTL.STOCKS,
     );
+  };
+
+  try {
+    const stocks = await fetchStocks();
     lastGoodStocks = stocks;
     res.json(stocks);
   } catch (error: unknown) {
     console.error('[market/stocks] getStocks failed:', error);
+    // The cached broker instance may be half-dead — its session expired
+    // server-side (e.g. a daily-limited broker token) while isConnected()
+    // still reports true, so getBroker() keeps handing it back. Reset it
+    // once so the failover chain re-runs (ends on mock if all live brokers
+    // are unavailable) before giving up.
+    try {
+      resetBroker();
+      const stocks = await fetchStocks();
+      lastGoodStocks = stocks;
+      res.json(stocks);
+      return;
+    } catch (retryError: unknown) {
+      console.error('[market/stocks] retry after broker reset failed:', retryError);
+    }
     if (lastGoodStocks && lastGoodStocks.length > 0) {
       res.json(lastGoodStocks);
       return;

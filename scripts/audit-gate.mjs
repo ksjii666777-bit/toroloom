@@ -76,6 +76,23 @@ const ALLOW_HIGH = {
     '@firebase/firestore-compat',      // transitive via @react-native-firebase/app
     '@react-native-firebase/app',      // direct dep ^24.1.1
     '@react-native-firebase/analytics',// direct dep ^24.1.1
+    // Expo/Sentry family — second "unknown advisory" batch published
+    // 2026-10-01/02 (CI first tripped on 5dd596a, 2026-10-02). Same class as
+    // the firebase batch: GHSA records are unresolved ("unknown advisory")
+    // and the vulnerable ranges span every modern release (e.g.
+    // @sentry/react-native >=5.16.0-alpha.1, expo >=41.0.0-alpha.0) — no
+    // fixed version exists to upgrade to. expo/@sentry/react-native are app
+    // RUNTIME deps, so keep these visible and re-review monthly; drop each
+    // entry as soon as a patched release lands.
+    '@expo/cli',                       // expo tooling (build + dev runtime)
+    '@expo/code-signing-certificates', // EAS code signing (build-time)
+    'expo',                            // direct dep — app runtime framework
+    '@sentry/react-native',            // direct dep ~7.11.0 — crash reporting
+    // node-forge — REAL advisory (RSA PKCS#1 v1.5 signature verification
+    // accepts extra nested DigestAlgorithm elements) but the vulnerable
+    // range is [*] — no patched release published yet. Transitive build
+    // tooling. Remove this entry as soon as node-forge ships a fix.
+    'node-forge',
   ]),
   backend: new Set([]), // backend currently has ZERO prod high/critical — keep it that way
 };

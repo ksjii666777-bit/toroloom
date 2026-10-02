@@ -25,14 +25,16 @@ import http from 'http';
 // Mock the broker service — the route only uses getBroker() from it.
 vi.mock('../services/broker', () => ({
   getBroker: vi.fn(),
+  resetBroker: vi.fn(),
 }));
 
 // Import AFTER mocks
-import { getBroker } from '../services/broker';
+import { getBroker, resetBroker } from '../services/broker';
 import { marketCache } from '../services/cache';
 import marketRoutes from '../routes/market';
 
 const mockGetBroker = vi.mocked(getBroker);
+const mockResetBroker = vi.mocked(resetBroker);
 
 // ──── Minimal http.request helper (same pattern as globalStocks.test.ts) ────
 
@@ -146,5 +148,29 @@ describe('GET /api/market/stocks — last-known-good fallback', () => {
     expect(status).toBe(200);
     expect(body[0].symbol).toBe('RELIANCE');
     expect(body.length).toBe(2);
+  });
+
+  it('recovers with FRESH data via broker reset + failover when the cached instance is half-dead', async () => {
+    marketCache.delete('stocks');
+    mockGetBroker.mockReset();
+    // 1st getBroker() call → half-dead instance (isConnected() true but
+    // getStocks throws); 2nd call (after resetBroker) → healthy instance
+    // serving a DIFFERENT list, so the test proves fresh data, not staleness.
+    const freshStocks = [
+      { id: 'INFY', symbol: 'INFY', name: 'Infosys Ltd.', sector: 'IT',
+        price: 1850, change: 22, changePercent: 1.2, isPositive: true,
+        marketCap: '₹7,70,000 Cr', volume: '6.8M', high52: 2000, low52: 1400 },
+    ];
+    mockGetBroker
+      .mockResolvedValueOnce({ getStocks: vi.fn().mockRejectedValue(new Error('session dead')) } as any)
+      .mockResolvedValueOnce({ getStocks: vi.fn().mockResolvedValue(freshStocks) } as any);
+
+    const { status, body } = await request(server, baseUrl, {
+      method: 'GET', path: '/api/market/stocks',
+    });
+
+    expect(status).toBe(200);
+    expect(mockResetBroker).toHaveBeenCalled();
+    expect(body[0].symbol).toBe('INFY');
   });
 });
