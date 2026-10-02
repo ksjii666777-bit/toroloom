@@ -1,0 +1,77 @@
+{
+	"info": {
+		"name": "Toroloom API",
+		"description": "Toroloom backend API smoke collection. Login request automatically saves the JWT token into the collection variable `token` — authed requests pick it up. Import into Postman, Hoppscotch, or Bruno.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "rootUrl", "value": "https://toroloom-production.up.railway.app" },
+		{ "key": "baseUrl", "value": "https://toroloom-production.up.railway.app/api" },
+		{ "key": "token", "value": "" }
+	],
+	"item": [
+		{
+			"name": "0. Health — /ready (no auth)",
+			"request": {
+				"method": "GET",
+				"url": "{{rootUrl}}/ready"
+			}
+		},
+		{
+			"name": "1. Login (auto-saves token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"const d = pm.response.json();",
+							"const t = d.token || d.accessToken || (d.data && d.data.token);",
+							"if (t) {",
+							"  pm.collectionVariables.set('token', t);",
+							"  pm.test('token saved', () => pm.expect(t).to.be.a('string'));",
+							"} else {",
+							"  pm.test('token found in response', () => pm.expect.fail('No token field — inspect response shape'));",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{ "key": "Content-Type", "value": "application/json" }
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@toroloom.com\",\n  \"password\": \"password123\"\n}"
+				},
+				"url": "{{baseUrl}}/auth/login"
+			}
+		},
+		{
+			"name": "2. Market — Stocks list (no auth)",
+			"request": {
+				"method": "GET",
+				"url": "{{baseUrl}}/market/stocks"
+			}
+		},
+		{
+			"name": "3. Market — Quotes (RELIANCE, TCS)",
+			"request": {
+				"method": "GET",
+				"url": "{{baseUrl}}/market/quotes?symbols=RELIANCE,TCS"
+			}
+		},
+		{
+			"name": "4. Watchlist (auth)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{ "key": "Authorization", "value": "Bearer {{token}}" }
+				],
+				"url": "{{baseUrl}}/watchlist"
+			}
+		}
+	]
+}
