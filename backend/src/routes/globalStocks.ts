@@ -19,6 +19,11 @@
 
 import { Router, Request, Response } from 'express';
 import { marketstack, isMarketStackConfigured } from '../services/marketstack';
+// US-stock universe (AAPL, MSFT, ...) — shared with the global-markets router
+// so bulk/single quotes and search resolve US symbols too (regression: AAPL
+// used to return { error: 'Not found' } from /quotes because ALL_MOCK below
+// only contained European and Asian seed data).
+import { MOCK_STOCKS as GLOBAL_US_STOCKS } from './globalMarkets';
 
 const router = Router();
 
@@ -35,14 +40,18 @@ const EXCHANGE_SUFFIX: Record<string, string> = {
   TSE: '.XTKS', HKEX: '.XHKG', NSE: '.XNSE',
   KRX: '.XKRX', SGX: '.XSES', TWSE: '.XTAI',
   SET: '.XBKK', ASX: '.XASX',
+  // US — MarketStack uses plain symbols (no MIC suffix); '' is falsy so
+  // toMsSymbol must check membership with `in`, not truthiness.
+  NASDAQ: '', NYSE: '',
 };
 
 const DEFAULT_EXCHANGE_SUFFIX = '.XLON'; // LSE default
 
 function toMsSymbol(symbol: string, exchange?: string): string {
-  const suffix = exchange ? (EXCHANGE_SUFFIX[exchange] || DEFAULT_EXCHANGE_SUFFIX) : DEFAULT_EXCHANGE_SUFFIX;
   const clean = symbol.replace(/[^A-Z0-9]/g, '');
-  return clean + suffix;
+  // `in` (not truthiness) — US exchanges intentionally map to '' (no suffix).
+  if (exchange && exchange in EXCHANGE_SUFFIX) return clean + EXCHANGE_SUFFIX[exchange];
+  return clean + DEFAULT_EXCHANGE_SUFFIX;
 }
 
 // ─── Mock European Stocks (fallback when MarketStack is not configured) ──
@@ -80,7 +89,13 @@ const MOCK_ASIAN_STOCKS = [
 ];
 
 // All global stocks combined for search
-const ALL_MOCK = [...MOCK_EUROPEAN_STOCKS, ...MOCK_ASIAN_STOCKS];
+const ALL_MOCK = [
+  ...MOCK_EUROPEAN_STOCKS,
+  ...MOCK_ASIAN_STOCKS,
+  // US stocks with defaulted regional fields so every ALL_MOCK consumer
+  // (/quotes, /quote/:symbol, /search, /exchanges) sees a uniform shape.
+  ...GLOBAL_US_STOCKS.map(s => ({ ...s, region: 'us', currency: 'USD', country: 'USA' })),
+];
 
 // ─── Helper: build symbol-to-exchange map ────────────────────
 const mockExchangeMap = new Map<string, string>();

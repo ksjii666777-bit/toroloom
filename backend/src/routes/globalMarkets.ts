@@ -58,7 +58,9 @@ const MOCK_INDICES = [
   { symbol: 'SET',   name: 'SET Index (Thailand)',        price: 1456.70,  change: 8.90,   changePercent: 0.62,  region: 'asia' },
 ];
 
-const MOCK_STOCKS = [
+// Exported so global-stocks routes can resolve US symbols (AAPL, MSFT, ...)
+// — they previously only existed on this router's own /stocks endpoint.
+export const MOCK_STOCKS = [
   { symbol: 'AAPL',  name: 'Apple Inc.',                  sector: 'Technology',     price: 234.50,  change: 3.45,  changePercent: 1.49,  marketCap: '$3.68T', volume: '48.2M', pe: 32.4,  dividend: 0.52, exchange: 'NASDAQ' },
   { symbol: 'MSFT',  name: 'Microsoft Corporation',       sector: 'Technology',     price: 468.90,  change: 5.60,  changePercent: 1.21,  marketCap: '$3.48T', volume: '22.1M', pe: 36.8,  dividend: 0.75, exchange: 'NASDAQ' },
   { symbol: 'GOOGL', name: 'Alphabet Inc.',               sector: 'Technology',     price: 185.20,  change: -1.80, changePercent: -0.96, marketCap: '$2.28T', volume: '28.5M', pe: 26.5,  dividend: 0.20, exchange: 'NASDAQ' },

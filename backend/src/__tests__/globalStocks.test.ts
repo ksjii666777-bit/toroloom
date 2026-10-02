@@ -22,6 +22,16 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import express from 'express';
 import http from 'http';
 
+// Shared server-launch helper for additional describes below.
+async function launchApp(app: express.Express): Promise<{ server: http.Server; baseUrl: string }> {
+  const server = http.createServer(app);
+  await new Promise<void>((resolve) => {
+    server.listen(0, () => resolve());
+  });
+  const port = (server.address() as any).port;
+  return { server, baseUrl: `http://localhost:${port}` };
+}
+
 // ──── Mock MarketStack — always return "not configured" so we test mock fallback ──
 
 vi.mock('../services/marketstack', () => ({
@@ -588,5 +598,58 @@ describe('Global Stocks Routes', () => {
       expect(status).toBe(200);
       expect(body.length).toBeGreaterThan(0);
     });
+  });
+});
+
+// ============================================================================
+// US stocks merged into the global universe (regression: AAPL/MSFT/... came
+// from the globalMarkets seed list but were missing from ALL_MOCK here, so
+// /quotes returned { error: 'Not found' } and /quote/:symbol 404'd for them)
+// ============================================================================
+
+describe('Global Stocks — US universe merge', () => {
+  let server: http.Server;
+  let baseUrl: string;
+
+  beforeAll(async () => {
+    const app = express();
+    app.use(express.json({ limit: '1mb' }));
+    app.use('/api/global-stocks', globalStocksRoutes);
+    ({ server, baseUrl } = await launchApp(app));
+  });
+
+  afterAll(() => {
+    server?.close();
+  });
+
+  it('GET /quotes?symbols=AAPL resolves a price instead of { error: "Not found" }', async () => {
+    const { status, body } = await request(server, baseUrl, {
+      method: 'GET', path: '/api/global-stocks/quotes?symbols=AAPL',
+    });
+
+    expect(status).toBe(200);
+    expect(Array.isArray(body)).toBe(true);
+    expect(body[0].symbol).toBe('AAPL');
+    expect(body[0].error).toBeUndefined();
+    expect(typeof body[0].price).toBe('number');
+  });
+
+  it('GET /quote/AAPL returns a quote (previously 404 not-found)', async () => {
+    const { status, body } = await request(server, baseUrl, {
+      method: 'GET', path: '/api/global-stocks/quote/AAPL',
+    });
+
+    expect(status).toBe(200);
+    expect(body.symbol).toBe('AAPL');
+    expect(typeof body.price).toBe('number');
+  });
+
+  it('GET /search?q=Apple finds AAPL', async () => {
+    const { status, body } = await request(server, baseUrl, {
+      method: 'GET', path: '/api/global-stocks/search?q=Apple',
+    });
+
+    expect(status).toBe(200);
+    expect(body.some((s: any) => s.symbol === 'AAPL')).toBe(true);
   });
 });

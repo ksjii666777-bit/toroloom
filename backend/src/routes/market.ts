@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { getBroker } from '../services/broker';
 import { marketCache, CACHE_TTL } from '../services/cache';
+import type { StockInfo } from '../services/broker/interface';
 
 const router = Router();
 
@@ -20,6 +21,13 @@ router.get('/indices', async (_req: Request, res: Response) => {
 });
 
 // GET /api/market/stocks
+// Last-known-good resilience: if the broker's getStocks() fails (e.g. an
+// upstream feed/session error — observed in production as an intermittent
+// 500 while quotes/indices kept working), serve the previous successful
+// snapshot instead of a hard 500 so the stock-list screen stays usable.
+// The full error is always logged for root-cause analysis (Railway/Sentry).
+let lastGoodStocks: StockInfo[] | null = null;
+
 router.get('/stocks', async (_req: Request, res: Response) => {
   try {
     const broker = await getBroker();
@@ -28,8 +36,14 @@ router.get('/stocks', async (_req: Request, res: Response) => {
       () => broker.getStocks(),
       CACHE_TTL.STOCKS,
     );
+    lastGoodStocks = stocks;
     res.json(stocks);
   } catch (error: unknown) {
+    console.error('[market/stocks] getStocks failed:', error);
+    if (lastGoodStocks && lastGoodStocks.length > 0) {
+      res.json(lastGoodStocks);
+      return;
+    }
     res.status(500).json({ error: (error as Error).message || 'Failed to fetch stocks' });
   }
 });
