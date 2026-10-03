@@ -171,6 +171,13 @@ appId: com.toroloom.app
     duration: 700
 - waitForAnimationToEnd:
     timeout: 3000
+# Run-37 (36985576422) att1: this exact step failed with the page still at
+# form-top — BOTH drags were silently dropped by the RN ScrollView (the
+# failure hierarchy showed order-summary-est-total clipped at y=1825, so
+# there WAS content below the fold and one accepted drag would have
+# revealed it). A single dropped gesture is invisible and fatal here, so
+# the guarded heal is repeated: up to 3 drags, each a no-op once the row
+# is visible. Drags can never fail; the EWU stays the single fatal gate.
 - runFlow:
     when:
       notVisible:
@@ -179,6 +186,17 @@ appId: com.toroloom.app
       - swipe:
           start: "90%, 50%"
           end: "90%, 15%"
+          duration: 700
+      - waitForAnimationToEnd:
+          timeout: 3000
+- runFlow:
+    when:
+      notVisible:
+        text: ".*Available:.*|.*Insufficient balance.*"
+    commands:
+      - swipe:
+          start: "92%, 60%"
+          end: "92%, 20%"
           duration: 700
       - waitForAnimationToEnd:
           timeout: 3000

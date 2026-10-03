@@ -87,6 +87,15 @@ Three commits in one day after the Audit Gate started failing — none touched a
 4. **Deterministic fix for a statistical backend test (`5ad4831`).** The rerun's Backend job failed on `commodityQuotes.test.ts` — "Energy commodities higher volatility than metals" compared the *empirical* average `|changePercent|` of 30 random ticks per symbol (0.0997 vs 0.1027 — margin-of-noise, a coin flip on a random walk). Fix: export `commoditySeeds` from `backend/src/services/broker/mockBroker.ts` and assert the configured volatilities directly (XAUUSD 0.15 < CL 0.32 / NG 0.40). CI-verified green in run-36.
 5. **Run-36 (job 110447389747, sha `5ad4831`)** re-verified everything together: 30/30 single attempt (L5056), crash tally 0 (L5057), all four recently-fixed flows att1 PASS (`connectBroker` L3735, `orderEdgeCases` L3900, `aadhaarVerification` L4102, `contractNoteParser` L4504), only retry `panVerification` 420s (L4247, att2 pass). grpc-js 1.14.5 ran under the full app runtime.
 
+### Run 37 (job 110769830125, sha `089cdfb`) — the assertion-flake class (2026-10-02)
+
+First suite run after the `/api/market/stocks` 500 + AAPL-`Not found` fixes (`5dd596a`, `089cdfb`) — **neither fix touches any flow here**, and it showed the one remaining blind spot in the runner.
+
+- **Result: both attempts 29/30, crash tally 0** (att1 L5153-5154, att2 L9149-9150), 06:42→11:38 UTC, ~2 h 56 m.
+- **att1 fails `orderEdgeCases` (L3834) — dropped scroll gesture.** The balance row (`.*Available:.*|.*Insufficient balance.*`) never entered the viewport and the failure hierarchy proved there *was* content below the fold (`order-summary-est-total` clipped at y=1825, L~4000): the two slow gutter drags at `90%` were silently dropped by the RN ScrollView. Passed att2 (L7899).
+- **att2 fails `aadhaarVerification` (L8193) — wedged emulator.** The `Verify OTP` tap and heal re-tap both COMPLETED, but "Aadhaar Verified." never rendered inside the 60 s EWU, and the diagnosis dump came back **completely empty** (crash buffer, scrollable containers AND hierarchy — i.e. `adb`/`uiautomator` itself was unresponsive). Same failure mode as run-35 att1. Passed att1 (L4201).
+- **Root cause of the *job* failure (not the flows): the per-flow retry only covered exit-124 timeouts and no-COMPLETED cold-start deaths.** Any single assertion-failure flake therefore killed its whole suite attempt, and the job-level attempt-2 was spent on a *different* flow — so two independent coin-flips both counted as fatal. Fix in `e2e-boot.sh`: **any** non-zero death now takes the diagnosis dump first (so the failed screen is still foregrounded) and then gets exactly one retry; a retry that passes emits a `::notice::` so the flake stays visible, and a flow that fails twice is reported as a deterministic failure (the hard gate is unchanged). Plus a third guarded gutter drag in `orderEdgeCases.yaml` for the dropped-gesture class.
+
 ### courseDetail — scroll-position fragility (runs 16–21, six consecutive)
 
 Failed every run from 16–21 (e.g. `run21.log` L4215 att1, L8149 att2). Root causes: fatal `scrollUntilVisible` for "Key Takeaways" below the fold, and UP-scroll heal missing for the Learning Hub. Fixed by `52f836c` (scroll Key Takeaways into view, hardware-BACK Funds exit) and `e8a4ad7` (UP-scroll heal). Clean from run 22 onward.
@@ -152,7 +161,7 @@ Post-fix att1 fail rate: run 30 att1 = 2 fails (1 real, fixed), run 31 att1 = 2 
 - `e4cb4f9`: crash-buffer capture (logcat -b crash), LessonView self-heal, RAM bump.
 - `a3e4a15`: hard gate (`continue-on-error: false`) + `::error::…BLOCKING` summary.
 - `3393d69` era: failure diagnosis now dumps scrollable-container bounds + full hierarchy with bounds (head -160) + crash buffer + screencap, in both trap functions of `e2e-boot.sh`.
-- Retry heuristics: exit-124 (timeout class) and no-COMPLETED cold-start class → single retry per flow.
+- Retry heuristics: originally exit-124 (timeout class) + no-COMPLETED cold-start class; **widened in run-37** to *any* non-zero death (assertion/step-failure class included) — diagnosis dump first, then one retry, `::notice::` on recovery, deterministic if both attempts fail.
 - `810a985`: CI `paths-ignore: docs/**` — docs-only pushes skip the whole workflow (a skipped run reports no status check; pair with branch-protection tolerance when the E2E check becomes required).
 - `40bae28`: per-run Hermes crash tally — counts `Fatal signal` events from the device crash buffer after each flow (buffer cleared per flow), warns per flow, and emits a run-level `::warning::` annotation with the total.
 - `2b8a10c`: Audit Gate advisory response — `@grpc/grpc-js` override (→ 1.14.5) + firebase-family `ALLOW_HIGH` entries with re-review note in `scripts/audit-gate.mjs`.
@@ -161,7 +170,7 @@ Post-fix att1 fail rate: run 30 att1 = 2 fails (1 real, fixed), run 31 att1 = 2 
 
 ## Status & next steps
 
-- Green under the hard gate: runs 30–33 and **36** (latest, single attempt, crash tally 0). Runs 34–35 were infra-class failures (registry advisories → latent cache-dependent build; stacked CDN + device flakes) — flow suite itself never regressed.
+- Green under the hard gate: runs 30–33 and **36** (single attempt, crash tally 0). Runs 34–35 were infra-class failures (registry advisories → latent cache-dependent build; stacked CDN + device flakes); run-**37** (post-`5dd596a`/`089cdfb`) was 29/30 in **both** attempts with 0 crashes — two *different* single-flow assertion flakes (`orderEdgeCases` dropped scroll, `aadhaarVerification` wedged emulator), which is exactly the class the widened per-flow retry now absorbs. Next run should confirm green without a code change.
 - Remaining manual step: mark **"E2E — Full Suite (master)"** as a required status check in branch protection (GitHub UI → Settings → Branches / Rulesets) — configure it to tolerate skipped runs (see the `810a985` docs-only caveat).
 - Watch: Hermes SIGSEGV per-run tally (>=2/run → upstream report); Google-CDN emulator-download failures; consider emulator warm-pool if cold-start 420s retries become frequent.
 - Docs-only pushes now skip CI entirely (`810a985`, dogfood-verified on `c98185c`): this file's updates cost zero CI minutes.

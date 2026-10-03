@@ -92,6 +92,35 @@ trap diag_on_fail EXIT
 # The per-flow header/summary lines keep the exact format the workflow's
 # result-collection steps already parse.
 FLOW_TIMEOUT_SECS=420
+# Capture what was on screen at the moment a flow died. MUST run while the
+# failed screen is still foregrounded — i.e. BEFORE the retry relaunches the
+# app, otherwise the dump shows a fresh launch and tells us nothing.
+capture_flow_diagnosis() {
+  local flow="$1"
+  echo "::group::Failure diagnosis — $flow (screen state at failure)"
+  # Several run-14/15 failures dumped the device LAUNCHER — the app
+  # process died mid-flow. Capture the native crash buffer right here
+  # (nothing else has restarted the app yet) so the actual stack lands
+  # in the job log instead of another blind fix cycle.
+  echo "---- CRASH buffer (logcat -b crash, last 60) ----"
+  adb logcat -b crash -d 2>/dev/null | tail -60 || true
+  adb shell uiautomator dump /sdcard/e2e_fail.xml >/dev/null 2>&1 || true
+  # Run-29 (109850376496) lesson: text+id alone cannot tell a target that
+  # is merely BELOW the fold from one that is not mounted at all — the
+  # orderEdgeCases/contractNoteParser failures needed the scroll geometry.
+  # Dump the scrollable containers (with bounds) first, then the whole
+  # hierarchy with bounds so the next failure is decidable offline.
+  echo "---- scrollable containers (bounds) ----"
+  adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
+    | grep -oE '<node[^>]*scrollable="true"[^>]*>' \
+    | grep -oE 'bounds="[^"]+"' || true
+  echo "---- hierarchy (text/id/bounds) ----"
+  adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
+    | grep -oE '(text|resource-id)="[^"]+"|bounds="[^"]+"' \
+    | tee "e2e-failure-${flow//\//_}-hierarchy.txt" | head -160 || true
+  adb exec-out screencap -p > "e2e-failure-${flow//\//_}.png" 2>/dev/null || true
+  echo "::endgroup::"
+}
 run_suite_per_flow() {
   local rc=0 failed=0 passed=0
   # Per-run native-crash tally (Hermes SIGSEGV watch).
@@ -140,18 +169,34 @@ run_suite_per_flow() {
     # debug-artifact block directly — the run-8 maestro cold-start crash
     # class). Retry once when a flow produced no COMPLETED step line at
     # all; anything that got as far as executing steps keeps its dump.
-    local retry_reason=""
-    if [ "$flow_rc" -eq 124 ]; then
-      retry_reason="timed out after ${FLOW_TIMEOUT_SECS}s (device/app stall class)"
-    elif [ "$flow_rc" -ne 0 ] && ! grep -q "COMPLETED" "$flow_out"; then
-      retry_reason="died before running any step (maestro cold-start crash class)"
-    fi
-    if [ -n "$retry_reason" ]; then
-      echo "::warning::$flow $retry_reason - retrying once."
+    # ANY non-zero death gets exactly ONE retry. Run-37 (36985576422)
+    # evidence for why the retry is no longer limited to timeout/cold-start
+    # deaths: both suite attempts flaked on ONE assertion-failure step each
+    # (att1 orderEdgeCases — a dropped scroll gesture left the balance row
+    # below the fold; att2 aadhaarVerification — the result title never
+    # rendered and the failure dump came back EMPTY, i.e. a wedged
+    # emulator), and EVERY flake passed its other attempt. All 30 flows
+    # are self-contained (clearState + launchApp), so a retry leaks no
+    # step-level state. The gate stays hard: a deterministic regression
+    # fails both attempts and still reds the job.
+    if [ "$flow_rc" -ne 0 ]; then
+      # Evidence first — the diagnosis must show the FAILED screen, so take
+      # it before the retry relaunches the app.
+      capture_flow_diagnosis "$flow"
+      if [ "$flow_rc" -eq 124 ]; then
+        echo "::warning::$flow timed out after ${FLOW_TIMEOUT_SECS}s (device/app stall class) - retrying once."
+      elif ! grep -q "COMPLETED" "$flow_out"; then
+        echo "::warning::$flow died before running any step (maestro cold-start crash class) - retrying once."
+      else
+        echo "::warning::$flow failed a step (assertion/step-failure class) - retrying once."
+      fi
       flow_rc=0
       timeout "$FLOW_TIMEOUT_SECS" maestro test "$flow" \
         --env "TEST_EMAIL=${TEST_EMAIL}" \
         --env "TEST_PASSWORD=${TEST_PASSWORD}" > >(tee "$flow_out") 2>&1 || flow_rc=$?
+      if [ "$flow_rc" -eq 0 ]; then
+        echo "::notice::$flow recovered on retry - the first attempt was flaky (see the diagnosis group above)."
+      fi
     fi
     rm -f "$flow_out"
     if [ "$flow_rc" -eq 0 ]; then
@@ -164,29 +209,7 @@ run_suite_per_flow() {
       else
         echo "[Failed] $(basename "$flow" .yaml) (maestro exit $flow_rc)"
       fi
-      echo "::group::Failure diagnosis — $flow (screen state at failure)"
-      # Several run-14/15 failures dumped the device LAUNCHER — the app
-      # process died mid-flow. Capture the native crash buffer right here
-      # (nothing else has restarted the app yet) so the actual stack lands
-      # in the job log instead of another blind fix cycle.
-      echo "---- CRASH buffer (logcat -b crash, last 60) ----"
-      adb logcat -b crash -d 2>/dev/null | tail -60 || true
-      adb shell uiautomator dump /sdcard/e2e_fail.xml >/dev/null 2>&1 || true
-      # Run-29 (109850376496) lesson: text+id alone cannot tell a target that
-      # is merely BELOW the fold from one that is not mounted at all — the
-      # orderEdgeCases/contractNoteParser failures needed the scroll geometry.
-      # Dump the scrollable containers (with bounds) first, then the whole
-      # hierarchy with bounds so the next failure is decidable offline.
-      echo "---- scrollable containers (bounds) ----"
-      adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
-        | grep -oE '<node[^>]*scrollable="true"[^>]*>' \
-        | grep -oE 'bounds="[^"]+"' || true
-      echo "---- hierarchy (text/id/bounds) ----"
-      adb exec-out cat /sdcard/e2e_fail.xml 2>/dev/null \
-        | grep -oE '(text|resource-id)="[^"]+"|bounds="[^"]+"' \
-        | tee "e2e-failure-${flow//\//_}-hierarchy.txt" | head -160 || true
-      adb exec-out screencap -p > "e2e-failure-${flow//\//_}.png" 2>/dev/null || true
-      echo "::endgroup::"
+      echo "::warning::$flow failed BOTH attempts - deterministic failure; see the first-attempt diagnosis group above."
       rc=1
     fi
     # Hermes SIGSEGV watch (runs 18/20/21/31 — see docs/e2e-stabilization.md):
