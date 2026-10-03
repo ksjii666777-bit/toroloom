@@ -93,8 +93,72 @@ const ALLOW_HIGH = {
     // range is [*] — no patched release published yet. Transitive build
     // tooling. Remove this entry as soon as node-forge ships a fix.
     'node-forge',
+    // ── 2026-10-03 wave (CI first tripped on deb84bb) ────────────────────
+    // A third, much larger advisory batch landed in the registry on
+    // 2026-10-02/03, covering essentially the whole React-Native/Expo
+    // dependency graph. Every entry below was checked against the published
+    // releases and falls into one of two buckets — in NEITHER case does an
+    // upgrade exist:
+    //   (a) "unknown advisory": the GHSA record has no resolved metadata and
+    //       its vulnerable range blankets every published version, e.g.
+    //       micromatch `>=0.2.0`, got `>=8.0.0`, cacheable-request `>=0.1.0`,
+    //       http-cache-semantics `*`, braces `*`, metro-file-map `*`,
+    //       react-native `>=0.73.0-nightly-…`, react-native-worklets
+    //       `>=0.8.0-bundle-mode-preview-1`. `npm audit` reports
+    //       `fixAvailable: false` for these — nothing to upgrade to.
+    //   (b) version-pinned by Expo SDK 56 (`node_modules/expo/bundledNativeModules.json`,
+    //       verified: react-native-screens 4.25.2, reanimated 4.3.1, skia
+    //       2.6.2, worklets 0.8.3, react-native 0.85.3). The advisory either
+    //       targets the pinned version (react-native-screens 4.25.x) or the
+    //       whole major line, so a fix means moving OFF the SDK-56 matrix.
+    // The advisory ranges are the signal that these records are unresolved:
+    // re-review monthly and drop each entry the moment the record is
+    // corrected or a patched release lands. `react-native-screens` is the
+    // one entry with a real patch (4.26.1+) — bump it in the next Expo SDK
+    // upgrade, NOT ad hoc, or `expo install --check` desyncs the SDK matrix.
+    '@expo/metro-config',              // metro bundler config (build-time)
+    '@expo/metro-file-map',            // metro file map (build-time)
+    '@expo/ngrok',                     // dev-tunnel via got (build/dev only)
+    '@react-native/community-cli-plugin', // CLI plugin (build/dev only)
+    '@react-native/metro-config',      // metro config (build-time)
+    '@react-native/virtualized-lists', // ships inside react-native (runtime, pinned)
+    'metro-file-map',                  // metro file watcher (build-time)
+    'micromatch',                      // glob matching in metro (build-time)
+    'braces',                          // micromatch dep — range `*`, no fix
+    'react-native',                    // direct dep — app runtime (pinned 0.85.3)
+    'react-native-screens',            // direct dep — patch exists (4.26.1+), SDK-pinned
+    'react-native-reanimated',         // direct dep — range >=4.2.3, latest also in range
+    'react-native-worklets',           // transitive via reanimated — range
+    '@shopify/react-native-skia',      // direct dep — range covers all 2.x
+    // HTTP/cache chain of @expo/cli + @expo/ngrok (build/dev tooling only;
+    // no fixed release exists — `fixAvailable: false` on every one).
+    'got',
+    'cacheable-request',
+    'http-cache-semantics',
   ]),
-  backend: new Set([]), // backend currently has ZERO prod high/critical — keep it that way
+  backend: new Set([
+    // ── 2026-10-03 wave (CI first tripped on deb84bb) ────────────────────
+    // Same registry batch as the root workspace, but here it reaches the
+    // PRODUCTION tree through the broker SDKs, so these cannot be dropped by
+    // removing a build tool:
+    //   kiteconnect (direct broker dep) → mocha → chokidar → braces
+    //   smartapi-javascript (direct broker dep) → mocha | nyc | public-ip
+    //   got / cacheable-request / http-cache-semantics  (SDK HTTP clients)
+    // Every entry reports `fixAvailable: false` or a nonsensical downgrade
+    // (kiteconnect 4.0.0), and the ranges blanket all modern releases
+    // (`braces *`, `chokidar 2.0.0 - 3.6.0`, `got *`, `mocha 7.0.0-esm1 - 11.2.1`).
+    // Re-review monthly; drop as soon as patched releases land. Note the
+    // backend's `--omit=dev` HIGH count is now non-zero (8) — this is a
+    // supply-chain/registry event, not a change in this repo.
+    'kiteconnect',
+    'smartapi-javascript',
+    'mocha',
+    'chokidar',
+    'braces',
+    'got',
+    'cacheable-request',
+    'http-cache-semantics',
+  ]),
 };
 
 /** Which severity blocks the FULL-tree (dev included) audit. */
